@@ -3588,6 +3588,9 @@ function attachDrag(el,idx){
 }
 
 /* ── DRAG ── */
+var dragIsTouch = false; /* true when current drag started from a finger */
+var TOUCH_LIFT  = 110;   /* px — lifts block above finger so player can see placement */
+
 function getXY(e){
   if(e.touches&&e.touches.length) return{x:e.touches[0].clientX,y:e.touches[0].clientY};
   if(e.changedTouches&&e.changedTouches.length) return{x:e.changedTouches[0].clientX,y:e.changedTouches[0].clientY};
@@ -3601,8 +3604,9 @@ function boardOrigin(){
 
 function cursorToSnap(mx,my,shape){
   var o=boardOrigin(), pR=shape.length, pC=shape[0].length;
+  var lift = dragIsTouch ? TOUCH_LIFT : 0;
   return{
-    r: Math.round((my-o.y-(pR*STEP)/2+STEP/2)/STEP),
+    r: Math.round((my-lift-o.y-(pR*STEP)/2+STEP/2)/STEP),
     c: Math.round((mx-o.x-(pC*STEP)/2+STEP/2)/STEP)
   };
 }
@@ -3617,6 +3621,7 @@ function startDrag(e,idx){
   e.preventDefault();
   savePrev();
   dragging=true; dragIdx=idx; dragPiece=pieces[idx];
+  dragIsTouch = !!(e.touches||e.changedTouches);
   SND.pickup();
   buildGhost(dragPiece);
   document.getElementById('ghost').style.display='block';
