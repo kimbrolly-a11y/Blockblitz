@@ -1087,7 +1087,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   <!-- Logo -->
   <div class="sp-logo">
     <img src="Assets/Title_logo.png" alt="Block Blitz"
-      style="width:92vw;max-width:420px;height:auto;display:block;margin:0 auto;filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45))"
+      style="width:96vw;max-width:504px;height:auto;display:block;margin:0 auto;filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45))"
       onerror="this.style.display='none';document.getElementById('spLogoFallback').style.display='flex'">
     <div id="spLogoFallback" style="display:none;flex-direction:column;align-items:center">
       <div class="sp-title-row">
@@ -1126,7 +1126,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   <!-- Logo -->
   <div class="menu-logo">
     <img src="Assets/Title_logo.png" alt="Block Blitz" id="menuLogoImg"
-      style="width:88vw;max-width:360px;height:auto;display:block;margin:0 auto -4px;filter:drop-shadow(0 4px 28px rgba(255,200,0,0.40))"
+      style="width:96vw;max-width:432px;height:auto;display:block;margin:0 auto -4px;filter:drop-shadow(0 4px 28px rgba(255,200,0,0.40))"
       onerror="this.style.display='none';document.getElementById('menuLogoFallback').style.display='block'">
     <div id="menuLogoFallback" style="display:none">
       <div class="menu-logo-row">
@@ -5175,19 +5175,43 @@ var SND=(function(){
     spin:function(){
       var c=ec();if(!c)return;
       var t0=c.currentTime;
-      /* Whooshing sweep — pitch drops as wheel slows */
-      try{var o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.connect(g);g.connect(c.destination);
-        o.frequency.setValueAtTime(700,t0);o.frequency.exponentialRampToValueAtTime(55,t0+3.5);
-        g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(.09,t0+.06);g.gain.exponentialRampToValueAtTime(.0001,t0+3.5);
-        o.start(t0);o.stop(t0+3.55);}catch(e){}
-      /* Ratchet ticks spaced by easeOut — fast at start, slow at end */
-      var N=26;
+      var totalDur=3.5;
+      /* Mechanical spinner clicks — easeOut³ spacing makes early ticks rapid,
+         late ticks slow, exactly like a real prize wheel slowing down */
+      var N=52;
       for(var i=0;i<N;i++){
-        var eased=1-Math.pow(1-(i/N),4);
-        var dl=eased*3.35;
-        var vol=.16-.07*(i/N);
-        tone(500-i*12,'square',vol,.002,.04,dl);
+        var p=i/N;
+        /* cubic easeOut: bunches ticks at the start, spreads at end */
+        var eased=1-Math.pow(1-p,3);
+        var dl=eased*totalDur;
+        var vol=0.28-0.12*p;           /* louder early, quieter as it slows */
+        var f=1600-700*p;              /* higher pitch early like fast spin */
+        var decay=0.018+0.045*p;       /* slightly longer click when slow */
+        try{
+          var t=t0+dl;
+          var o=c.createOscillator(),bpf=c.createBiquadFilter(),g=c.createGain();
+          o.type='sawtooth'; o.frequency.value=f;
+          bpf.type='bandpass'; bpf.frequency.value=f*2.2; bpf.Q.value=4;
+          o.connect(bpf); bpf.connect(g); g.connect(c.destination);
+          g.gain.setValueAtTime(0,t);
+          g.gain.linearRampToValueAtTime(vol,t+0.001);   /* snap attack */
+          g.gain.exponentialRampToValueAtTime(0.0001,t+decay);
+          o.start(t); o.stop(t+decay+0.01);
+        }catch(e){}
       }
+      /* Final settling thud when wheel stops */
+      try{
+        var ts=t0+totalDur+0.04;
+        var o2=c.createOscillator(),g2=c.createGain();
+        o2.type='sine';
+        o2.frequency.setValueAtTime(220,ts);
+        o2.frequency.exponentialRampToValueAtTime(70,ts+0.18);
+        g2.gain.setValueAtTime(0,ts);
+        g2.gain.linearRampToValueAtTime(0.22,ts+0.008);
+        g2.gain.exponentialRampToValueAtTime(0.0001,ts+0.22);
+        o2.connect(g2); g2.connect(c.destination);
+        o2.start(ts); o2.stop(ts+0.25);
+      }catch(e){}
     }
   };
 })();
