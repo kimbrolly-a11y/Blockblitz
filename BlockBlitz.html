@@ -5117,6 +5117,23 @@ var SND=(function(){
       var c=ec();if(!c)return;
       var t0=c.currentTime+.68;
       try{var o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.connect(g);g.connect(c.destination);o.frequency.setValueAtTime(220,t0);o.frequency.exponentialRampToValueAtTime(65,t0+1.1);g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(.24,t0+.06);g.gain.exponentialRampToValueAtTime(.0001,t0+1.15);o.start(t0);o.stop(t0+1.2);}catch(e){}
+    },
+    spin:function(){
+      var c=ec();if(!c)return;
+      var t0=c.currentTime;
+      /* Whooshing sweep — pitch drops as wheel slows */
+      try{var o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.connect(g);g.connect(c.destination);
+        o.frequency.setValueAtTime(700,t0);o.frequency.exponentialRampToValueAtTime(55,t0+3.5);
+        g.gain.setValueAtTime(.0001,t0);g.gain.linearRampToValueAtTime(.09,t0+.06);g.gain.exponentialRampToValueAtTime(.0001,t0+3.5);
+        o.start(t0);o.stop(t0+3.55);}catch(e){}
+      /* Ratchet ticks spaced by easeOut — fast at start, slow at end */
+      var N=26;
+      for(var i=0;i<N;i++){
+        var eased=1-Math.pow(1-(i/N),4);
+        var dl=eased*3.35;
+        var vol=.16-.07*(i/N);
+        tone(500-i*12,'square',vol,.002,.04,dl);
+      }
     }
   };
 })();
@@ -5402,8 +5419,7 @@ var MUSIC=(function(){
     play:function(lv){
       if(muted) return;
       if(!ec()) return;
-      var mood=Math.floor(lv/10)%SCALES.length;
-      if(running&&mood===currentMood) return;
+      var mood=lv%SCALES.length;
       var changed=(mood!==currentMood);
       currentMood=mood;
       if(running){
@@ -5691,6 +5707,7 @@ function closeSpin(){
 
 function doSpin(){
   if(isSpinning || spinsLeft<=0) return;
+  SND.spin();
   isSpinning=true;
   spinsLeft--;
   lsSet('bbspins', spinsLeft);
