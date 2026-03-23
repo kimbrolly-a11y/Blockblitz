@@ -792,16 +792,20 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   left:50%;transform:translateX(-50%);
   width:100%;max-width:430px;
   z-index:250;
-  background:linear-gradient(170deg,#0a0e27 0%,#0d1b5e 50%,#0a3d8f 100%);
+  background:url('Assets/Bb_background1.png') center center / cover no-repeat;
   display:flex;flex-direction:column;align-items:stretch;
   overflow:hidden;
   transition:opacity .3s ease,transform .3s ease;
+}
+#menuScreen::after{
+  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:rgba(0,0,0,0.42);
 }
 #menuScreen.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(18px)}
 .menu-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(70px);z-index:0}
 
 /* Everything inside is above the orbs */
-#menuScreen > *:not(.menu-orb){position:relative;z-index:1}
+#menuScreen > *:not(canvas){position:relative;z-index:1}
 
 /* ── Top bar ── */
 .menu-stats{
@@ -846,11 +850,11 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* ── Mode cards ── */
 .menu-cards{
-  flex:1;display:flex;flex-direction:column;gap:10px;
-  padding:2px 14px 6px;overflow-y:auto;min-height:0;
+  flex:1;display:flex;flex-direction:column;gap:8px;
+  padding:2px 14px 6px;overflow:hidden;min-height:0;
 }
 .menu-mode-card{
-  border-radius:18px;padding:12px 16px;
+  border-radius:18px;padding:10px 14px;
   cursor:pointer;position:relative;overflow:hidden;
   flex-shrink:0;
   transition:transform .15s cubic-bezier(.17,.89,.32,1.28);
@@ -1127,10 +1131,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 <!-- MAIN MENU SCREEN -->
 <div id="menuScreen" class="hidden" style="display:none">
-  <!-- Background orbs -->
-  <div class="menu-orb" style="width:300px;height:300px;top:-80px;left:-80px;background:rgba(80,100,255,0.15)"></div>
-  <div class="menu-orb" style="width:260px;height:260px;bottom:-60px;right:-60px;background:rgba(0,180,255,0.12)"></div>
-  <div class="menu-orb" style="width:200px;height:200px;top:40%;left:50%;margin-left:-100px;background:rgba(255,215,0,0.07)"></div>
+  <!-- Animated particles overlay -->
+  <canvas id="menuParticles" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
 
   <!-- Top stats row -->
   <div class="menu-stats">
@@ -1147,7 +1149,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   <!-- Logo -->
   <div class="menu-logo">
     <img src="Assets/Title_logo.png" alt="Block Blitz" id="menuLogoImg"
-      style="width:96vw;max-width:432px;height:auto;display:block;margin:0 auto -4px;filter:drop-shadow(0 4px 28px rgba(255,200,0,0.40))"
+      style="width:96vw;max-width:432px;height:auto;display:block;margin:0 auto -4px;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.85)) drop-shadow(0 4px 28px rgba(255,200,0,0.50))"
       onerror="this.style.display='none';document.getElementById('menuLogoFallback').style.display='block'">
     <div id="menuLogoFallback" style="display:none">
       <div class="menu-logo-row">
@@ -1203,15 +1205,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     </div>
   </div>
 
-  <!-- Profile promo banner (hidden once profile created) -->
-  <div class="profile-promo" id="profilePromo" onclick="BB.openProfile()" style="display:none">
-    <div class="profile-promo-icon">🌍</div>
-    <div class="profile-promo-text">
-      <div class="profile-promo-title">Join the World Leaderboard!</div>
-      <div class="profile-promo-sub">Tap to create your free profile →</div>
-    </div>
-  </div>
-
   <!-- Bottom action buttons -->
   <div class="menu-bottom">
     <button class="menu-bottom-btn" onclick="BB.openSpinFromMenu()">
@@ -1221,10 +1214,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <button class="menu-bottom-btn" onclick="BB.openDailyChallenge()">
       <div class="menu-bottom-btn-icon">📅</div>
       <div class="menu-bottom-btn-lbl">Daily</div>
-    </button>
-    <button class="menu-bottom-btn" onclick="BB.openLeaderboard()">
-      <div class="menu-bottom-btn-icon">🏆</div>
-      <div class="menu-bottom-btn-lbl">Leaders</div>
     </button>
     <div class="menu-bottom-btn" id="menuRankBtn" style="cursor:pointer" onclick="BB.openRankInfo()">
       <div class="menu-bottom-btn-icon" id="menuRankIcon">🎖️</div>
@@ -1291,7 +1280,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <div id="rankBadge">Rookie</div>
     <div class="mode-badge" id="modeBadge">⚡ CLASSIC</div>
     <div class="top-row2-right">
-      <button class="settings-btn-sm" onclick="BB.openLeaderboard()" title="Leaderboard">🏆</button>
       <button class="settings-btn-sm" onclick="BB.openDailyChallenge()" title="Daily">📅</button>
     </div>
   </div>
@@ -1444,20 +1432,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <div class="modal-sub" style="margin-bottom:14px" id="bonusSub">Come back tomorrow for more!</div>
     <button class="btn-retry" style="background:linear-gradient(180deg,#9c27b0,#6a1b9a);box-shadow:0 6px 0 #4a148c,0 8px 24px rgba(156,39,176,0.4);font-size:18px;margin-bottom:8px" onclick="BB.spinFromBonus()">🎰 Use My Free Spin!</button>
     <button class="btn-half btn-menu" style="width:100%;border-radius:14px;padding:12px" onclick="BB.closeDailyBonus()">🎮 Play Later</button>
-  </div>
-</div>
-
-<!-- LEADERBOARD MODAL -->
-<div class="modal-bg" id="lbModal">
-  <div class="modal-card">
-    <span class="modal-emoji">🏆</span>
-    <div class="modal-title">Leaderboard</div>
-    <div class="lb-tabs">
-      <div class="lb-tab active" id="lbTabLocal" onclick="BB.lbShowTab('local')">📱 My Scores</div>
-      <div class="lb-tab" id="lbTabWorld" onclick="BB.lbShowTab('world')">🌍 World</div>
-    </div>
-    <div class="lb-list" id="lbList"></div>
-    <button class="btn-retry" style="margin-top:14px" onclick="BB.closeLeaderboard()">Close</button>
   </div>
 </div>
 
@@ -6049,6 +6023,64 @@ window.addEventListener('resize', function(){
   var cs=Math.floor((w-3*7)/8);cs=Math.max(32,Math.min(cs,46));
   document.documentElement.style.setProperty('--cs',cs+'px');
 });
+
+/* ── MENU PARTICLES ── */
+(function(){
+  var canvas=document.getElementById('menuParticles');
+  if(!canvas) return;
+  var ctx=canvas.getContext('2d');
+  var particles=[];
+  var W,H;
+  function resize(){
+    W=canvas.width=canvas.offsetWidth;
+    H=canvas.height=canvas.offsetHeight;
+  }
+  function mkParticle(){
+    return{
+      x:Math.random()*W,
+      y:Math.random()*H,
+      r:Math.random()*2.5+0.5,
+      alpha:Math.random()*0.5+0.1,
+      speed:Math.random()*0.3+0.1,
+      drift:(Math.random()-0.5)*0.3,
+      twinkleSpeed:Math.random()*0.02+0.005,
+      twinkleDir:1
+    };
+  }
+  function init(){
+    resize();
+    particles=[];
+    for(var i=0;i<55;i++) particles.push(mkParticle());
+  }
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<particles.length;i++){
+      var p=particles[i];
+      p.y-=p.speed;
+      p.x+=p.drift;
+      p.alpha+=p.twinkleSpeed*p.twinkleDir;
+      if(p.alpha>0.6||p.alpha<0.05) p.twinkleDir*=-1;
+      if(p.y<-5||p.x<-5||p.x>W+5){ particles[i]=mkParticle(); particles[i].y=H+5; }
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,255,255,'+p.alpha.toFixed(2)+')';
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',init);
+  /* Start only when menuScreen is visible */
+  var started=false;
+  function maybeStart(){
+    var ms=document.getElementById('menuScreen');
+    if(!started&&ms&&!ms.classList.contains('hidden')&&ms.style.display!=='none'){
+      started=true; init(); draw();
+    } else if(!started){
+      setTimeout(maybeStart,200);
+    }
+  }
+  setTimeout(maybeStart,300);
+})();
 </script>
 </body>
 </html>
