@@ -1086,10 +1086,15 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   <div id="spStars"></div>
   <!-- Logo -->
   <div class="sp-logo">
-    <div class="sp-title-row">
-      <span class="sp-block-word">BLOCK</span>
-      <span class="sp-bolt">⚡</span>
-      <span class="sp-blitz-word">BLITZ</span>
+    <img src="Assets/Title_logo.png" alt="Block Blitz"
+      style="width:92vw;max-width:420px;height:auto;display:block;margin:0 auto;filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45))"
+      onerror="this.style.display='none';document.getElementById('spLogoFallback').style.display='flex'">
+    <div id="spLogoFallback" style="display:none;flex-direction:column;align-items:center">
+      <div class="sp-title-row">
+        <span class="sp-block-word">BLOCK</span>
+        <span class="sp-bolt">⚡</span>
+        <span class="sp-blitz-word">BLITZ</span>
+      </div>
     </div>
     <div class="sp-tagline">Blast · Every · Block</div>
   </div>
@@ -1120,10 +1125,15 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
   <!-- Logo -->
   <div class="menu-logo">
-    <div class="menu-logo-row">
-      <span class="menu-logo-block">BLOCK</span>
-      <span class="menu-logo-bolt">⚡</span>
-      <span class="menu-logo-blitz">BLITZ</span>
+    <img src="Assets/Title_logo.png" alt="Block Blitz" id="menuLogoImg"
+      style="width:88vw;max-width:360px;height:auto;display:block;margin:0 auto -4px;filter:drop-shadow(0 4px 28px rgba(255,200,0,0.40))"
+      onerror="this.style.display='none';document.getElementById('menuLogoFallback').style.display='block'">
+    <div id="menuLogoFallback" style="display:none">
+      <div class="menu-logo-row">
+        <span class="menu-logo-block">BLOCK</span>
+        <span class="menu-logo-bolt">⚡</span>
+        <span class="menu-logo-blitz">BLITZ</span>
+      </div>
     </div>
     <div class="menu-tagline">Choose Your Path</div>
   </div>
@@ -1243,7 +1253,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   <div class="top-row1">
     <button class="back-btn" onclick="BB.goMenu()">‹</button>
     <div class="top-center">
-      <span class="top-level-lbl">LEVEL</span>
+      <span class="top-level-lbl" id="levelLblText">LEVEL</span>
       <span class="top-level-num" id="levelLabel">1</span>
     </div>
     <div class="top-bar-right">
@@ -1545,6 +1555,19 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <div style="font-family:'Fredoka One';font-size:26px;color:#ffd700;margin-bottom:14px" id="dcBestScore">-</div>
     <button class="btn-retry" style="background:linear-gradient(180deg,#ffd700,#ff9800);box-shadow:0 6px 0 #e65100;color:#111" id="dcStartBtn" onclick="BB.startDailyChallenge()">▶ Start Challenge</button>
     <button class="btn-retry" style="margin-top:8px;background:rgba(255,255,255,.15);box-shadow:none" onclick="BB.closeDCModal()">Cancel</button>
+  </div>
+</div>
+
+<!-- SHOP CONFIRM MODAL -->
+<div class="modal-bg" id="shopConfirmModal">
+  <div class="modal-card" style="max-width:300px">
+    <span class="modal-emoji" id="shopConfirmIcon">🛒</span>
+    <div class="modal-title" id="shopConfirmTitle">Confirm Purchase</div>
+    <div style="font-size:14px;color:#fff;margin-bottom:6px" id="shopConfirmItem">Item</div>
+    <div style="font-size:20px;font-family:'Fredoka One';color:#ffd700;margin-bottom:4px" id="shopConfirmCoins">🪙 0</div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:18px" id="shopConfirmCash">or $0.00 via IAP</div>
+    <button class="btn-retry" id="shopConfirmBtn" onclick="BB.shopConfirmExecute()" style="margin-bottom:8px">✅ Buy Now</button>
+    <button class="btn-retry" style="background:rgba(255,255,255,.15);box-shadow:none" onclick="BB.shopConfirmClose()">Cancel</button>
   </div>
 </div>
 
@@ -3194,7 +3217,14 @@ function updateGemUI(){
   document.getElementById('starCount').textContent  = starsLeft;
   document.getElementById('pentaCount').textContent = pentasLeft;
   var lbl=document.getElementById('levelLabel');
-  if(lbl) lbl.textContent = level+1;
+  var lblTxt=document.getElementById('levelLblText');
+  if(isDailyChallenge){
+    if(lblTxt) lblTxt.textContent='DAILY';
+    if(lbl) lbl.textContent='📅';
+  } else {
+    if(lblTxt) lblTxt.textContent='LEVEL';
+    if(lbl) lbl.textContent=level+1;
+  }
   /* Keep adventure gem counters in sync */
   if(isAdventureMode){
     var advStar = document.getElementById('advStarCount');
@@ -4968,22 +4998,47 @@ function openShop(){
   document.getElementById('shopModal').classList.add('on');
 }
 function closeShop(){ document.getElementById('shopModal').classList.remove('on'); }
+var _shopPendingType=null;
+var SHOP_ITEMS={
+  bomb:  {icon:'💣',name:'Bomb ×1',      coins:350,cash:'$0.99'},
+  row:   {icon:'➡️', name:'Row Blast ×1', coins:280,cash:'$0.99'},
+  col:   {icon:'⬇️', name:'Col Blast ×1', coins:280,cash:'$0.99'},
+  undo:  {icon:'↩️', name:'Undo ×3',      coins:150,cash:'$0.49'},
+  pro:   {icon:'👑', name:'Go Pro',        coins:999,cash:'$2.99 — Removes Ads + 500 bonus coins'}
+};
 function shopBuy(type){
-  var prices={bomb:350,row:280,col:280,undo:150};
-  var price=prices[type]; if(!price||coins<price) return;
-  coins-=price; lsSet('bbcoins',coins);
-  if(type==='undo'){ undoCount+=3; lsSet('bbundo',undoCount); updateUndoBtn(); }
-  else { powerups[type]++; savePU(); updatePUBar(); }
-  updateCoinUI(); openShop();
+  var item=SHOP_ITEMS[type]; if(!item) return;
+  if(coins<item.coins) return;
+  _shopPendingType=type;
+  document.getElementById('shopConfirmIcon').textContent=item.icon;
+  document.getElementById('shopConfirmTitle').textContent='Confirm Purchase';
+  document.getElementById('shopConfirmItem').textContent=item.name;
+  document.getElementById('shopConfirmCoins').textContent='🪙 '+item.coins+' coins';
+  document.getElementById('shopConfirmCash').textContent='or '+item.cash+' via in-app purchase';
+  document.getElementById('shopModal').classList.remove('on');
+  document.getElementById('shopConfirmModal').classList.add('on');
 }
-function shopBuyPro(){
-  if(isPro||coins<999) return;
-  coins=coins-999+500; lsSet('bbcoins',coins);
-  isPro=true; lsSet('bbpro','1');
-  powerups.bomb+=2; powerups.row+=2; powerups.col+=2; savePU(); updatePUBar();
-  undoCount+=5; lsSet('bbundo',undoCount); updateUndoBtn();
+function shopBuyPro(){ shopBuy('pro'); }
+function shopConfirmClose(){
+  document.getElementById('shopConfirmModal').classList.remove('on');
+  _shopPendingType=null;
+  openShop();
+}
+function shopConfirmExecute(){
+  var type=_shopPendingType; _shopPendingType=null;
+  document.getElementById('shopConfirmModal').classList.remove('on');
+  if(!type) return;
+  var item=SHOP_ITEMS[type]; if(!item||coins<item.coins) return;
+  coins-=item.coins; lsSet('bbcoins',coins);
+  if(type==='undo'){ undoCount+=3; lsSet('bbundo',undoCount); updateUndoBtn(); }
+  else if(type==='pro'){
+    coins+=500; lsSet('bbcoins',coins);
+    isPro=true; lsSet('bbpro','1');
+    powerups.bomb+=2; powerups.row+=2; powerups.col+=2; savePU(); updatePUBar();
+    undoCount+=5; lsSet('bbundo',undoCount); updateUndoBtn();
+    setTimeout(function(){ toastMsg('👑 Pro activated! +500 coins, +2 power-ups, +5 undos'); },200);
+  } else { powerups[type]++; savePU(); updatePUBar(); }
   updateCoinUI(); openShop();
-  setTimeout(function(){alert('👑 Pro activated!\n+500 bonus coins\n+2 of each power-up\n+5 undo charges');},200);
 }
 
 function savePrev(){
@@ -5227,19 +5282,23 @@ var MUSIC=(function(){
     }catch(e){}
   }
 
-  /* Soft pad — triangle, slow bloom */
+  /* Bright pad — punchy attack, quicker decay, open filter */
   function pad(midi,vol,dur){
     try{
       var f=freq(midi),t=ctx.currentTime;
-      var o=ctx.createOscillator(),fl=ctx.createBiquadFilter(),g=ctx.createGain();
-      o.type='triangle'; o.frequency.value=f;
-      fl.type='lowpass'; fl.frequency.value=900; fl.Q.value=0.3;
+      var o=ctx.createOscillator(),o2=ctx.createOscillator();
+      var fl=ctx.createBiquadFilter(),g=ctx.createGain(),g2=ctx.createGain();
+      o.type='square'; o.frequency.value=f;
+      o2.type='triangle'; o2.frequency.value=f*1.5; /* fifth harmonic, brightness */
+      g2.gain.value=0.18; o2.connect(g2); g2.connect(fl);
+      fl.type='lowpass'; fl.frequency.value=3500; fl.Q.value=0.5;
       g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(vol,t+dur*0.30);
-      g.gain.setValueAtTime(vol*0.7,t+dur*0.65);
+      g.gain.linearRampToValueAtTime(vol,t+0.06); /* punchy attack */
+      g.gain.setValueAtTime(vol*0.6,t+dur*0.45);
       g.gain.linearRampToValueAtTime(0,t+dur);
-      o.connect(fl); fl.connect(g); g.connect(rvbIn);
+      o.connect(fl); fl.connect(g); g.connect(master); /* less reverb = cleaner */
       o.start(t); o.stop(t+dur+.1);
+      o2.start(t); o2.stop(t+dur+.1);
     }catch(e){}
   }
 
@@ -5295,97 +5354,96 @@ var MUSIC=(function(){
 
   /* ── 8 streams ── */
 
-  /* 1. Melody — cheerful pluck runs, 2-4 notes */
+  /* 1. Melody — lively pluck runs, 3-5 notes, faster pace */
   function streamMelody(){
     if(!running||muted) return;
     var sc=SCALES[currentMood];
-    var notes=inRange(sc,60,76);
+    var notes=inRange(sc,60,79);
     if(notes.length){
-      var count=Math.random()<0.25?4:Math.random()<0.5?3:2;
-      var gap=rnd(120,240);
+      var count=Math.random()<0.3?5:Math.random()<0.5?4:3;
+      var gap=rnd(80,160);
       for(var i=0;i<count;i++){
         (function(n,dl){
-          setTimeout(function(){ if(running&&!muted) pluck(n,rnd(.055,.095),rnd(1.2,2.2)); },dl);
+          setTimeout(function(){ if(running&&!muted) pluck(n,rnd(.065,.110),rnd(0.6,1.4)); },dl);
         })(pick(notes), i*gap);
       }
     }
-    sched('melody',streamMelody,rnd(800,2200));
+    sched('melody',streamMelody,rnd(400,1100));
   }
 
-  /* 2. Arpeggio — ascending 3-note figure, gives upbeat movement */
+  /* 2. Arpeggio — rapid ascending figure, 4 notes, arcade energy */
   function streamArp(){
     if(!running||muted) return;
     var sc=SCALES[currentMood];
-    var notes=inRange(sc,60,72).sort(function(a,b){return a-b;});
-    if(notes.length>=3){
-      /* Pick a root and go up two steps */
-      var start=Math.floor(Math.random()*(notes.length-2));
-      var gap=rnd(70,120); /* quick, light */
-      for(var i=0;i<3;i++){
+    var notes=inRange(sc,55,76).sort(function(a,b){return a-b;});
+    if(notes.length>=4){
+      var start=Math.floor(Math.random()*(notes.length-3));
+      var gap=rnd(45,80); /* quick staccato */
+      for(var i=0;i<4;i++){
         (function(n,dl){
-          setTimeout(function(){ if(running&&!muted) pluck(n,rnd(.050,.085),rnd(0.5,1.0)); },dl);
+          setTimeout(function(){ if(running&&!muted) pluck(n,rnd(.060,.100),rnd(0.3,0.7)); },dl);
         })(notes[start+i], i*gap);
       }
     }
-    sched('arp',streamArp,rnd(700,1800));
+    sched('arp',streamArp,rnd(350,900));
   }
 
-  /* 3. Bells — bright, medium decay */
+  /* 3. Bells — bright, crisp, more frequent */
   function streamBell(){
     if(!running||muted) return;
     var sc=SCALES[currentMood];
     var notes=inRange(sc,69,84);
-    if(notes.length){ bell(pick(notes),rnd(.060,.100),rnd(1.8,3.5)); }
-    sched('bell',streamBell,rnd(1500,4000));
+    if(notes.length){ bell(pick(notes),rnd(.065,.110),rnd(1.2,2.5)); }
+    sched('bell',streamBell,rnd(700,2000));
   }
 
-  /* 4. Pad — warm foundation */
+  /* 4. Pad — punchy, shorter, brighter */
   function streamPad(){
     if(!running||muted) return;
     var sc=SCALES[currentMood];
     var notes=inRange(sc,52,67);
-    if(notes.length){ pad(pick(notes),rnd(.040,.065),rnd(4.0,7.0)); }
-    sched('pad',streamPad,rnd(3000,7000));
+    if(notes.length){ pad(pick(notes),rnd(.038,.060),rnd(1.5,3.0)); }
+    sched('pad',streamPad,rnd(1500,3500));
   }
 
-  /* 5. Bass — gentle anchor */
+  /* 5. Bass — punchier, faster repeat */
   function streamBass(){
     if(!running||muted) return;
     var sc=SCALES[currentMood];
     var notes=inRange(sc,48,60);
-    if(notes.length){ bass(pick(notes),rnd(.055,.085),rnd(3.0,5.5)); }
-    sched('bass',streamBass,rnd(3500,8000));
+    if(notes.length){ bass(pick(notes),rnd(.065,.100),rnd(1.5,3.0)); }
+    sched('bass',streamBass,rnd(1500,3500));
   }
 
-  /* 6. Shimmer — occasional sparkle wash */
+  /* 6. Shimmer — more frequent sparkle wash */
   function streamShimmer(){
     if(!running||muted) return;
     var sc=SCALES[currentMood];
     var notes=inRange(sc,60,72);
-    if(notes.length&&Math.random()<0.7){ shimmer(pick(notes),rnd(.028,.050),rnd(2.5,5.0)); }
-    sched('shimmer',streamShimmer,rnd(5000,12000));
+    if(notes.length&&Math.random()<0.75){ shimmer(pick(notes),rnd(.032,.055),rnd(1.5,3.5)); }
+    sched('shimmer',streamShimmer,rnd(2000,5000));
   }
 
-  /* 7. Pulse — very soft rhythmic heartbeat (~90 BPM feel) */
+  /* 7. Pulse — energetic arcade beat (~170 BPM) */
   var _beat=0;
   function streamPulse(){
     if(!running||muted) return;
     var sc=SCALES[currentMood];
-    var root=sc[0]; /* always tonic */
+    var root=sc[0];
     _beat++;
-    /* Slightly accent beats 1 and 3 of every 4 */
     var accent=(_beat%4===0||_beat%4===2);
-    tick(root+(accent?0:12), accent?0.038:0.022);
-    sched('pulse',streamPulse,rnd(460,510)); /* ~120 BPM */
+    var offbeat=(_beat%4===1||_beat%4===3);
+    tick(root+(accent?0:(offbeat?12:7)), accent?0.048:(offbeat?0.028:0.018));
+    sched('pulse',streamPulse,rnd(340,365)); /* ~168 BPM */
   }
 
-  /* 8. Sparkle — high brief bell accents */
+  /* 8. Sparkle — high brief bells, more frequent */
   function streamSparkle(){
     if(!running||muted) return;
     var sc=SCALES[currentMood];
     var notes=inRange(sc,76,86);
-    if(notes.length&&Math.random()<0.6){ bell(pick(notes),rnd(.028,.048),rnd(1.5,3.0)); }
-    sched('sparkle',streamSparkle,rnd(3000,8000));
+    if(notes.length&&Math.random()<0.7){ bell(pick(notes),rnd(.032,.055),rnd(0.8,2.0)); }
+    sched('sparkle',streamSparkle,rnd(1200,3500));
   }
 
   function stopAll(){
@@ -5823,6 +5881,8 @@ return{
   closeShop:         closeShop,
   shopBuy:           shopBuy,
   shopBuyPro:        shopBuyPro,
+  shopConfirmClose:  shopConfirmClose,
+  shopConfirmExecute:shopConfirmExecute,
   openMenu:          openMenu,
   closeMenu:         closeMenu,
   selectMode:        selectMode,
