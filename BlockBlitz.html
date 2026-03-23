@@ -1540,7 +1540,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       </div>
     </div>
     <div class="modal-sub" id="dcSub">Today's special level!</div>
-    <div style="font-family:'Fredoka One';font-size:13px;color:#ce93d8;margin-bottom:10px" id="dcLevelName"></div>
     <div style="font-size:11px;color:#90caf9;margin-bottom:2px">Best Score</div>
     <div style="font-family:'Fredoka One';font-size:26px;color:#ffd700;margin-bottom:14px" id="dcBestScore">-</div>
     <button class="btn-retry" style="background:linear-gradient(180deg,#ffd700,#ff9800);box-shadow:0 6px 0 #e65100;color:#111" id="dcStartBtn" onclick="BB.startDailyChallenge()">▶ Start Challenge</button>
@@ -4921,7 +4920,6 @@ function openDailyChallenge(){
   s('dcModEmoji',mod.icon); s('dcModIcon',mod.icon);
   s('dcModName',mod.name);  s('dcModDesc',mod.desc);
   s('dcModPill',mod.icon+' '+mod.name);
-  s('dcLevelName','Layout: '+(DC_NAMES[lv]||'Challenge '+(lv+1)));
   var today=new Date().toISOString().slice(0,10);
   var done=lsGet('bbdailydate','')===today;
   var best=parseInt(lsGet('bbdailyscore','0'))||0;
@@ -5147,18 +5145,18 @@ var MUSIC=(function(){
   var ctx=null,master=null,rvbIn=null,muted=false,running=false,currentMood=-1;
   var streams={};
 
-  /* ── 6 bright pentatonic scales ── */
+  /* ── 6 bright major scales ── */
   var SCALES=[
     [48,50,52,55,57,60,62,64,67,69,72,74,76,79,81], /* C major  — sunny, cheerful  */
     [43,45,47,50,52,55,57,59,62,64,67,69,71,74,76], /* G major  — warm, bouncy     */
     [38,40,42,45,47,50,52,54,57,59,62,64,66,69,71], /* D major  — bright, skipping */
-    [45,48,50,52,55,57,60,62,64,67,69,72,74,76,79], /* A minor  — gentle, flowing  */
-    [41,43,45,48,50,53,55,57,60,62,65,67,69,72,74], /* F major  — round, cosy      */
-    [40,43,45,47,50,52,55,57,59,62,64,67,69,71,74], /* E minor  — calm, sparkling  */
+    [45,47,49,52,54,57,59,61,64,66,69,71,73,76,78], /* A major  — punchy, upbeat   */
+    [41,43,45,48,50,53,55,57,60,62,65,67,69,72,74], /* F major  — round, bouncy    */
+    [40,42,44,47,49,52,54,56,59,61,64,66,68,71,73], /* E major  — bright, zippy    */
   ];
   var MOOD_NAMES=[
-    '🌿 Tranquil Garden','🌾 Sunlit Meadow','💎 Crystal Drift',
-    '🌙 Moonlit Shore','🍂 Forest Evening','✨ Starlit Calm'
+    '🎮 Game On!','⚡ Power Up!','💎 Crystal Rush',
+    '🚀 Turbo Mode','🎯 On Fire!','✨ Arcade Blitz'
   ];
 
   /* ── helpers ── */
@@ -5176,10 +5174,10 @@ var MUSIC=(function(){
     var d1=ctx.createDelay(.5),d2=ctx.createDelay(.5);
     var f1=ctx.createGain(),f2=ctx.createGain();
     var filt=ctx.createBiquadFilter(),mix=ctx.createGain();
-    d1.delayTime.value=0.17; d2.delayTime.value=0.27;
-    f1.gain.value=0.28; f2.gain.value=0.22;
-    filt.type='lowpass'; filt.frequency.value=3200;
-    mix.gain.value=0.32;
+    d1.delayTime.value=0.10; d2.delayTime.value=0.17;
+    f1.gain.value=0.18; f2.gain.value=0.14;
+    filt.type='lowpass'; filt.frequency.value=4500;
+    mix.gain.value=0.16;
     d1.connect(f1); f1.connect(d1); d1.connect(d2);
     d2.connect(f2); f2.connect(d2); d2.connect(filt);
     filt.connect(mix); mix.connect(master);
@@ -5217,10 +5215,10 @@ var MUSIC=(function(){
       o.type='sine'; o.frequency.value=f;
       o2.type='sine'; o2.frequency.value=f*3.0; /* warmth harmonic */
       g2.gain.value=0.22; o2.connect(g2);
-      fl.type='lowpass'; fl.frequency.value=2200; fl.Q.value=0.6;
+      fl.type='lowpass'; fl.frequency.value=4800; fl.Q.value=0.4;
       g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(vol,t+0.006);
-      g.gain.exponentialRampToValueAtTime(0.0001,t+dur*0.55);
+      g.gain.linearRampToValueAtTime(vol,t+0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur*0.38);
       o.connect(fl); g2.connect(fl); fl.connect(g);
       g.connect(rvbIn); g.connect(master);
       o.start(t); o.stop(t+dur+.1);
@@ -5310,7 +5308,7 @@ var MUSIC=(function(){
         })(pick(notes), i*gap);
       }
     }
-    sched('melody',streamMelody,rnd(1800,4500));
+    sched('melody',streamMelody,rnd(800,2200));
   }
 
   /* 2. Arpeggio — ascending 3-note figure, gives upbeat movement */
@@ -5321,14 +5319,14 @@ var MUSIC=(function(){
     if(notes.length>=3){
       /* Pick a root and go up two steps */
       var start=Math.floor(Math.random()*(notes.length-2));
-      var gap=rnd(90,160); /* quick, light */
+      var gap=rnd(70,120); /* quick, light */
       for(var i=0;i<3;i++){
         (function(n,dl){
-          setTimeout(function(){ if(running&&!muted) pluck(n,rnd(.040,.070),rnd(0.8,1.4)); },dl);
+          setTimeout(function(){ if(running&&!muted) pluck(n,rnd(.050,.085),rnd(0.5,1.0)); },dl);
         })(notes[start+i], i*gap);
       }
     }
-    sched('arp',streamArp,rnd(1400,3200));
+    sched('arp',streamArp,rnd(700,1800));
   }
 
   /* 3. Bells — bright, medium decay */
@@ -5377,7 +5375,7 @@ var MUSIC=(function(){
     /* Slightly accent beats 1 and 3 of every 4 */
     var accent=(_beat%4===0||_beat%4===2);
     tick(root+(accent?0:12), accent?0.038:0.022);
-    sched('pulse',streamPulse,rnd(620,720)); /* ~88 BPM */
+    sched('pulse',streamPulse,rnd(460,510)); /* ~120 BPM */
   }
 
   /* 8. Sparkle — high brief bell accents */
