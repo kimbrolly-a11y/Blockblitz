@@ -695,11 +695,32 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   display:flex;flex-direction:column;align-items:center;
   position:relative;z-index:10;
   opacity:0;
-  animation:spLogoIn .8s cubic-bezier(.17,.89,.32,1.28) .45s both;
+  animation:spLogoIn .8s cubic-bezier(.17,.89,.32,1.28) .45s both,
+            spLogoFloat 3.8s ease-in-out 1.35s infinite;
 }
 @keyframes spLogoIn{
   from{opacity:0;transform:scale(.35) translateY(40px)}
   to  {opacity:1;transform:scale(1)   translateY(0)}
+}
+@keyframes spLogoFloat{
+  0%,100%{transform:translateY(0)    scale(1)}
+  50%    {transform:translateY(-10px) scale(1.04)}
+}
+/* Logo image glow pulse */
+#splashLogoImg{
+  animation:spLogoGlow 3.8s ease-in-out 1.35s infinite;
+}
+@keyframes spLogoGlow{
+  0%,100%{filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45))}
+  50%    {filter:drop-shadow(0 10px 52px rgba(255,220,0,0.80)) drop-shadow(0 0 28px rgba(255,130,0,0.50))}
+}
+/* Menu logo gentle float */
+#menuLogoImg{
+  animation:menuLogoFloat 4.2s ease-in-out infinite;
+}
+@keyframes menuLogoFloat{
+  0%,100%{transform:translateY(0)   scale(1)}
+  50%    {transform:translateY(-7px) scale(1.03)}
 }
 
 /* Title row */
@@ -1086,8 +1107,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   <div id="spStars"></div>
   <!-- Logo -->
   <div class="sp-logo">
-    <img src="Assets/Title_logo.png" alt="Block Blitz"
-      style="width:96vw;max-width:504px;height:auto;display:block;margin:0 auto;filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45))"
+    <img src="Assets/Title_logo.png" alt="Block Blitz" id="splashLogoImg"
+      style="width:96vw;max-width:504px;height:auto;display:block;margin:0 auto"
       onerror="this.style.display='none';document.getElementById('spLogoFallback').style.display='flex'">
     <div id="spLogoFallback" style="display:none;flex-direction:column;align-items:center">
       <div class="sp-title-row">
