@@ -792,20 +792,16 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   left:50%;transform:translateX(-50%);
   width:100%;max-width:430px;
   z-index:250;
-  background:url('Assets/Bb_background1.png') center center / cover no-repeat;
+  background:linear-gradient(rgba(0,0,0,0.42),rgba(0,0,0,0.42)),url('Assets/Bb_background1.png') center center / cover no-repeat;
   display:flex;flex-direction:column;align-items:stretch;
   overflow:hidden;
   transition:opacity .3s ease,transform .3s ease;
-}
-#menuScreen::after{
-  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-  background:rgba(0,0,0,0.42);
 }
 #menuScreen.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(18px)}
 .menu-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(70px);z-index:0}
 
 /* Everything inside is above the orbs */
-#menuScreen > *:not(canvas){position:relative;z-index:1}
+#menuScreen > *{position:relative;z-index:1}
 
 /* ── Top bar ── */
 .menu-stats{
@@ -1132,7 +1128,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 <!-- MAIN MENU SCREEN -->
 <div id="menuScreen" class="hidden" style="display:none">
   <!-- Animated particles overlay -->
-  <canvas id="menuParticles" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none"></canvas>
+  <canvas id="menuParticles" style="position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block"></canvas>
 
   <!-- Top stats row -->
   <div class="menu-stats">
