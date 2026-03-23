@@ -30,10 +30,10 @@ body>*{position:relative;z-index:1}
 /* ══ TOP BAR ══ */
 .top-bar{
   width:100%;display:flex;flex-direction:column;
-  padding:8px 12px 5px;flex-shrink:0;
+  padding:5px 12px 3px;flex-shrink:0;
   background:rgba(255,255,255,0.05);
   border-bottom:1px solid rgba(255,255,255,0.08);
-  backdrop-filter:blur(10px);gap:4px;
+  backdrop-filter:blur(10px);gap:3px;
 }
 /* Row 1: back · level · buttons */
 .top-row1{display:flex;align-items:center;justify-content:space-between;width:100%}
@@ -84,7 +84,7 @@ body>*{position:relative;z-index:1}
 .settings-btn-sm:active{color:#fff;transform:scale(0.9)}
 
 /* ══ XP BAR ══ */
-.xp-bar-wrap{width:100%;padding:4px 12px 3px;flex-shrink:0}
+.xp-bar-wrap{width:100%;padding:3px 12px 2px;flex-shrink:0}
 .xp-bar-row{display:flex;align-items:center;gap:8px}
 .xp-label{font-family:'Fredoka One';font-size:11px;color:#90caf9;white-space:nowrap;min-width:36px}
 .xp-track{
@@ -109,13 +109,13 @@ body>*{position:relative;z-index:1}
 /* ══ POWER-UP + UNDO ROW (combined) ══ */
 .pu-bar{
   width:100%;display:flex;align-items:center;
-  gap:6px;padding:4px 12px;flex-shrink:0;
+  gap:6px;padding:3px 12px;flex-shrink:0;
 }
 .pu-btn{
   background:rgba(255,255,255,0.1);
   border:1.5px solid rgba(255,255,255,0.18);
   border-radius:14px;color:#fff;font-size:17px;
-  padding:5px 12px;cursor:pointer;
+  padding:4px 10px;cursor:pointer;
   display:flex;align-items:center;gap:4px;
   transition:transform .12s,border-color .15s,background .15s,box-shadow .15s;
   box-shadow:0 2px 8px rgba(0,0,0,0.25);
@@ -169,7 +169,7 @@ body>*{position:relative;z-index:1}
 /* ══ DAILY CHALLENGE HUD ══ */
 .dc-hud{
   display:none;width:100%;
-  padding:5px 12px;flex-shrink:0;
+  padding:3px 12px;flex-shrink:0;
   align-items:center;justify-content:center;gap:10px;
   background:rgba(255,215,0,0.07);
   border-bottom:1px solid rgba(255,215,0,0.15);
@@ -360,14 +360,14 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 /* ══ TRAY ══ */
 .tray{
   width:100%;display:flex;justify-content:space-around;align-items:center;
-  padding:8px 10px 6px;flex-shrink:0;
+  padding:5px 10px 4px;flex-shrink:0;
   background:rgba(255,255,255,0.07);
   border-top:2px solid rgba(255,255,255,0.14);
   box-shadow:0 -4px 20px rgba(0,0,0,0.35);
 }
 /* Shuffle row */
 .tray-actions{
-  display:flex;justify-content:center;padding:2px 10px 8px;
+  display:flex;justify-content:center;padding:2px 10px 5px;
   background:rgba(255,255,255,0.04);
   border-top:1px solid rgba(255,255,255,0.08);
 }
@@ -386,7 +386,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   border-radius:8px;padding:1px 6px;margin-left:2px;
 }
 .slot{
-  flex:1;max-width:110px;min-height:76px;
+  flex:1;max-width:110px;min-height:68px;
   display:flex;align-items:center;justify-content:center;
   cursor:grab;touch-action:none;border-radius:14px;
   background:rgba(255,255,255,0.09);
@@ -3030,8 +3030,14 @@ function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 /* ── CELL SIZE ── */
 function setCS(){
   var w = Math.min(window.innerWidth, 430) - 20;
-  CS = Math.floor((w - GAP*(COLS-1)) / COLS);
-  CS = Math.max(30, Math.min(CS, 44));
+  var h = window.innerHeight;
+  /* Fixed UI overhead: top-bar + xp/dc bar + pu-bar + tray + tray-actions + board padding */
+  var fixedH = 275;
+  var availH = h - fixedH;
+  var csFromW = Math.floor((w - GAP*(COLS-1)) / COLS);
+  var csFromH = Math.floor((availH - GAP*(ROWS-1)) / ROWS);
+  CS = Math.min(csFromW, csFromH);
+  CS = Math.max(28, Math.min(CS, 44));
   GAP = Math.max(3, Math.floor(CS/13));
   STEP = CS + GAP;
   document.documentElement.style.setProperty('--cs', CS+'px');
