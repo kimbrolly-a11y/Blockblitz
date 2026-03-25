@@ -3399,6 +3399,7 @@ function boardFillPct(){
 }
 function randPiece(maxSz){
   maxSz = maxSz || 99;
+  if(isLeagueMode) maxSz = Math.min(maxSz, leagueMaxPieceSize());
   var pool=SHAPES.filter(function(s){return shapeSize(s)<=maxSz;});
   if(!pool.length) pool=SHAPES;
   return {shape:pool[Math.floor(Math.random()*pool.length)], color:COLORS[Math.floor(Math.random()*COLORS.length)]};
@@ -3829,6 +3830,7 @@ function checkLines(){
   combo++;
   if(combo>maxCombo){maxCombo=combo;lsSet('bbmaxcombo',maxCombo);}
   var pts=cleared*COLS*10*Math.max(1,combo);
+  if(isLeagueMode) pts=Math.round(pts*leagueMultiplier());
   score+=pts;
 
   /* Collect gems in cleared rows/cols */
@@ -3878,6 +3880,8 @@ function checkLines(){
   else if(cleared>=2) hamsterReact('clear2');
   else hamsterReact('clear1');
   spawnConfetti(popEls);
+  /* League stage progression */
+  if(isLeagueMode) leagueOnClear(cleared);
 
   setTimeout(function(){
     syncBoard();
@@ -5673,6 +5677,20 @@ function switchMapMode(mode){
 
 /* ══ BLITZ LEAGUE ══ */
 var isLeagueMode=false;
+var leagueStage=0;
+var leagueLinesCleared=0;
+var LEAGUE_LINES_PER_STAGE=5;
+
+function leagueMultiplier(){ return 1 + leagueStage*0.25; }
+function leagueIceCount(){
+  if(leagueStage<3) return 0;
+  return Math.min(10, Math.floor((leagueStage-2)*1.5));
+}
+function leagueMaxPieceSize(){
+  if(leagueStage<2) return 3;
+  if(leagueStage<4) return 4;
+  return 99;
+}
 
 function getWeekId(){
   var d=new Date(), jan1=new Date(d.getFullYear(),0,1);
@@ -5684,7 +5702,6 @@ function getLeagueData(){
   var week=getWeekId();
   var stored=lsGet('bbLeagueWeek','');
   if(stored!==week){
-    /* New week — check if rewards due from last week */
     checkLeagueRewards();
     lsSet('bbLeagueWeek',week);
     lsSet('bbLeague','[]');
@@ -5697,7 +5714,7 @@ function checkLeagueRewards(){
   if(!prev.length) return;
   var rewarded=lsGet('bbLeagueRewarded','');
   var prevWeek=lsGet('bbLeagueWeek','');
-  if(rewarded===prevWeek) return; /* already rewarded */
+  if(rewarded===prevWeek) return;
   prev.sort(function(a,b){return b.score-a.score;});
   var rewards=[500,300,150];
   var profile=JSON.parse(lsGet('bbprofile','{}'));
@@ -5705,7 +5722,7 @@ function checkLeagueRewards(){
   for(var i=0;i<Math.min(3,prev.length);i++){
     if(prev[i].name.toLowerCase()===pName){
       awardCoins(rewards[i]);
-      showToast('🏆 League reward: +'+rewards[i]+' coins!');
+      showToast('League #'+(i+1)+': +'+rewards[i]+' coins!');
     }
   }
   lsSet('bbLeagueRewarded',prevWeek);
@@ -5715,15 +5732,14 @@ function submitLeagueScore(s){
   var lb=getLeagueData();
   var profile=JSON.parse(lsGet('bbprofile','{}'));
   var name=profile.name||'Player';
-  /* Update or add entry */
   var found=false;
   for(var i=0;i<lb.length;i++){
     if(lb[i].name===name){
-      if(s>lb[i].score) lb[i].score=s;
+      if(s>lb[i].score){ lb[i].score=s; lb[i].stage=leagueStage; }
       found=true; break;
     }
   }
-  if(!found) lb.push({name:name,score:s,date:new Date().toISOString()});
+  if(!found) lb.push({name:name,score:s,stage:leagueStage,date:new Date().toISOString()});
   lb.sort(function(a,b){return b.score-a.score;});
   lsSet('bbLeague',JSON.stringify(lb));
 }
@@ -5740,15 +5756,16 @@ function renderLeagueLB(){
   var myBest=0;
   lb.forEach(function(e){ if(e.name===pName&&e.score>myBest) myBest=e.score; });
   if(bestEl) bestEl.textContent=myBest>0?'Your best: '+myBest.toLocaleString():'No score yet this week';
-  if(!lb.length){ el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.4);padding:20px;font-size:13px">No scores yet — be the first!</div>'; return; }
+  if(!lb.length){ el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.4);padding:20px;font-size:13px">No scores yet</div>'; return; }
   var html='';
-  var medals=['🥇','🥈','🥉'];
+  var medals=['\u{1F947}','\u{1F948}','\u{1F949}'];
   for(var i=0;i<Math.min(10,lb.length);i++){
     var medal=i<3?medals[i]:(i+1)+'.';
     var isMe=lb[i].name===pName;
     html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;margin-bottom:4px;background:rgba(255,255,255,'+(isMe?'0.12':'0.04')+');font-size:12px">';
     html+='<span style="min-width:28px">'+medal+'</span>';
     html+='<span style="flex:1;color:'+(isMe?'#ffd700':'#fff')+'">'+lb[i].name+'</span>';
+    html+='<span style="font-size:9px;color:rgba(255,255,255,0.5);margin-right:6px">S'+(lb[i].stage||0)+'</span>';
     html+='<span style="font-family:Fredoka One;color:#00e5ff">'+lb[i].score.toLocaleString()+'</span>';
     html+='</div>';
   }
@@ -5765,23 +5782,59 @@ function startLeague(){
   closeLeague();
   isLeagueMode=true;
   isAdventureMode=false;
+  leagueStage=0;
+  leagueLinesCleared=0;
   closeMenu();
   setTimeout(function(){
-    level=0;
-    startLevel(0);
-    /* Override UI for league mode */
-    var mb=document.getElementById('modeBadge');
-    if(mb){ mb.textContent='🏆 BLITZ LEAGUE'; mb.className='mode-badge'; mb.style.background='rgba(255,215,0,0.25)'; mb.style.borderColor='rgba(255,215,0,0.4)'; mb.style.color='#ffd700'; }
-    /* Hide power-ups in league mode */
-    var pu=document.querySelector('.pu-bar');
-    if(pu) pu.style.display='none';
-    /* Hide XP bar — score IS the goal */
-    var xp=document.querySelector('.xp-bar-wrap');
-    if(xp) xp.style.display='none';
-    /* Hide gem display */
-    var gd=document.querySelector('.adv-gem-display');
-    if(gd) gd.classList.remove('visible');
+    level=leagueStage;
+    startLevel(level);
+    applyLeagueUI();
   },300);
+}
+
+function applyLeagueUI(){
+  var mb=document.getElementById('modeBadge');
+  if(mb){ mb.textContent='STAGE '+(leagueStage+1); mb.className='mode-badge'; mb.style.background='rgba(255,215,0,0.25)'; mb.style.borderColor='rgba(255,215,0,0.4)'; mb.style.color='#ffd700'; }
+  var pu=document.querySelector('.pu-bar'); if(pu) pu.style.display='none';
+  var xp=document.querySelector('.xp-bar-wrap'); if(xp) xp.style.display='';
+  var gd=document.querySelector('.adv-gem-display'); if(gd) gd.classList.remove('visible');
+  updateLeagueXPBar();
+}
+
+function updateLeagueXPBar(){
+  if(!isLeagueMode) return;
+  var pct=Math.min(100, Math.round((leagueLinesCleared/LEAGUE_LINES_PER_STAGE)*100));
+  var fill=document.getElementById('xpFill');
+  var lbl=document.getElementById('xpLabel');
+  if(fill) fill.style.width=pct+'%';
+  if(lbl) lbl.textContent='Stage '+(leagueStage+1)+' | '+leagueLinesCleared+'/'+LEAGUE_LINES_PER_STAGE+' lines ('+Math.round(leagueMultiplier()*10)/10+'x)';
+}
+
+function leagueOnClear(linesJustCleared){
+  leagueLinesCleared+=linesJustCleared;
+  updateLeagueXPBar();
+  if(leagueLinesCleared>=LEAGUE_LINES_PER_STAGE){
+    leagueLinesCleared-=LEAGUE_LINES_PER_STAGE;
+    leagueStage++;
+    showToast('Stage '+(leagueStage+1)+'! ('+Math.round(leagueMultiplier()*10)/10+'x)');
+    SND.stageWin();
+    var iceCount=leagueIceCount();
+    if(iceCount>0) spawnLeagueIce(iceCount);
+    applyLeagueUI();
+  }
+}
+
+function spawnLeagueIce(count){
+  var empties=[];
+  for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
+    if(board[r][c].type===T.EMPTY) empties.push({r:r,c:c});
+  }
+  for(var i=empties.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=empties[i]; empties[i]=empties[j]; empties[j]=tmp; }
+  var toAdd=Math.min(count,empties.length);
+  for(var k=0;k<toAdd;k++){
+    board[empties[k].r][empties[k].c]={type:T.ICE,color:null};
+  }
+  syncBoard();
 }
 
 function openMenu(){
