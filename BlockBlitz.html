@@ -339,9 +339,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* Highlight states */
 .cell.lit{
-  background:#00e5ff!important;
-  border:2px solid rgba(255,255,255,0.9)!important;
-  box-shadow:0 0 12px rgba(0,229,255,0.7),0 0 4px rgba(0,229,255,0.9)!important;
+  background:rgba(255,255,255,0.25)!important;
+  border:2px solid rgba(255,255,255,0.45)!important;
+  box-shadow:0 0 8px rgba(255,255,255,0.15)!important;
 }
 .cell.bad-lit{
   background:#e040fb!important;
@@ -375,8 +375,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 /* Shuffle row */
 .tray-actions{
   display:flex;justify-content:center;padding:2px 10px 5px;
-  background:rgba(255,255,255,0.04);
-  border-top:1px solid rgba(255,255,255,0.08);
+  background:transparent;
+  border-top:none;
 }
 .shuffle-btn{
   background:rgba(255,255,255,0.08);
@@ -438,7 +438,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 #ghost.invalid{opacity:.28}
 .ghost-grid{display:grid;gap:var(--gap)}
 .ghost-cell{border-radius:8px;position:relative;overflow:hidden;}
-.ghost-cell::after{content:'';position:absolute;top:3px;left:3px;right:3px;height:42%;background:linear-gradient(180deg,rgba(255,255,255,.40),transparent);border-radius:5px 5px 0 0;pointer-events:none;}
+.ghost-cell::after{display:none}
 
 /* ══ MODALS ══ */
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(12px);z-index:500;justify-content:center;align-items:center}
@@ -447,8 +447,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   background:transparent;backdrop-filter:none;
   align-items:stretch;padding:0;
 }
-.modal-bg.map-full.on{animation:fadeIn .4s ease}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .modal-bg.map-full .map-card{
   /* Full-screen within the 430px body column */
   position:fixed;
@@ -784,7 +782,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   overflow:hidden;
   transition:opacity .3s ease,transform .3s ease;
 }
-#menuScreen.hidden{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(18px)}
+#menuScreen.hidden{opacity:0;pointer-events:none;transform:translateX(-50%)}
 .menu-orb{position:absolute;border-radius:50%;pointer-events:none;filter:blur(70px);z-index:0}
 
 /* Everything inside is above the orbs */
@@ -1080,7 +1078,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* ── Logo image on splash + menu ── */
 #splashLogoImg{max-width:min(97%,442px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:spLogoGlow 3.8s ease-in-out 1.35s infinite}
-#menuLogoImg{max-width:min(96%,778px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
+#menuLogoImg{max-width:min(100%,1012px);height:auto;display:block;margin:12px auto 0;transform:scale(1.3);transform-origin:center top;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
 @keyframes spLogoGlow{
   0%,100%{filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45)) drop-shadow(0 2px 8px rgba(255,200,0,.35))}
   50%    {filter:drop-shadow(0 10px 52px rgba(255,220,0,0.80)) drop-shadow(0 0 28px rgba(255,130,0,0.50))}
@@ -1194,11 +1192,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <img id="menuLogoImg" src="Assets/Title_logo.png" alt="Block Blitz">
   </div>
 
-  <!-- Tagline above mode cards -->
-  <div class="menu-tagline">Choose Your Path</div>
-
   <!-- Mode cards -->
   <div class="menu-cards">
+    <div class="menu-tagline">Choose Your Path</div>
     <!-- Classic Mode -->
     <div class="menu-mode-card menu-card-classic" onclick="BB.selectMode('classic')">
       <div class="menu-card-shine"></div>
@@ -3674,16 +3670,9 @@ function buildGhost(p){
     gc.style.width=CS+'px'; gc.style.height=CS+'px';
     gc.style.borderRadius='8px'; gc.style.overflow='hidden'; gc.style.position='relative';
     if(p.shape[r][c]){
-      var isGC = p.gemCell && p.gemCell.r===r && p.gemCell.c===c;
-      if(isGC){
-        gc.style.background='#f9a825';
-        gc.style.boxShadow='0 4px 0 #e65100';
-        var ge = p.gemCell.type==='star'?'⭐':'🔶';
-        gc.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:'+Math.floor(CS*0.44)+'px;pointer-events:none">'+ge+'</div>';
-      } else {
-        gc.style.background=p.color;
-        gc.style.boxShadow='0 4px 0 '+darken(p.color);
-      }
+      gc.style.background='rgba(200,200,200,0.35)';
+      gc.style.boxShadow='none';
+      gc.style.border='1.5px solid rgba(255,255,255,0.25)';
     } else { gc.style.background='transparent'; }
     gg.appendChild(gc);
   }
@@ -3764,22 +3753,16 @@ function onUp(e,_move,_up){
 function clearLit(){
   document.querySelectorAll('.cell.lit,.cell.bad-lit').forEach(function(el){
     el.classList.remove('lit','bad-lit');
-    el.style.background=''; el.style.boxShadow=''; el.style.border='';
   });
 }
 
-function litCells(shape,r0,c0,cls,color){
+function litCells(shape,r0,c0,cls){
   for(var r=0;r<shape.length;r++) for(var c=0;c<shape[0].length;c++){
     if(!shape[r][c]) continue;
     var nr=r0+r, nc=c0+c;
     if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue;
     var el=cellEl(nr,nc); if(!el) continue;
     el.classList.add(cls);
-    if(cls==='lit'&&color){
-      el.style.background=color;
-      el.style.boxShadow='0 0 10px '+color;
-      el.style.border='2px solid rgba(255,255,255,0.5)';
-    }
   }
 }
 
@@ -5231,7 +5214,19 @@ var SND=(function(){
   document.addEventListener('touchstart',unlock,{once:true});
   function tone(f,t2,v,a,d,dl){var c=ec();if(!c)return;dl=dl||0;var t=c.currentTime+dl;try{var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t2;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+d);o.start(t);o.stop(t+a+d+.05);}catch(e){}}
   return{
-    pickup:function(){tone(340,'sine',.06,.02,.18);tone(510,'sine',.03,.03,.14,.03);},
+    pickup:function(){
+      /* Swish sound — filtered noise burst */
+      var c=ec();if(!c)return;var t=c.currentTime;
+      try{
+        var buf=c.createBuffer(1,c.sampleRate*0.12,c.sampleRate);
+        var d=buf.getChannelData(0);
+        for(var i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,2);
+        var src=c.createBufferSource();src.buffer=buf;
+        var bp=c.createBiquadFilter();bp.type='bandpass';bp.frequency.value=3000;bp.Q.value=1.5;
+        var g=c.createGain();g.gain.setValueAtTime(0.10,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+        src.connect(bp);bp.connect(g);g.connect(c.destination);src.start(t);
+      }catch(e){}
+    },
     place: function(){tone(220,'sine',.22,.005,.12);tone(150,'square',.07,.005,.09);},
     gem:   function(){tone(1568,'sine',.18,.003,.12);tone(2093,'triangle',.12,.003,.09,.04);tone(2637,'sine',.08,.003,.07,.08);},
     clear: function(n,combo){
@@ -5254,15 +5249,15 @@ var SND=(function(){
       var c=ec();if(!c)return;
       var t0=c.currentTime;
       var totalDur=3.5;
-      var N=40;
-      /* Gentle clicking ticks that slow down */
+      var N=36;
+      /* Soft clicking ticks that decelerate — sine only */
       for(var i=0;i<N;i++){
         var p=i/N;
         var eased=1-Math.pow(1-p,3);
         var dl=eased*totalDur;
-        var vol=0.10-0.04*p;
-        var f=800+200*(1-p);
-        var decay=0.02+0.03*p;
+        var vol=0.08-0.03*p;
+        var f=660;
+        var decay=0.025+0.04*p;
         try{
           var t=t0+dl;
           var o=c.createOscillator(),g=c.createGain();
@@ -5271,13 +5266,14 @@ var SND=(function(){
           g.gain.setValueAtTime(0,t);
           g.gain.linearRampToValueAtTime(vol,t+0.002);
           g.gain.exponentialRampToValueAtTime(0.0001,t+decay);
-          o.start(t); o.stop(t+decay+0.01);
+          o.start(t); o.stop(t+decay+0.02);
         }catch(e){}
       }
-      /* Pleasant reward chime at the end */
-      var ts=t0+totalDur+0.05;
-      [523,659,784,1047].forEach(function(f,i){
-        tone(f,'sine',.14,.01,.30,ts-t0+i*0.08);
+      /* Celebratory bell chime: ding-ding-DING! */
+      var ts=totalDur+0.08;
+      [784,988,1175,1568].forEach(function(f,i){
+        tone(f,'sine',.12,.005,.40,ts+i*0.10);
+        tone(f*2,'sine',.04,.005,.25,ts+i*0.10+0.01);
       });
     }
   };
@@ -5701,11 +5697,7 @@ function buildMapModal(mode){
         bubble.textContent=(lvNum+1);
         (function(n, adv){
           bubble.addEventListener('click',function(){
-            /* Fade out map modal */
-            var mm=document.getElementById('mapModal');
-            mm.style.transition='opacity .35s ease';
-            mm.style.opacity='0';
-            setTimeout(function(){mm.classList.remove('on');mm.style.transition='';mm.style.opacity='';},380);
+            document.getElementById('mapModal').classList.remove('on');
             var ms = document.getElementById('menuScreen');
             if(ms){ ms.classList.add('hidden'); ms.style.display='none'; }
             setTimeout(function(){
