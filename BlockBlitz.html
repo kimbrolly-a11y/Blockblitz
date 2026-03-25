@@ -3211,7 +3211,7 @@ function applyCell(el, cell){
   el.className='cell';
   el.style.width=CS+'px'; el.style.height=CS+'px';
   el.style.background=''; el.style.boxShadow='';
-  /* Remove any old pseudo-style via data */
+  el.innerHTML=''; /* clear any sheen/icon divs left by placePiece */
   if(cell.type===T.EMPTY){
     el.classList.add('empty');
   } else if(cell.type===T.GOLD){
