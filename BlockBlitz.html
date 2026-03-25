@@ -3832,8 +3832,8 @@ function checkLines(){
   var toKeepGold={}; /* track gold cells that remain */
   /* Animate cleared cells BEFORE modifying board — include gold blocks */
   var popSet={}, popEls=[];
-  fullRows.forEach(function(r){for(var c=0;c<COLS;c++){var k=r+'_'+c;var ct=board[r][c].type;if(!popSet[k]&&ct!==T.EMPTY){popSet[k]=true;var el=cellEl(r,c);if(el){el.classList.add('pop');popEls.push(el);}}}});
-  fullCols.forEach(function(c){for(var r=0;r<ROWS;r++){var k=r+'_'+c;var ct=board[r][c].type;if(!popSet[k]&&ct!==T.EMPTY){popSet[k]=true;var el=cellEl(r,c);if(el){el.classList.add('pop');popEls.push(el);}}}});
+  fullRows.forEach(function(r){for(var c=0;c<COLS;c++){var k=r+'_'+c;var ct=board[r][c].type;if(!popSet[k]&&ct!==T.EMPTY){popSet[k]=true;var el=cellEl(r,c);if(el){el.classList.remove('filled');el.style.background='';el.style.boxShadow='';el.innerHTML='';el.classList.add('pop');popEls.push(el);}}}});
+  fullCols.forEach(function(c){for(var r=0;r<ROWS;r++){var k=r+'_'+c;var ct=board[r][c].type;if(!popSet[k]&&ct!==T.EMPTY){popSet[k]=true;var el=cellEl(r,c);if(el){el.classList.remove('filled');el.style.background='';el.style.boxShadow='';el.innerHTML='';el.classList.add('pop');popEls.push(el);}}}});
 
   fullRows.forEach(function(r){
     for(var c=0;c<COLS;c++){
