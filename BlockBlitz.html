@@ -325,17 +325,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .badge-skin-unlock{background:rgba(255,255,255,0.1);border-radius:12px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:#ce93d8}
 .badge-skin-unlock strong{color:#fff;font-size:13px}
 
-/* ══ SKIN SELECTOR ══ */
-.skin-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%;margin-bottom:16px;max-height:55vh;overflow-y:auto}
-.skin-card{border-radius:14px;padding:12px 10px;cursor:pointer;border:2px solid rgba(255,255,255,0.1);transition:all .18s;position:relative;text-align:center}
-.skin-card.active{border-color:#ffd700;box-shadow:0 0 12px rgba(255,215,0,0.4)}
-.skin-card.locked{opacity:0.55;cursor:default}
-.skin-card-preview{height:36px;border-radius:8px;margin-bottom:7px;border:1px solid rgba(255,255,255,0.1)}
-.skin-card-animal{font-size:22px;margin-bottom:3px}
-.skin-card-name{font-family:'Fredoka One',sans-serif;font-size:12px;color:#fff}
-.skin-card-unlock{font-size:10px;color:#90caf9;margin-top:2px}
-.skin-card-lock{position:absolute;top:6px;right:8px;font-size:14px}
-.skin-card-active-badge{position:absolute;top:6px;left:8px;font-size:10px;background:#ffd700;color:#111;border-radius:6px;padding:1px 5px;font-family:'Fredoka One',sans-serif}
 
 /* Highlight states */
 .cell.lit{
@@ -1182,8 +1171,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <div class="menu-stat-pill">🪙 <span id="menuCoins">0</span></div>
     <div class="menu-action-row">
       <button class="menu-action-btn" id="menuProfileBtn" onclick="BB.openProfile()" title="Profile">👤</button>
-      <button class="menu-action-btn" id="menuSkinsBtn" onclick="BB.openSkinSelector()" title="Board Skins">🎨</button>
-      <button class="menu-action-btn" onclick="BB.openMascotEditor()" title="Wardrobe">👒</button>
+      <button class="menu-action-btn" onclick="BB.openLeague()" title="Blitz League">🏆</button>
       <button class="menu-action-btn" onclick="BB.openShop()" title="Shop">🛒</button>
       <button class="menu-action-btn music-toggle muted" onclick="BB.toggleMusic()">🎵</button>
     </div>
@@ -1248,6 +1236,10 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <span class="menu-bottom-btn-icon" id="menuRankIcon">🎖️</span>
       <span class="menu-bottom-btn-lbl" id="menuRankLbl">Rookie</span>
     </div>
+    <button class="menu-bottom-btn" onclick="BB.openLeague()">
+      <span class="menu-bottom-btn-icon">🏆</span>
+      <span class="menu-bottom-btn-lbl">League</span>
+    </button>
   </div>
 </div>
 
@@ -1508,48 +1500,25 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   </div>
 </div>
 
-<!-- SKIN SELECTOR MODAL -->
-<div class="modal-bg" id="skinModal">
+<!-- BLITZ LEAGUE MODAL -->
+<div class="modal-bg" id="leagueModal">
   <div class="modal-card" style="max-height:90vh;overflow-y:auto">
-    <span class="modal-emoji">🎨</span>
-    <div class="modal-title">Board Skins</div>
-    <div style="font-size:12px;color:#90caf9;margin-bottom:14px;text-align:center">Complete worlds to unlock free!<br>Or spend coins to unlock early 🪙</div>
-    <div class="skin-grid" id="skinGrid"></div>
-    <button class="btn-retry" style="background:rgba(255,255,255,.15);box-shadow:none" onclick="BB.closeSkinSelector()">Close</button>
+    <span class="modal-emoji">🏆</span>
+    <div class="modal-title">Blitz League</div>
+    <div style="font-size:12px;color:#90caf9;margin-bottom:6px;text-align:center">Weekly Marathon — Resets every Monday</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-bottom:12px;text-align:center" id="leagueWeekLabel"></div>
+    <div style="display:flex;justify-content:center;gap:12px;margin-bottom:14px">
+      <div style="text-align:center;font-size:11px;color:#ffd700">🥇 500<br><span style="font-size:9px;color:#90caf9">coins</span></div>
+      <div style="text-align:center;font-size:11px;color:#c0c0c0">🥈 300<br><span style="font-size:9px;color:#90caf9">coins</span></div>
+      <div style="text-align:center;font-size:11px;color:#cd7f32">🥉 150<br><span style="font-size:9px;color:#90caf9">coins</span></div>
+    </div>
+    <div style="font-size:12px;color:#ffd700;text-align:center;margin-bottom:10px" id="leagueMyBest"></div>
+    <div class="lb-list" id="leagueLBList" style="max-height:180px;overflow-y:auto;margin-bottom:14px"></div>
+    <button class="btn-retry" style="background:linear-gradient(145deg,#ffd700,#ff8f00);color:#111;font-weight:800;font-size:16px;padding:12px 32px;border-radius:16px;margin-bottom:8px" onclick="BB.startLeague()">Play Now</button>
+    <button class="btn-retry" style="background:rgba(255,255,255,.15);box-shadow:none" onclick="BB.closeLeague()">Close</button>
   </div>
 </div>
 
-<!-- WARDROBE MODAL -->
-<div class="modal-bg" id="mascotModal">
-  <div class="modal-card" style="max-height:90vh;overflow-y:auto">
-    <span class="modal-emoji">👒</span>
-    <div class="modal-title">Wardrobe</div>
-
-    <!-- Live preview -->
-    <div class="mascot-preview-wrap">
-      <div class="mascot-preview-body">
-        <div class="mascot-prev-bg" id="mascotPrevBg"></div>
-        <div class="mascot-prev-animal" id="mascotPrevAnimal"></div>
-        <div class="mascot-prev-hat"    id="mascotPrevHat"></div>
-        <div class="mascot-prev-outfit" id="mascotPrevOutfit"></div>
-        <div class="mascot-prev-acc"    id="mascotPrevAcc"></div>
-      </div>
-    </div>
-
-    <!-- Tabs -->
-    <div class="mascot-etabs">
-      <button class="mascot-etab active" id="mtab-hat"    onclick="BB.mascotTab('hat')">🎩 Hat</button>
-      <button class="mascot-etab"        id="mtab-outfit" onclick="BB.mascotTab('outfit')">👕 Outfit</button>
-      <button class="mascot-etab"        id="mtab-color"  onclick="BB.mascotTab('color')">🎨 Colour</button>
-      <button class="mascot-etab"        id="mtab-acc"    onclick="BB.mascotTab('acc')">✨ Acc</button>
-    </div>
-
-    <!-- Items rendered by JS -->
-    <div class="mascot-item-grid" id="mascotItemGrid"></div>
-
-    <button class="btn-retry" style="background:rgba(255,255,255,.15);box-shadow:none;margin-top:4px" onclick="BB.closeMascotEditor()">Close</button>
-  </div>
-</div>
 
 <!-- RANK INFO MODAL -->
 <div class="modal-bg" id="rankInfoModal">
@@ -3902,6 +3871,7 @@ function checkLines(){
    Adventure: Triggers when ALL gems are collected (or XP bar if level has no gems). Stars = score vs XP target. */
 function checkStageClear(){
   if(gameEnded) return; /* prevent dual modals */
+  if(isLeagueMode) return; /* league mode: play until game over, no win condition */
 
   var target = isDailyChallenge
     ? (DC_LEVEL_TARGETS[getDailyChallengeLevel()]||400)
@@ -4076,6 +4046,14 @@ function doGameOver(){
   var coinEarned=Math.floor(score/150); awardCoins(coinEarned);
   /* Leaderboard */
   submitToLeaderboard(score,level);
+  /* Blitz League */
+  if(isLeagueMode){
+    submitLeagueScore(score);
+    isLeagueMode=false;
+    /* Restore power-ups bar & XP bar for next game */
+    var _pu=document.querySelector('.pu-bar'); if(_pu) _pu.style.display='';
+    var _xp=document.querySelector('.xp-bar-wrap'); if(_xp) _xp.style.display='';
+  }
   if(isDailyChallenge){
     stopDCTimer();
     saveDailyScore(score);
@@ -5675,6 +5653,119 @@ function switchMapMode(mode){
   buildMapModal(mode);
 }
 
+/* ══ BLITZ LEAGUE ══ */
+var isLeagueMode=false;
+
+function getWeekId(){
+  var d=new Date(), jan1=new Date(d.getFullYear(),0,1);
+  var wk=Math.ceil(((d-jan1)/86400000+jan1.getDay()+1)/7);
+  return d.getFullYear()+'-W'+(wk<10?'0':'')+wk;
+}
+
+function getLeagueData(){
+  var week=getWeekId();
+  var stored=lsGet('bbLeagueWeek','');
+  if(stored!==week){
+    /* New week — check if rewards due from last week */
+    checkLeagueRewards();
+    lsSet('bbLeagueWeek',week);
+    lsSet('bbLeague','[]');
+  }
+  return JSON.parse(lsGet('bbLeague','[]'));
+}
+
+function checkLeagueRewards(){
+  var prev=JSON.parse(lsGet('bbLeague','[]'));
+  if(!prev.length) return;
+  var rewarded=lsGet('bbLeagueRewarded','');
+  var prevWeek=lsGet('bbLeagueWeek','');
+  if(rewarded===prevWeek) return; /* already rewarded */
+  prev.sort(function(a,b){return b.score-a.score;});
+  var rewards=[500,300,150];
+  var profile=JSON.parse(lsGet('bbprofile','{}'));
+  var pName=(profile.name||'Player').toLowerCase();
+  for(var i=0;i<Math.min(3,prev.length);i++){
+    if(prev[i].name.toLowerCase()===pName){
+      awardCoins(rewards[i]);
+      showToast('🏆 League reward: +'+rewards[i]+' coins!');
+    }
+  }
+  lsSet('bbLeagueRewarded',prevWeek);
+}
+
+function submitLeagueScore(s){
+  var lb=getLeagueData();
+  var profile=JSON.parse(lsGet('bbprofile','{}'));
+  var name=profile.name||'Player';
+  /* Update or add entry */
+  var found=false;
+  for(var i=0;i<lb.length;i++){
+    if(lb[i].name===name){
+      if(s>lb[i].score) lb[i].score=s;
+      found=true; break;
+    }
+  }
+  if(!found) lb.push({name:name,score:s,date:new Date().toISOString()});
+  lb.sort(function(a,b){return b.score-a.score;});
+  lsSet('bbLeague',JSON.stringify(lb));
+}
+
+function renderLeagueLB(){
+  var lb=getLeagueData();
+  var el=document.getElementById('leagueLBList');
+  if(!el) return;
+  var weekEl=document.getElementById('leagueWeekLabel');
+  if(weekEl) weekEl.textContent='Week: '+getWeekId();
+  var bestEl=document.getElementById('leagueMyBest');
+  var profile=JSON.parse(lsGet('bbprofile','{}'));
+  var pName=(profile.name||'Player');
+  var myBest=0;
+  lb.forEach(function(e){ if(e.name===pName&&e.score>myBest) myBest=e.score; });
+  if(bestEl) bestEl.textContent=myBest>0?'Your best: '+myBest.toLocaleString():'No score yet this week';
+  if(!lb.length){ el.innerHTML='<div style="text-align:center;color:rgba(255,255,255,0.4);padding:20px;font-size:13px">No scores yet — be the first!</div>'; return; }
+  var html='';
+  var medals=['🥇','🥈','🥉'];
+  for(var i=0;i<Math.min(10,lb.length);i++){
+    var medal=i<3?medals[i]:(i+1)+'.';
+    var isMe=lb[i].name===pName;
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;border-radius:8px;margin-bottom:4px;background:rgba(255,255,255,'+(isMe?'0.12':'0.04')+');font-size:12px">';
+    html+='<span style="min-width:28px">'+medal+'</span>';
+    html+='<span style="flex:1;color:'+(isMe?'#ffd700':'#fff')+'">'+lb[i].name+'</span>';
+    html+='<span style="font-family:Fredoka One;color:#00e5ff">'+lb[i].score.toLocaleString()+'</span>';
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+
+function openLeague(){
+  renderLeagueLB();
+  document.getElementById('leagueModal').classList.add('on');
+}
+function closeLeague(){ document.getElementById('leagueModal').classList.remove('on'); }
+
+function startLeague(){
+  closeLeague();
+  isLeagueMode=true;
+  isAdventureMode=false;
+  closeMenu();
+  setTimeout(function(){
+    level=0;
+    startLevel(0);
+    /* Override UI for league mode */
+    var mb=document.getElementById('modeBadge');
+    if(mb){ mb.textContent='🏆 BLITZ LEAGUE'; mb.className='mode-badge'; mb.style.background='rgba(255,215,0,0.25)'; mb.style.borderColor='rgba(255,215,0,0.4)'; mb.style.color='#ffd700'; }
+    /* Hide power-ups in league mode */
+    var pu=document.querySelector('.pu-bar');
+    if(pu) pu.style.display='none';
+    /* Hide XP bar — score IS the goal */
+    var xp=document.querySelector('.xp-bar-wrap');
+    if(xp) xp.style.display='none';
+    /* Hide gem display */
+    var gd=document.querySelector('.adv-gem-display');
+    if(gd) gd.classList.remove('visible');
+  },300);
+}
+
 function openMenu(){
   var hr=document.getElementById('hamsterReact'); if(hr) hr.classList.remove('show');
   refreshPromo();
@@ -5704,6 +5795,8 @@ function openMenu(){
   if(ms){ ms.style.display='flex'; ms.classList.remove('hidden'); }
   /* Show daily bonus once per day, after menu is visible */
   setTimeout(checkDailyBonus, 600);
+  /* Check league rewards from previous week */
+  setTimeout(function(){ getLeagueData(); }, 800);
 }
 function closeMenu(){
   menuVisible = false;
@@ -5885,12 +5978,10 @@ return{
   closeProfile:      closeProfile,
   saveProfile:       saveProfile,
   onPhotoSelected:   onPhotoSelected,
-  openSkinSelector:  openSkinSelector,
-  closeSkinSelector: closeSkinSelector,
   closeBadgePopup:   closeBadgePopup,
-  openMascotEditor:  openMascotEditor,
-  closeMascotEditor: closeMascotEditor,
-  mascotTab:         mascotTab,
+  openLeague:        openLeague,
+  closeLeague:       closeLeague,
+  startLeague:       startLeague,
   openRankInfo:      openRankInfo,
   closeRankInfo:     closeRankInfo,
   openDailyChallenge:openDailyChallenge,
