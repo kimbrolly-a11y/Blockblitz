@@ -844,6 +844,15 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   border:1.5px solid rgba(206,147,216,0.3);
   box-shadow:0 4px 18px rgba(106,27,154,0.5);
 }
+.menu-card-league{
+  background:linear-gradient(135deg,#e65100 0%,#bf360c 50%,#4e1500 100%);
+  border:1.5px solid rgba(255,183,77,0.3);
+  box-shadow:0 4px 18px rgba(230,81,0,0.5);
+}
+.badge-league{
+  background:rgba(255,215,0,0.25)!important;border-color:rgba(255,215,0,0.5)!important;
+  color:#ffd700!important;
+}
 .menu-card-shine{
   position:absolute;top:0;left:0;right:0;height:50%;pointer-events:none;
   background:linear-gradient(180deg,rgba(255,255,255,0.09),transparent);
@@ -1171,7 +1180,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <div class="menu-stat-pill">🪙 <span id="menuCoins">0</span></div>
     <div class="menu-action-row">
       <button class="menu-action-btn" id="menuProfileBtn" onclick="BB.openProfile()" title="Profile">👤</button>
-      <button class="menu-action-btn" onclick="BB.openLeague()" title="Blitz League">🏆</button>
       <button class="menu-action-btn" onclick="BB.openShop()" title="Shop">🛒</button>
       <button class="menu-action-btn music-toggle muted" onclick="BB.toggleMusic()">🎵</button>
     </div>
@@ -1220,6 +1228,19 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       </div>
       <div class="menu-card-cta">Play ›</div>
     </div>
+
+    <!-- Blitz League Mode -->
+    <div class="menu-mode-card menu-card-league" onclick="BB.openLeague()">
+      <div class="menu-card-shine"></div>
+      <div class="menu-card-left">
+        <div class="menu-card-top">
+          <div class="menu-card-title">🏆 Blitz League</div>
+          <div class="menu-card-badge badge-league">WEEKLY</div>
+        </div>
+        <div class="menu-card-desc">Endless marathon — no goals, no power-ups. Place blocks until you can't. Top 3 win coins!</div>
+      </div>
+      <div class="menu-card-cta">Play ›</div>
+    </div>
   </div>
 
   <!-- Bottom action buttons -->
@@ -1236,10 +1257,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <span class="menu-bottom-btn-icon" id="menuRankIcon">🎖️</span>
       <span class="menu-bottom-btn-lbl" id="menuRankLbl">Rookie</span>
     </div>
-    <button class="menu-bottom-btn" onclick="BB.openLeague()">
-      <span class="menu-bottom-btn-icon">🏆</span>
-      <span class="menu-bottom-btn-lbl">League</span>
-    </button>
   </div>
 </div>
 
@@ -1513,7 +1530,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <div style="text-align:center;font-size:11px;color:#cd7f32">🥉 150<br><span style="font-size:9px;color:#90caf9">coins</span></div>
     </div>
     <div style="font-size:12px;color:#ffd700;text-align:center;margin-bottom:10px" id="leagueMyBest"></div>
-    <div class="lb-list" id="leagueLBList" style="max-height:180px;overflow-y:auto;margin-bottom:14px"></div>
+    <div style="font-family:'Fredoka One';font-size:13px;color:rgba(255,255,255,0.6);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;text-align:left">Leaderboard</div>
+    <div class="lb-list" id="leagueLBList" style="max-height:220px;overflow-y:auto;margin-bottom:14px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:6px"></div>
     <button class="btn-retry" style="background:linear-gradient(145deg,#ffd700,#ff8f00);color:#111;font-weight:800;font-size:16px;padding:12px 32px;border-radius:16px;margin-bottom:8px" onclick="BB.startLeague()">Play Now</button>
     <button class="btn-retry" style="background:rgba(255,255,255,.15);box-shadow:none" onclick="BB.closeLeague()">Close</button>
   </div>
