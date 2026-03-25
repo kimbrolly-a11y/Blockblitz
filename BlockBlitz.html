@@ -339,14 +339,14 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* Highlight states */
 .cell.lit{
-  background:rgba(255,255,255,0.25)!important;
-  border:2px solid rgba(255,255,255,0.45)!important;
-  box-shadow:0 0 8px rgba(255,255,255,0.15)!important;
+  background:#00e5ff!important;
+  border:2px solid rgba(255,255,255,0.85)!important;
+  box-shadow:0 0 12px rgba(0,229,255,0.7),0 0 4px rgba(0,229,255,0.9)!important;
 }
 .cell.bad-lit{
-  background:#e040fb!important;
-  border:2px solid #f48ffb!important;
-  box-shadow:0 0 14px rgba(224,64,251,0.9),0 0 4px rgba(224,64,251,1)!important;
+  background:rgba(120,120,120,0.35)!important;
+  border:1.5px solid rgba(255,255,255,0.15)!important;
+  box-shadow:none!important;
 }
 
 /* Animations */
@@ -434,8 +434,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 #hamsterReact.show .hamster-react-img{animation:hamsterBounce .7s ease}
 
 /* Ghost */
-#ghost{position:fixed;pointer-events:none;z-index:9999;display:none;opacity:.85;transition:opacity .1s}
-#ghost.invalid{opacity:.28}
+#ghost{position:fixed;pointer-events:none;z-index:9999;display:none;opacity:.75;transition:opacity .1s}
+#ghost.invalid{opacity:.20}
 .ghost-grid{display:grid;gap:var(--gap)}
 .ghost-cell{border-radius:8px;position:relative;overflow:hidden;}
 .ghost-cell::after{display:none}
