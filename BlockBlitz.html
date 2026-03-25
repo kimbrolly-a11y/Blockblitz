@@ -342,6 +342,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .cell.pop{animation:cellPop .28s ease forwards;z-index:10}
 @keyframes cellPop{0%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.6}100%{transform:scale(0);opacity:0}}
 @keyframes leagueShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-4px) rotate(-0.5deg)}30%{transform:translateX(4px) rotate(0.5deg)}45%{transform:translateX(-3px)}60%{transform:translateX(3px)}75%{transform:translateX(-1px)}}
+.board-wrap.blitz-mode{animation:blitzPulse .8s ease-in-out infinite!important;box-shadow:0 0 30px rgba(255,215,0,0.6),0 0 60px rgba(255,140,0,0.3)!important}
+@keyframes blitzPulse{0%,100%{box-shadow:0 0 30px rgba(255,215,0,0.6),0 0 60px rgba(255,140,0,0.3)}50%{box-shadow:0 0 50px rgba(255,215,0,0.9),0 0 80px rgba(255,140,0,0.5)}}
 .cell.land{animation:cellLand .14s ease}
 @keyframes cellLand{from{transform:scale(0) rotate(-8deg);opacity:0}to{transform:scale(1);opacity:1}}
 
@@ -3355,14 +3357,19 @@ function updateStreakBadge(){
 }
 function updateModeBadge(){
   var el=document.getElementById('modeBadge'); if(!el) return;
-  if(isAdventureMode){
+  if(isLeagueMode){
+    el.textContent='🏆 STAGE '+(leagueStage+1);
+    el.classList.remove('adv');
+    el.style.background='rgba(255,215,0,0.25)'; el.style.borderColor='rgba(255,215,0,0.4)'; el.style.color='#ffd700';
+  } else if(isAdventureMode){
     el.textContent='⚔️ ADVENTURE';
     el.classList.add('adv');
+    el.style.background=''; el.style.borderColor=''; el.style.color='';
   } else {
     el.textContent='⚡ CLASSIC';
     el.classList.remove('adv');
+    el.style.background=''; el.style.borderColor=''; el.style.color='';
   }
-  /* Re-sync bar visibility after mode switch */
   updateXPBar();
 }
 
@@ -3654,6 +3661,7 @@ function ghostTL(sr,sc){
 
 function startDrag(e,idx){
   if(!pieces[idx]) return;
+  if(leagueCascading) return; /* block interaction during cascade */
   e.preventDefault();
   savePrev();
   dragging=true; dragIdx=idx; dragPiece=pieces[idx];
@@ -3844,7 +3852,14 @@ function checkLines(){
   combo++;
   if(combo>maxCombo){maxCombo=combo;lsSet('bbmaxcombo',maxCombo);}
   var pts=cleared*COLS*10*Math.max(1,combo);
-  if(isLeagueMode) pts=Math.round(pts*leagueMultiplier());
+  if(isLeagueMode){
+    pts=Math.round(pts*leagueMultiplier());
+    if(blitzModeActive) pts*=3;
+    /* Count target-color blocks in cleared lines */
+    var _tcSet={};
+    fullRows.forEach(function(r){for(var c2=0;c2<COLS;c2++){var k=r+'_'+c2;if(!_tcSet[k]&&board[r][c2].type===T.FILLED&&board[r][c2].color===leagueTargetColor){_tcSet[k]=true;leagueTargetCleared++;}}});
+    fullCols.forEach(function(c2){for(var r2=0;r2<ROWS;r2++){var k=r2+'_'+c2;if(!_tcSet[k]&&board[r2][c2].type===T.FILLED&&board[r2][c2].color===leagueTargetColor){_tcSet[k]=true;leagueTargetCleared++;}}});
+  }
   score+=pts;
 
   /* Collect gems in cleared rows/cols */
@@ -5693,22 +5708,30 @@ function switchMapMode(mode){
   buildMapModal(mode);
 }
 
-/* ══ BLITZ LEAGUE ══ */
+/* ══ BLITZ LEAGUE — Color Chain Cascade ══ */
 var isLeagueMode=false;
 var leagueStage=0;
-var leagueLinesCleared=0;
-var LEAGUE_LINES_PER_STAGE=5;
+var leagueTargetColor='';
+var leagueTargetCount=0;
+var leagueTargetCleared=0;
+var blitzMeter=0;
+var blitzModeActive=false;
+var blitzModeTimer=null;
+var blitzDecayTimer=null;
+var leagueCascading=false; /* lock to prevent piece placement during cascade */
+
+var LEAGUE_COLOR_NAMES={
+  '#e53935':'Red','#1e88e5':'Blue','#ab47bc':'Purple',
+  '#00acc1':'Cyan','#43a047':'Green','#ff8f00':'Amber','#5c6bc0':'Indigo'
+};
+var LEAGUE_COLOR_EMOJI={
+  '#e53935':'\u{1F534}','#1e88e5':'\u{1F535}','#ab47bc':'\u{1F7E3}',
+  '#00acc1':'\u{1F7E6}','#43a047':'\u{1F7E2}','#ff8f00':'\u{1F7E0}','#5c6bc0':'\u{1F7E3}'
+};
+var LEAGUE_TARGETS=[8,10,12,14,16,18,20,22,24,28]; /* target count per stage */
 
 function leagueMultiplier(){ return 1 + leagueStage*0.25; }
-function leagueIceCount(){
-  if(leagueStage<3) return 0;
-  return Math.min(10, Math.floor((leagueStage-2)*1.5));
-}
-function leagueMaxPieceSize(){
-  if(leagueStage<2) return 3;
-  if(leagueStage<4) return 4;
-  return 99;
-}
+function leagueIceCount(){ return leagueStage<3?0:Math.min(10,Math.floor((leagueStage-2)*1.5)); }
 
 function getWeekId(){
   var d=new Date(), jan1=new Date(d.getFullYear(),0,1);
@@ -5796,76 +5819,187 @@ function openLeague(){
 }
 function closeLeague(){ document.getElementById('leagueModal').classList.remove('on'); }
 
+function pickLeagueTarget(){
+  leagueTargetColor=COLORS[leagueStage%COLORS.length];
+  leagueTargetCount=LEAGUE_TARGETS[Math.min(leagueStage,LEAGUE_TARGETS.length-1)];
+  leagueTargetCleared=0;
+}
+
 function startLeague(){
   closeLeague();
   isLeagueMode=true;
   isAdventureMode=false;
   leagueStage=0;
-  leagueLinesCleared=0;
+  blitzMeter=0; blitzModeActive=false;
+  clearTimeout(blitzModeTimer); clearInterval(blitzDecayTimer);
+  pickLeagueTarget();
   closeMenu();
   setTimeout(function(){
-    level=leagueStage;
-    startLevel(level);
+    level=0;
+    startLevel(0);
     applyLeagueUI();
+    updateGemUI();
   },300);
 }
 
 function applyLeagueUI(){
-  var mb=document.getElementById('modeBadge');
-  if(mb){ mb.textContent='STAGE '+(leagueStage+1); mb.className='mode-badge'; mb.style.background='rgba(255,215,0,0.25)'; mb.style.borderColor='rgba(255,215,0,0.4)'; mb.style.color='#ffd700'; }
   var pu=document.querySelector('.pu-bar'); if(pu) pu.style.display='none';
   var xp=document.querySelector('.xp-bar-wrap'); if(xp) xp.style.display='';
   var gd=document.querySelector('.adv-gem-display'); if(gd) gd.classList.remove('visible');
+  updateModeBadge();
   updateLeagueXPBar();
 }
 
 function updateLeagueXPBar(){
   if(!isLeagueMode) return;
-  var pct=Math.min(100, Math.round((leagueLinesCleared/LEAGUE_LINES_PER_STAGE)*100));
+  var pct=leagueTargetCount>0?Math.min(100,Math.round((leagueTargetCleared/leagueTargetCount)*100)):0;
   var fill=document.getElementById('xpFill');
   var lbl=document.getElementById('xpLabel');
   if(fill){
     fill.style.width=pct+'%';
-    fill.style.background='linear-gradient(90deg,#ff8f00,#ffd700,#ff6f00)';
+    fill.style.background='linear-gradient(90deg,'+leagueTargetColor+',#ffd700)';
   }
-  if(lbl) lbl.textContent='Stage '+(leagueStage+1)+' | '+leagueLinesCleared+'/'+LEAGUE_LINES_PER_STAGE+' lines ('+Math.round(leagueMultiplier()*10)/10+'x)';
+  var cName=LEAGUE_COLOR_NAMES[leagueTargetColor]||'?';
+  var emoji=LEAGUE_COLOR_EMOJI[leagueTargetColor]||'';
+  if(lbl) lbl.textContent=emoji+' Clear '+leagueTargetCount+' '+cName+' | '+leagueTargetCleared+'/'+leagueTargetCount+(blitzModeActive?' | BLITZ!':'');
 }
 
-function leagueOnClear(linesJustCleared){
-  leagueLinesCleared+=linesJustCleared;
-  updateLeagueXPBar();
-  if(leagueLinesCleared>=LEAGUE_LINES_PER_STAGE){
-    leagueLinesCleared-=LEAGUE_LINES_PER_STAGE;
-    leagueStage++;
-    showToast('Stage '+(leagueStage+1)+'! ('+Math.round(leagueMultiplier()*10)/10+'x)');
-    SND.stageWin();
-    /* Board shake effect */
+/* ── COLOR CLUSTER DETECTION (flood-fill BFS) ── */
+function findColorClusters(){
+  var visited=[];
+  for(var r=0;r<ROWS;r++){ visited.push([]); for(var c=0;c<COLS;c++) visited[r].push(false); }
+  var clusters=[];
+  for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
+    if(visited[r][c]) continue;
+    var cell=board[r][c];
+    if(cell.type!==T.FILLED||!cell.color) continue;
+    /* BFS to find connected same-color cells */
+    var cluster=[];
+    var queue=[{r:r,c:c}];
+    visited[r][c]=true;
+    while(queue.length){
+      var cur=queue.shift();
+      cluster.push(cur);
+      var dirs=[[-1,0],[1,0],[0,-1],[0,1]];
+      for(var d=0;d<4;d++){
+        var nr=cur.r+dirs[d][0], nc=cur.c+dirs[d][1];
+        if(nr<0||nr>=ROWS||nc<0||nc>=COLS||visited[nr][nc]) continue;
+        if(board[nr][nc].type===T.FILLED&&board[nr][nc].color===cell.color){
+          visited[nr][nc]=true;
+          queue.push({r:nr,c:nc});
+        }
+      }
+    }
+    if(cluster.length>=3) clusters.push({color:cell.color, cells:cluster});
+  }
+  return clusters;
+}
+
+/* ── CASCADE ENGINE ── */
+function leagueCascade(chainLevel){
+  if(!isLeagueMode) return;
+  chainLevel=chainLevel||1;
+  var clusters=findColorClusters();
+  if(!clusters.length){
+    leagueCascading=false;
+    /* Start blitz meter decay */
+    clearInterval(blitzDecayTimer);
+    blitzDecayTimer=setInterval(function(){
+      if(blitzMeter>0){ blitzMeter=Math.max(0,blitzMeter-2); updateBlitzMeterUI(); }
+      else clearInterval(blitzDecayTimer);
+    },500);
+    return;
+  }
+  leagueCascading=true;
+
+  /* Score the clusters */
+  var chainMult=[0,1,3,6,10,15,21]; /* chain level multiplier */
+  var mult=chainMult[Math.min(chainLevel,chainMult.length-1)];
+  var totalCells=0;
+  var targetCleared=0;
+
+  clusters.forEach(function(cl){
+    totalCells+=cl.cells.length;
+    if(cl.color===leagueTargetColor) targetCleared+=cl.cells.length;
+    /* Animate pop on cluster cells */
+    cl.cells.forEach(function(pos){
+      var el=cellEl(pos.r,pos.c);
+      if(el){ el.classList.remove('filled'); el.style.background=''; el.style.boxShadow=''; el.innerHTML=''; el.classList.add('pop'); }
+      board[pos.r][pos.c]={type:T.EMPTY,color:null};
+    });
+  });
+
+  var pts=totalCells*50*mult;
+  if(blitzModeActive) pts*=3;
+  pts=Math.round(pts*leagueMultiplier());
+  score+=pts;
+
+  /* Track target color progress */
+  leagueTargetCleared+=targetCleared;
+
+  /* Blitz meter: +15 per chain level */
+  blitzMeter=Math.min(100,blitzMeter+15*chainLevel);
+  updateBlitzMeterUI();
+  if(blitzMeter>=100&&!blitzModeActive) triggerBlitzMode();
+
+  /* Show chain text */
+  if(chainLevel>=2) showFlyScore('CHAIN x'+chainLevel+'! +'+pts, true);
+  else showFlyScore('+'+pts, clusters.length>1);
+
+  SND.clear(clusters.length, chainLevel);
+
+  /* Board shake on big chains */
+  if(chainLevel>=2){
     var bw=document.querySelector('.board-wrap');
     if(bw){ bw.style.animation='leagueShake .4s ease'; setTimeout(function(){ bw.style.animation=''; },450); }
-    /* Spawn hazards */
-    var iceCount=leagueIceCount();
-    if(iceCount>0) spawnLeagueIce(iceCount);
-    /* Spawn random obstacle blocks at higher stages */
-    if(leagueStage>=2) spawnLeagueObstacles(Math.min(6, leagueStage-1));
-    applyLeagueUI();
-    updateGemUI(); /* refresh header stage number */
+  }
+
+  updateXPBar();
+  updateLeagueXPBar();
+
+  /* Check stage advance */
+  if(leagueTargetCleared>=leagueTargetCount){
+    setTimeout(function(){
+      leagueStage++;
+      pickLeagueTarget();
+      showToast('Stage '+(leagueStage+1)+'!');
+      SND.stageWin();
+      var iceCount=leagueIceCount();
+      if(iceCount>0) spawnLeagueIce(iceCount);
+      if(leagueStage>=4) spawnLeagueObstacles(Math.min(4,leagueStage-3));
+      applyLeagueUI();
+      updateGemUI();
+    },500);
+  }
+
+  /* Apply gravity then re-check after delay */
+  setTimeout(function(){
+    leagueGravity();
+    syncBoard();
+    setTimeout(function(){ leagueCascade(chainLevel+1); },350);
+  },400);
+}
+
+/* ── GRAVITY: drop blocks into empty spaces below ── */
+function leagueGravity(){
+  for(var c=0;c<COLS;c++){
+    var writeRow=ROWS-1;
+    for(var r=ROWS-1;r>=0;r--){
+      if(board[r][c].type===T.FILLED){
+        if(r!==writeRow){
+          board[writeRow][c]=board[r][c];
+          board[r][c]={type:T.EMPTY,color:null};
+        }
+        writeRow--;
+      } else if(board[r][c].type!==T.EMPTY){
+        /* Keep non-filled non-empty cells (ICE, GOLD, etc) in place */
+        writeRow=r-1;
+      }
+    }
   }
 }
 
-/* Spawn pre-filled obstacle blocks to make the board harder */
-function spawnLeagueObstacles(count){
-  var empties=[];
-  for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
-    if(board[r][c].type===T.EMPTY) empties.push({r:r,c:c});
-  }
-  for(var i=empties.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=empties[i]; empties[i]=empties[j]; empties[j]=tmp; }
-  var toAdd=Math.min(count,Math.floor(empties.length*0.15)); /* never fill more than 15% of empty space */
-  for(var k=0;k<toAdd;k++){
-    board[empties[k].r][empties[k].c]={type:T.FILLED,color:COLORS[Math.floor(Math.random()*COLORS.length)]};
-  }
-  syncBoard();
-}
-
+/* ── ICE / OBSTACLE SPAWNING ── */
 function spawnLeagueIce(count){
   var empties=[];
   for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
@@ -5873,11 +6007,50 @@ function spawnLeagueIce(count){
   }
   for(var i=empties.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=empties[i]; empties[i]=empties[j]; empties[j]=tmp; }
   var toAdd=Math.min(count,empties.length);
-  for(var k=0;k<toAdd;k++){
-    board[empties[k].r][empties[k].c]={type:T.ICE,color:null};
-  }
+  for(var k=0;k<toAdd;k++) board[empties[k].r][empties[k].c]={type:T.ICE,color:null};
   syncBoard();
 }
+
+function spawnLeagueObstacles(count){
+  var empties=[];
+  for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
+    if(board[r][c].type===T.EMPTY) empties.push({r:r,c:c});
+  }
+  for(var i=empties.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var tmp=empties[i]; empties[i]=empties[j]; empties[j]=tmp; }
+  var toAdd=Math.min(count,Math.floor(empties.length*0.12));
+  for(var k=0;k<toAdd;k++) board[empties[k].r][empties[k].c]={type:T.FILLED,color:COLORS[Math.floor(Math.random()*COLORS.length)]};
+  syncBoard();
+}
+
+/* ── BLITZ MODE ── */
+function triggerBlitzMode(){
+  blitzModeActive=true;
+  showToast('BLITZ MODE! 3x Score!');
+  var bw=document.querySelector('.board-wrap');
+  if(bw) bw.classList.add('blitz-mode');
+  clearTimeout(blitzModeTimer);
+  blitzModeTimer=setTimeout(function(){
+    blitzModeActive=false;
+    blitzMeter=0;
+    var bw2=document.querySelector('.board-wrap');
+    if(bw2) bw2.classList.remove('blitz-mode');
+    updateBlitzMeterUI();
+  },8000);
+}
+
+function updateBlitzMeterUI(){
+  updateLeagueXPBar();
+}
+
+/* Called from checkLines when in league mode */
+function leagueOnClear(linesCleared){
+  /* Count target-color blocks in the cleared lines */
+  /* (already counted by the main checkLines — we track via cascade) */
+  updateLeagueXPBar();
+  /* Trigger cascade check after syncBoard completes */
+  setTimeout(function(){ leagueCascade(1); },400);
+}
+
 
 function openMenu(){
   var hr=document.getElementById('hamsterReact'); if(hr) hr.classList.remove('show');
