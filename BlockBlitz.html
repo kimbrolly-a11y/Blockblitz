@@ -145,7 +145,7 @@ body>*{position:relative;z-index:1}
 /* ══ BOARD WRAP ══ */
 .board-outer{
   flex:1;display:flex;align-items:center;justify-content:center;
-  width:100%;padding:0 8px;min-height:0;
+  width:100%;padding:0 8px;min-height:0;overflow:hidden;
 }
 .board-wrap{
   background:linear-gradient(160deg,#0a1535,#0d1e4a);
@@ -360,14 +360,14 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 /* ══ TRAY ══ */
 .tray{
   width:100%;display:flex;justify-content:space-around;align-items:center;
-  padding:8px 10px 6px;flex-shrink:0;
+  padding:5px 10px 4px;flex-shrink:0;
   background:rgba(255,255,255,0.07);
   border-top:2px solid rgba(255,255,255,0.14);
   box-shadow:0 -4px 20px rgba(0,0,0,0.35);
 }
 /* Shuffle row */
 .tray-actions{
-  display:flex;justify-content:center;padding:2px 10px 8px;
+  display:flex;justify-content:center;padding:2px 10px 5px;
   background:rgba(255,255,255,0.04);
   border-top:1px solid rgba(255,255,255,0.08);
 }
@@ -375,7 +375,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   background:rgba(255,255,255,0.08);
   border:1.5px solid rgba(255,255,255,0.18);
   color:#fff;font-size:12px;font-weight:700;letter-spacing:.3px;
-  border-radius:20px;padding:5px 20px;cursor:pointer;
+  border-radius:20px;padding:4px 20px;cursor:pointer;
   transition:all .15s;
 }
 .shuffle-btn:active{transform:scale(0.94);}
@@ -386,7 +386,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   border-radius:8px;padding:1px 6px;margin-left:2px;
 }
 .slot{
-  flex:1;max-width:110px;min-height:76px;
+  flex:1;max-width:110px;min-height:64px;
   display:flex;align-items:center;justify-content:center;
   cursor:grab;touch-action:none;border-radius:14px;
   background:rgba(255,255,255,0.09);
@@ -806,7 +806,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 /* ── Logo ── */
 .menu-logo{
   display:flex;flex-direction:column;align-items:center;
-  padding:2px 0 6px;flex-shrink:0;
+  padding:6px 0 4px;flex-shrink:0;
 }
 .menu-logo-row{display:flex;align-items:center;gap:2px;line-height:1}
 .menu-logo-block{
@@ -825,76 +825,75 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* ── Mode cards ── */
 .menu-cards{
-  flex:1;display:flex;flex-direction:column;gap:10px;
-  padding:2px 14px 6px;overflow-y:auto;min-height:0;
+  flex:1;display:flex;flex-direction:column;gap:8px;
+  padding:0 14px 8px;justify-content:flex-end;min-height:0;
 }
 .menu-mode-card{
-  border-radius:18px;padding:12px 16px;
+  border-radius:14px;padding:10px 14px;
   cursor:pointer;position:relative;overflow:hidden;
   flex-shrink:0;
+  display:flex;align-items:center;gap:12px;
   transition:transform .15s cubic-bezier(.17,.89,.32,1.28);
 }
 .menu-mode-card:active{transform:scale(0.97)}
 .menu-card-classic{
   background:linear-gradient(135deg,#1a56b0 0%,#0d47a1 50%,#0a2a6e 100%);
   border:1.5px solid rgba(100,180,255,0.3);
-  box-shadow:0 6px 24px rgba(21,101,192,0.5);
+  box-shadow:0 4px 18px rgba(21,101,192,0.5);
 }
 .menu-card-adv{
   background:linear-gradient(135deg,#7b1fa2 0%,#4a148c 50%,#1a0040 100%);
   border:1.5px solid rgba(206,147,216,0.3);
-  box-shadow:0 6px 24px rgba(106,27,154,0.5);
+  box-shadow:0 4px 18px rgba(106,27,154,0.5);
 }
 .menu-card-shine{
   position:absolute;top:0;left:0;right:0;height:50%;pointer-events:none;
   background:linear-gradient(180deg,rgba(255,255,255,0.09),transparent);
-  border-radius:18px 18px 0 0;
+  border-radius:14px 14px 0 0;
 }
-.menu-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.menu-card-title{font-family:'Fredoka One';font-size:19px;color:#fff;letter-spacing:.3px}
+.menu-card-left{flex:1;min-width:0}
+.menu-card-top{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.menu-card-title{font-family:'Fredoka One';font-size:17px;color:#fff;letter-spacing:.3px}
 .menu-card-badge{
-  font-family:'Fredoka One';font-size:10px;letter-spacing:1.5px;text-transform:uppercase;
-  padding:3px 8px;border-radius:8px;
+  font-family:'Fredoka One';font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:2px 7px;border-radius:6px;
 }
 .badge-classic{background:rgba(255,215,0,0.18);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
 .badge-adv{background:rgba(206,147,216,0.18);color:#ce93d8;border:1px solid rgba(206,147,216,0.3)}
-.menu-card-desc{
-  font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:8px;line-height:1.4;
-}
-.menu-card-footer{display:flex;align-items:center;justify-content:space-between}
-.menu-card-meta{display:flex;align-items:baseline;gap:10px}
+.menu-card-desc{display:none}
+.menu-card-footer{display:flex;align-items:center;gap:8px}
+.menu-card-meta{display:flex;align-items:center;gap:8px}
 .menu-card-lv{
-  font-family:'Fredoka One';font-size:26px;color:#fff;line-height:1;
+  font-family:'Fredoka One';font-size:18px;color:#fff;line-height:1;
 }
-.menu-card-lv-sub{font-size:9px;color:rgba(255,255,255,0.45);letter-spacing:1px;text-transform:uppercase;margin-top:1px}
-.menu-card-stars-row{font-size:13px;letter-spacing:1px}
+.menu-card-lv-sub{font-size:8px;color:rgba(255,255,255,0.45);letter-spacing:1px;text-transform:uppercase}
+.menu-card-stars-row{font-size:12px;letter-spacing:1px}
 .menu-card-cta{
-  font-family:'Fredoka One';font-size:14px;color:rgba(255,255,255,0.7);
-  background:rgba(255,255,255,0.1);border-radius:10px;
-  padding:5px 13px;letter-spacing:.5px;
+  font-family:'Fredoka One';font-size:14px;color:#fff;
+  background:rgba(255,255,255,0.15);border-radius:12px;
+  padding:8px 18px;letter-spacing:.5px;flex-shrink:0;
   transition:background .15s,transform .15s;
 }
-.menu-mode-card:active .menu-card-cta{background:rgba(255,255,255,0.2);transform:scale(0.95)}
+.menu-mode-card:active .menu-card-cta{background:rgba(255,255,255,0.25);transform:scale(0.95)}
 
 /* ── Bottom buttons ── */
 .menu-bottom{
-  display:flex;gap:6px;
-  padding:6px 14px;
+  display:flex;gap:8px;
+  padding:8px 14px;
   padding-bottom:max(env(safe-area-inset-bottom),10px);
   flex-shrink:0;
-  background:rgba(0,0,0,0.15);
-  border-top:1px solid rgba(255,255,255,0.06);
+  justify-content:center;
 }
 .menu-bottom-btn{
-  flex:1;padding:8px 4px 6px;
-  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);
-  border-radius:14px;color:#fff;cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;gap:2px;
+  display:flex;align-items:center;gap:5px;
+  padding:8px 14px;
+  background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.12);
+  border-radius:22px;color:#fff;cursor:pointer;
   transition:background .15s,transform .1s;
 }
-.menu-bottom-btn:active{background:rgba(255,255,255,0.16);transform:scale(0.93)}
-.menu-bottom-btn-icon{font-size:20px;line-height:1}
-.menu-bottom-btn-lbl{font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:.5px;text-transform:uppercase;font-family:'Nunito',sans-serif;font-weight:800}
+.menu-bottom-btn:active{background:rgba(255,255,255,0.20);transform:scale(0.93)}
+.menu-bottom-btn-icon{font-size:16px;line-height:1}
+.menu-bottom-btn-lbl{font-family:'Fredoka One';font-size:11px;color:rgba(255,255,255,0.85);letter-spacing:.3px}
 
 /* ══ LEVEL MAP ══ */
 .map-card{
@@ -1070,8 +1069,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .spin-info{font-size:12px;color:#90caf9;text-align:center;margin-top:4px}
 
 /* ── Logo image on splash + menu ── */
-#splashLogoImg{max-width:min(75%,340px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:spLogoGlow 3.8s ease-in-out 1.35s infinite}
-#menuLogoImg{max-width:min(54%,230px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
+#splashLogoImg{max-width:min(97%,442px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:spLogoGlow 3.8s ease-in-out 1.35s infinite}
+#menuLogoImg{max-width:min(90%,403px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
 @keyframes spLogoGlow{
   0%,100%{filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45)) drop-shadow(0 2px 8px rgba(255,200,0,.35))}
   50%    {filter:drop-shadow(0 10px 52px rgba(255,220,0,0.80)) drop-shadow(0 0 28px rgba(255,130,0,0.50))}
@@ -1095,6 +1094,43 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .shop-confirm-btns button{font-family:'Fredoka One';font-size:15px;padding:10px 22px;border-radius:14px;border:none;cursor:pointer}
 .shop-confirm-yes{background:linear-gradient(180deg,#4caf50,#2e7d32);color:#fff;box-shadow:0 4px 0 #1b5e20}
 .shop-confirm-no{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2)!important}
+
+/* ── Responsive: short viewports (game fits without squishing) ── */
+@media (max-height:700px){
+  .top-bar{padding:4px 10px 3px;gap:2px}
+  .xp-bar-wrap{padding:2px 10px 1px}
+  .pu-bar{padding:2px 10px;gap:4px}
+  .pu-btn{padding:3px 9px;font-size:15px}
+  .tray{padding:4px 8px 3px}
+  .slot{min-height:60px}
+  .tray-actions{padding:1px 8px 4px}
+  .board-wrap{padding:6px;border-radius:14px}
+  .dc-hud{padding:3px 10px}
+}
+@media (max-height:600px){
+  .top-bar{padding:2px 8px 2px;gap:1px}
+  .top-level-num{font-size:18px}
+  .mini-stat{font-size:11px;padding:2px 6px}
+  .xp-bar-wrap{padding:1px 8px 0}
+  .pu-bar{padding:1px 8px}
+  .pu-btn{padding:2px 7px;font-size:14px}
+  .tray{padding:3px 6px 2px}
+  .slot{min-height:50px}
+  .tray-actions{padding:0 6px 3px}
+  .board-wrap{padding:4px;border-radius:12px}
+}
+@media (max-height:480px){
+  .top-bar{padding:1px 8px 1px}
+  .top-row2{font-size:10px}
+  .mini-stat{font-size:10px;padding:1px 4px}
+  .xp-bar-wrap{padding:0 8px}
+  .pu-bar{padding:1px 6px;gap:3px}
+  .pu-btn{padding:1px 6px;font-size:13px}
+  .tray{padding:2px 4px 1px;gap:4px}
+  .slot{min-height:42px}
+  .tray-actions{padding:0 4px 2px}
+  .board-wrap{padding:3px;border-radius:10px}
+}
 </style>
 </head>
 <body>
@@ -1155,57 +1191,51 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <!-- Classic Mode -->
     <div class="menu-mode-card menu-card-classic" onclick="BB.selectMode('classic')">
       <div class="menu-card-shine"></div>
-      <div class="menu-card-top">
-        <div class="menu-card-title">⚡ Classic</div>
-        <div class="menu-card-badge badge-classic">XP WIN</div>
-      </div>
-      <div class="menu-card-desc">Fill the XP bar to clear each stage. Collect gems for bonus stars!</div>
-      <div class="menu-card-footer">
-        <div class="menu-card-meta">
-          <div>
-            <div class="menu-card-lv" id="menuClassicLevel">1</div>
-            <div class="menu-card-lv-sub">Level Reached</div>
-          </div>
-          <div class="menu-card-stars-row" id="menuClassicStars">☆☆☆</div>
+      <div class="menu-card-left">
+        <div class="menu-card-top">
+          <div class="menu-card-title">⚡ Classic</div>
+          <div class="menu-card-badge badge-classic">XP WIN</div>
         </div>
-        <div class="menu-card-cta">Play ›</div>
+        <div class="menu-card-footer">
+          <span class="menu-card-lv" id="menuClassicLevel">1</span>
+          <span class="menu-card-lv-sub">LV</span>
+          <span class="menu-card-stars-row" id="menuClassicStars">☆☆☆</span>
+        </div>
       </div>
+      <div class="menu-card-cta">Play ›</div>
     </div>
 
     <!-- Adventure Mode -->
     <div class="menu-mode-card menu-card-adv" onclick="BB.selectMode('adventure')">
       <div class="menu-card-shine"></div>
-      <div class="menu-card-top">
-        <div class="menu-card-title">⚔️ Adventure</div>
-        <div class="menu-card-badge badge-adv">GEM WIN</div>
-      </div>
-      <div class="menu-card-desc">Collect ALL gems on each stage to win. Score big for more stars!</div>
-      <div class="menu-card-footer">
-        <div class="menu-card-meta">
-          <div>
-            <div class="menu-card-lv" id="menuAdvLevel">1</div>
-            <div class="menu-card-lv-sub">Level Reached</div>
-          </div>
-          <div class="menu-card-stars-row" id="menuAdvStars">☆☆☆</div>
+      <div class="menu-card-left">
+        <div class="menu-card-top">
+          <div class="menu-card-title">⚔️ Adventure</div>
+          <div class="menu-card-badge badge-adv">GEM WIN</div>
         </div>
-        <div class="menu-card-cta">Play ›</div>
+        <div class="menu-card-footer">
+          <span class="menu-card-lv" id="menuAdvLevel">1</span>
+          <span class="menu-card-lv-sub">LV</span>
+          <span class="menu-card-stars-row" id="menuAdvStars">☆☆☆</span>
+        </div>
       </div>
+      <div class="menu-card-cta">Play ›</div>
     </div>
   </div>
 
   <!-- Bottom action buttons -->
   <div class="menu-bottom">
     <button class="menu-bottom-btn" onclick="BB.openSpinFromMenu()">
-      <div class="menu-bottom-btn-icon">🎰</div>
-      <div class="menu-bottom-btn-lbl">Daily Spin</div>
+      <span class="menu-bottom-btn-icon">🎰</span>
+      <span class="menu-bottom-btn-lbl">Spin</span>
     </button>
     <button class="menu-bottom-btn" onclick="BB.openDailyChallenge()">
-      <div class="menu-bottom-btn-icon">📅</div>
-      <div class="menu-bottom-btn-lbl">Daily</div>
+      <span class="menu-bottom-btn-icon">📅</span>
+      <span class="menu-bottom-btn-lbl">Challenge</span>
     </button>
-    <div class="menu-bottom-btn" id="menuRankBtn" style="cursor:pointer" onclick="BB.openRankInfo()">
-      <div class="menu-bottom-btn-icon" id="menuRankIcon">🎖️</div>
-      <div class="menu-bottom-btn-lbl" id="menuRankLbl">Rookie</div>
+    <div class="menu-bottom-btn" id="menuRankBtn" onclick="BB.openRankInfo()">
+      <span class="menu-bottom-btn-icon" id="menuRankIcon">🎖️</span>
+      <span class="menu-bottom-btn-lbl" id="menuRankLbl">Rookie</span>
     </div>
   </div>
 </div>
@@ -2981,16 +3011,42 @@ function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function setCS(){
   var w = Math.min(window.innerWidth, 430) - 20;
   var h = window.innerHeight;
-  var fixedH = 275;  /* top-bar + xp-bar + power-ups + tray approx */
-  var availH = h - fixedH;
+  /* Measure all fixed-height siblings directly */
+  var topH = (document.querySelector('.top-bar')     ||{offsetHeight:61}).offsetHeight;
+  var xpH  = (document.querySelector('.xp-bar-wrap') ||{offsetHeight:14}).offsetHeight;
+  var puH  = (document.querySelector('.pu-bar')      ||{offsetHeight:29}).offsetHeight;
+  var taH  = (document.querySelector('.tray-actions')||{offsetHeight:30}).offsetHeight;
+  /* Tray: use measured height if slots exist, else estimate from CSS min-height at this breakpoint */
+  var trayEl = document.getElementById('tray');
+  var trayH;
+  if(trayEl && trayEl.querySelectorAll('.slot').length > 0){
+    trayH = trayEl.offsetHeight;
+  } else {
+    var slotMin  = h<481?42: h<601?50: h<701?60: 64;
+    var trayPad  = h<481? 3: h<601? 5: h<701? 7:  9;
+    trayH = slotMin + trayPad + 2; /* +2 for top border */
+  }
+  /* Board-wrap padding varies by breakpoint */
+  var bwPad = h<481?6: h<601?8: h<701?12: 16;
+  var availH = Math.max(40, h - topH - xpH - puH - trayH - taH - bwPad);
   var csFromW = Math.floor((w - GAP*(COLS-1)) / COLS);
   var csFromH = Math.floor((availH - GAP*(ROWS-1)) / ROWS);
   CS = Math.min(csFromW, csFromH);
-  CS = Math.max(28, Math.min(CS, 44));
-  GAP = Math.max(3, Math.floor(CS/13));
+  CS = Math.max(18, Math.min(CS, 50));
+  GAP = Math.max(2, Math.floor(CS/13));
   STEP = CS + GAP;
   document.documentElement.style.setProperty('--cs', CS+'px');
   document.documentElement.style.setProperty('--gap', GAP+'px');
+  /* If board is already rendered, update cell inline styles so resize takes effect immediately */
+  var bEl = document.getElementById('board');
+  if(bEl && bEl.children.length > 0){
+    bEl.style.gridTemplateColumns = 'repeat('+COLS+','+CS+'px)';
+    bEl.style.gridTemplateRows    = 'repeat('+ROWS+','+CS+'px)';
+    bEl.style.gap = GAP+'px';
+    var cels = bEl.querySelectorAll('.cell');
+    for(var _i=0;_i<cels.length;_i++){ cels[_i].style.width=CS+'px'; cels[_i].style.height=CS+'px'; }
+    renderTray(); /* rebuild tray mini-pieces at new scale */
+  }
 }
 
 /* ── INIT ── */
@@ -3068,6 +3124,9 @@ function updatePUBar(){
 function savePU(){ lsSet('bbpowerups',JSON.stringify(powerups)); }
 
 function startLevel(lv){
+  /* Pre-populate tray with 3 empty slot placeholders so setCS() measures correct tray height */
+  (function(){var t=document.getElementById('tray');t.innerHTML='';for(var i=0;i<3;i++){var s=document.createElement('div');s.className='slot empty';t.appendChild(s);}})();
+  setCS();
   /* Init hamster face */
   var _hri=document.getElementById('hamsterReactImg');
   if(_hri&&!_hri.innerHTML) _hri.innerHTML=buildHamsterSVG('happy');
@@ -3505,13 +3564,16 @@ function renderTray(){
       var p=pieces[i], rows=p.shape.length, cols=p.shape[0].length;
       var gridW=cols*CS+(cols-1)*GAP, gridH=rows*CS+(rows-1)*GAP;
       var scale=Math.min((SLOT_W-8)/gridW, (SLOT_H-8)/gridH, 1);
+      /* Use actual scaled dimensions — transform:scale is visual-only and inflates slot height */
+      var sCS =Math.max(8, Math.round(CS*scale));
+      var sGAP=Math.max(1, Math.round(GAP*scale));
 
       var mg=document.createElement('div');
-      mg.style.cssText='display:grid;grid-template-columns:repeat('+cols+','+CS+'px);grid-template-rows:repeat('+rows+','+CS+'px);gap:'+GAP+'px;transform:scale('+scale.toFixed(3)+');transform-origin:center center;pointer-events:none';
+      mg.style.cssText='display:grid;grid-template-columns:repeat('+cols+','+sCS+'px);grid-template-rows:repeat('+rows+','+sCS+'px);gap:'+sGAP+'px;pointer-events:none';
 
       for(var r2=0;r2<rows;r2++) for(var c2=0;c2<cols;c2++){
         var mc=document.createElement('div');
-        mc.style.cssText='width:'+CS+'px;height:'+CS+'px;border-radius:8px;position:relative;overflow:hidden;';
+        mc.style.cssText='width:'+sCS+'px;height:'+sCS+'px;border-radius:'+Math.max(3,Math.round(8*scale))+'px;position:relative;overflow:hidden;';
         if(p.shape[r2][c2]){
           var isGemCell = p.gemCell && p.gemCell.r===r2 && p.gemCell.c===c2;
           if(isGemCell){
@@ -3519,7 +3581,7 @@ function renderTray(){
             mc.style.background='#f9a825';
             mc.style.boxShadow='0 4px 0 #e65100';
             var emoji = p.gemCell.type==='star'?'⭐':'🔶';
-            var fs = Math.max(12, Math.floor(CS*0.44));
+            var fs = Math.max(8, Math.floor(sCS*0.44));
             mc.innerHTML='<div style="position:absolute;top:3px;left:3px;right:3px;height:42%;background:linear-gradient(180deg,rgba(255,255,255,.4),transparent);border-radius:5px 5px 0 0;pointer-events:none"></div>'
               +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:'+fs+'px;pointer-events:none">'+emoji+'</div>';
           } else {
@@ -3638,7 +3700,10 @@ function onUp(e,_move,_up){
   clearLit();
   document.getElementById('ghost').style.display='none';
   document.querySelectorAll('.slot').forEach(function(s){s.classList.remove('active');});
-  var pt=getXY(e), snap=cursorToSnap(pt.x,pt.y,dragPiece.shape);
+  var pt=getXY(e);
+  var ax=pt.x, ay=pt.y;
+  if(dragIsTouch){ ay-=TOUCH_LIFT; ax-=TOUCH_SHIFT; }
+  var snap=cursorToSnap(ax,ay,dragPiece.shape);
   if(canPlace(dragPiece.shape,snap.r,snap.c)){
     SND.place();
     placePiece(dragPiece,snap.r,snap.c);
@@ -5893,6 +5958,7 @@ return{
   shopBuyPro:        shopBuyPro,
   shopConfirmYes:    shopConfirmYes,
   shopConfirmCancel: shopConfirmCancel,
+  setCS:             setCS,
   openMenu:          openMenu,
   closeMenu:         closeMenu,
   selectMode:        selectMode,
@@ -6035,9 +6101,8 @@ window.addEventListener('load', function(){
   /* Menu will be shown after splash is dismissed */
 });
 window.addEventListener('resize', function(){
-  var w=Math.min(window.innerWidth,420)-24;
-  var cs=Math.floor((w-3*7)/8);cs=Math.max(32,Math.min(cs,46));
-  document.documentElement.style.setProperty('--cs',cs+'px');
+  /* Re-run height-aware cell sizing */
+  if(BB && typeof BB.setCS==='function') BB.setCS();
 });
 </script>
 </body>
