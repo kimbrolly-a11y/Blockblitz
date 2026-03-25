@@ -861,7 +861,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 }
 .badge-classic{background:rgba(255,215,0,0.18);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
 .badge-adv{background:rgba(206,147,216,0.18);color:#ce93d8;border:1px solid rgba(206,147,216,0.3)}
-.menu-card-desc{display:none}
+.menu-card-desc{font-size:11px;color:rgba(255,255,255,0.6);margin:4px 0 2px;line-height:1.35;letter-spacing:.1px}
 .menu-card-footer{display:flex;align-items:center;gap:8px}
 .menu-card-meta{display:flex;align-items:center;gap:8px}
 .menu-card-lv{
@@ -1071,7 +1071,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* ── Logo image on splash + menu ── */
 #splashLogoImg{max-width:min(97%,442px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:spLogoGlow 3.8s ease-in-out 1.35s infinite}
-#menuLogoImg{max-width:min(96%,598px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
+#menuLogoImg{max-width:min(96%,778px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
 @keyframes spLogoGlow{
   0%,100%{filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45)) drop-shadow(0 2px 8px rgba(255,200,0,.35))}
   50%    {filter:drop-shadow(0 10px 52px rgba(255,220,0,0.80)) drop-shadow(0 0 28px rgba(255,130,0,0.50))}
@@ -1197,6 +1197,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
           <div class="menu-card-title">⚡ Classic</div>
           <div class="menu-card-badge badge-classic">XP WIN</div>
         </div>
+        <div class="menu-card-desc">Fill rows &amp; columns to earn XP and level up. Chain clears for bigger combos!</div>
         <div class="menu-card-footer">
           <span class="menu-card-lv" id="menuClassicLevel">1</span>
           <span class="menu-card-lv-sub">LV</span>
@@ -1214,6 +1215,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
           <div class="menu-card-title">⚔️ Adventure</div>
           <div class="menu-card-badge badge-adv">GEM WIN</div>
         </div>
+        <div class="menu-card-desc">Collect every ⭐ &amp; 🔶 gem hidden on the board to complete each level!</div>
         <div class="menu-card-footer">
           <span class="menu-card-lv" id="menuAdvLevel">1</span>
           <span class="menu-card-lv-sub">LV</span>
