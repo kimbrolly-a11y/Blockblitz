@@ -5327,192 +5327,181 @@ var SND=(function(){
    8 independent streams — melody, arpeggio, bells, pad, bass,
    shimmer, pulse, and sparkle. 6 mood scales per world.        */
 var MUSIC=(function(){
-  var ctx=null,master=null,rvbIn=null,muted=true,running=false,currentMood=-1;
-  var streams={};
+  var ctx=null,master=null,muted=true,running=false,currentMood=-1;
+  var nodes=[]; /* active audio nodes for cleanup */
 
-  /* ── 6 calming pentatonic scales ── */
-  var SCALES=[
-    [48,50,52,55,57,60,62,64,67,69,72,74,76,79,81], /* C maj pent — serene         */
-    [43,45,47,50,52,55,57,59,62,64,67,69,71,74,76], /* G maj pent — warm           */
-    [50,53,55,57,60,62,65,67,69,72,74,77,79,81,84], /* D min pent — contemplative  */
-    [45,48,50,52,55,57,60,62,64,67,69,72,74,76,79], /* A min pent — deep calm      */
-    [41,43,45,48,50,53,55,57,60,62,65,67,69,72,74], /* F maj pent — gentle         */
-    [52,55,57,59,62,64,67,69,71,74,76,79,81,83,86], /* E min pent — dreamy         */
-  ];
   var MOOD_NAMES=[
-    '🌊 Ocean Drift','🌙 Moonlight','🍃 Still Waters',
-    '✨ Starlight','🌸 Petal Rain','💫 Dreamscape'
+    '🌲 Forest Breeze','🌧️ Gentle Rain','🌊 Ocean Waves','🧘 Deep Calm'
   ];
 
   /* ── helpers ── */
   function rnd(lo,hi){return lo+Math.random()*(hi-lo);}
-  function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
-  function inRange(sc,lo,hi){return sc.filter(function(m){return m>=lo&&m<=hi;});}
-  function freq(midi){return 440*Math.pow(2,(midi-69)/12);}
 
   /* ── boot ── */
   function boot(){
     if(ctx) return true;
     try{ ctx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){ return false; }
-    master=ctx.createGain(); master.gain.value=0.40; master.connect(ctx.destination);
-    /* Lush reverb: longer delays, more feedback for ambient space */
-    var d1=ctx.createDelay(1),d2=ctx.createDelay(1);
-    var f1=ctx.createGain(),f2=ctx.createGain();
-    var filt=ctx.createBiquadFilter(),mix=ctx.createGain();
-    d1.delayTime.value=0.22; d2.delayTime.value=0.37;
-    f1.gain.value=0.30; f2.gain.value=0.25;
-    filt.type='lowpass'; filt.frequency.value=2800;
-    mix.gain.value=0.28;
-    d1.connect(f1); f1.connect(d1); d1.connect(d2);
-    d2.connect(f2); f2.connect(d2); d2.connect(filt);
-    filt.connect(mix); mix.connect(master);
-    rvbIn=d1;
+    master=ctx.createGain(); master.gain.value=0.35; master.connect(ctx.destination);
     return true;
   }
   function resume(){if(ctx&&ctx.state==='suspended')ctx.resume();}
   function ec(){return boot()&&(resume(),true);}
 
-  /* ── tone generators (all sine-based, soft attacks) ── */
-
-  /* Soft chime — slow attack, long ring, pure sine */
-  function chime(midi,vol,dur){
-    try{
-      var f=freq(midi),t=ctx.currentTime;
-      var o=ctx.createOscillator(),g=ctx.createGain();
-      o.type='sine'; o.frequency.value=f;
-      g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(vol,t+0.08);
-      g.gain.setValueAtTime(vol*0.7,t+dur*0.3);
-      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-      o.connect(g); g.connect(rvbIn); g.connect(master);
-      o.start(t); o.stop(t+dur+.2);
-    }catch(e){}
+  /* ── Create noise buffer (white noise source) ── */
+  function makeNoise(dur){
+    var sr=ctx.sampleRate, len=Math.floor(sr*dur);
+    var buf=ctx.createBuffer(1,len,sr);
+    var data=buf.getChannelData(0);
+    for(var i=0;i<len;i++) data[i]=Math.random()*2-1;
+    return buf;
   }
 
-  /* Warm pad — breathing sine with fifth, very slow envelope */
-  function pad(midi,vol,dur){
-    try{
-      var f=freq(midi),t=ctx.currentTime;
-      var o=ctx.createOscillator(),o2=ctx.createOscillator();
-      var fl=ctx.createBiquadFilter(),g=ctx.createGain(),g2=ctx.createGain();
-      o.type="sine"; o.frequency.value=f;
-      o2.type="sine"; o2.frequency.value=f*1.498;
-      g2.gain.value=0.12; o2.connect(g2); g2.connect(fl);
-      fl.type="lowpass"; fl.frequency.value=2000; fl.Q.value=0.3;
-      var att=dur*0.25;
-      g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(vol,t+att);
-      g.gain.setValueAtTime(vol*0.65,t+att+dur*0.45);
-      g.gain.linearRampToValueAtTime(0,t+dur);
-      o.connect(fl); fl.connect(g); g.connect(master);
-      o.start(t); o.stop(t+dur+.2);
-      o2.start(t); o2.stop(t+dur+.2);
-    }catch(e){}
-  }
-
-  /* Deep bass — sub sine, very gentle */
-  function bass(midi,vol,dur){
-    try{
-      var f=freq(midi-12),t=ctx.currentTime;
-      var o=ctx.createOscillator(),g=ctx.createGain();
-      o.type="sine"; o.frequency.value=f;
-      g.gain.setValueAtTime(0,t);
-      g.gain.linearRampToValueAtTime(vol,t+0.5);
-      g.gain.setValueAtTime(vol*0.6,t+dur*0.6);
-      g.gain.linearRampToValueAtTime(0,t+dur);
-      o.connect(g); g.connect(master);
-      o.start(t); o.stop(t+dur+.2);
-    }catch(e){}
-  }
-
-  /* Shimmer wash — detuned chorus, very soft */
-  function shimmer(midi,vol,dur){
-    try{
-      var f=freq(midi+12),t=ctx.currentTime;
-      [-8,-3,3,7].forEach(function(cents){
+  /* ── SCENE 0: Forest Breeze ── */
+  function startForest(){
+    var t=ctx.currentTime;
+    /* Wind: pink-ish filtered noise */
+    var noiseBuf=makeNoise(4);
+    var wind=ctx.createBufferSource(); wind.buffer=noiseBuf; wind.loop=true;
+    var windF=ctx.createBiquadFilter(); windF.type='lowpass'; windF.frequency.value=800; windF.Q.value=0.5;
+    var windG=ctx.createGain(); windG.gain.value=0.12;
+    /* Slow wind modulation */
+    var windLFO=ctx.createOscillator(); windLFO.type='sine'; windLFO.frequency.value=0.15;
+    var windLFOG=ctx.createGain(); windLFOG.gain.value=300;
+    windLFO.connect(windLFOG); windLFOG.connect(windF.frequency);
+    wind.connect(windF); windF.connect(windG); windG.connect(master);
+    wind.start(t); windLFO.start(t);
+    nodes.push(wind,windLFO);
+    /* Soft bird chirps — occasional sine blips */
+    (function chirpLoop(){
+      if(!running||muted) return;
+      if(Math.random()<0.3){
         var o=ctx.createOscillator(),g=ctx.createGain();
-        o.type="sine"; o.frequency.value=f*Math.pow(2,cents/1200);
-        g.gain.setValueAtTime(0,t);
-        g.gain.linearRampToValueAtTime(vol*0.15,t+dur*0.35);
-        g.gain.linearRampToValueAtTime(0,t+dur);
-        o.connect(g); g.connect(rvbIn);
-        o.start(t); o.stop(t+dur+.2);
-      });
-    }catch(e){}
+        var f=rnd(2200,4800), ct=ctx.currentTime;
+        o.type='sine'; o.frequency.setValueAtTime(f,ct);
+        o.frequency.exponentialRampToValueAtTime(f*rnd(0.7,1.4),ct+0.15);
+        g.gain.setValueAtTime(0,ct);
+        g.gain.linearRampToValueAtTime(rnd(0.008,0.018),ct+0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001,ct+rnd(0.1,0.25));
+        o.connect(g); g.connect(master);
+        o.start(ct); o.stop(ct+0.3);
+      }
+      setTimeout(chirpLoop, rnd(3000,8000));
+    })();
   }
 
-  /* ── stream scheduler ── */
-  function sched(name,fn,delay){
-    clearTimeout(streams[name]);
-    streams[name]=setTimeout(fn,delay);
+  /* ── SCENE 1: Gentle Rain ── */
+  function startRain(){
+    var t=ctx.currentTime;
+    /* Rain: band-passed noise */
+    var noiseBuf=makeNoise(4);
+    var rain=ctx.createBufferSource(); rain.buffer=noiseBuf; rain.loop=true;
+    var rainBP=ctx.createBiquadFilter(); rainBP.type='bandpass'; rainBP.frequency.value=3000; rainBP.Q.value=0.3;
+    var rainG=ctx.createGain(); rainG.gain.value=0.10;
+    rain.connect(rainBP); rainBP.connect(rainG); rainG.connect(master);
+    rain.start(t);
+    nodes.push(rain);
+    /* Deeper rain layer */
+    var rain2=ctx.createBufferSource(); rain2.buffer=noiseBuf; rain2.loop=true;
+    var rainLP=ctx.createBiquadFilter(); rainLP.type='lowpass'; rainLP.frequency.value=600;
+    var rainG2=ctx.createGain(); rainG2.gain.value=0.08;
+    rain2.connect(rainLP); rainLP.connect(rainG2); rainG2.connect(master);
+    rain2.start(t);
+    nodes.push(rain2);
+    /* Distant rumble — very low sine, occasional */
+    (function rumbleLoop(){
+      if(!running||muted) return;
+      if(Math.random()<0.25){
+        var o=ctx.createOscillator(),g=ctx.createGain();
+        var ct=ctx.currentTime;
+        o.type='sine'; o.frequency.value=rnd(30,60);
+        g.gain.setValueAtTime(0,ct);
+        g.gain.linearRampToValueAtTime(rnd(0.03,0.06),ct+1.5);
+        g.gain.linearRampToValueAtTime(0,ct+4);
+        o.connect(g); g.connect(master);
+        o.start(ct); o.stop(ct+4.5);
+      }
+      setTimeout(rumbleLoop, rnd(8000,20000));
+    })();
   }
 
-  /* ── 5 ambient streams (sparse, lots of space) ── */
-
-  /* 1. Melody — single floating notes, lots of silence */
-  function streamMelody(){
-    if(!running||muted) return;
-    var sc=SCALES[currentMood];
-    var notes=inRange(sc,62,79);
-    if(notes.length&&Math.random()<0.7){
-      chime(pick(notes),rnd(.030,.055),rnd(3.0,6.0));
-    }
-    sched("melody",streamMelody,rnd(3000,7000));
+  /* ── SCENE 2: Ocean Waves ── */
+  function startOcean(){
+    var t=ctx.currentTime;
+    /* Wave noise */
+    var noiseBuf=makeNoise(4);
+    var wave=ctx.createBufferSource(); wave.buffer=noiseBuf; wave.loop=true;
+    var waveF=ctx.createBiquadFilter(); waveF.type='lowpass'; waveF.frequency.value=500; waveF.Q.value=0.3;
+    var waveG=ctx.createGain(); waveG.gain.value=0.14;
+    /* Slow wave rhythm via LFO on gain */
+    var waveLFO=ctx.createOscillator(); waveLFO.type='sine'; waveLFO.frequency.value=0.08;
+    var waveLFOG=ctx.createGain(); waveLFOG.gain.value=0.08;
+    waveLFO.connect(waveLFOG); waveLFOG.connect(waveG.gain);
+    wave.connect(waveF); waveF.connect(waveG); waveG.connect(master);
+    wave.start(t); waveLFO.start(t);
+    nodes.push(wave,waveLFO);
+    /* Higher hiss layer — foam */
+    var foam=ctx.createBufferSource(); foam.buffer=noiseBuf; foam.loop=true;
+    var foamBP=ctx.createBiquadFilter(); foamBP.type='highpass'; foamBP.frequency.value=2000;
+    var foamG=ctx.createGain(); foamG.gain.value=0.04;
+    var foamLFO=ctx.createOscillator(); foamLFO.type='sine'; foamLFO.frequency.value=0.08;
+    var foamLFOG=ctx.createGain(); foamLFOG.gain.value=0.03;
+    foamLFO.connect(foamLFOG); foamLFOG.connect(foamG.gain);
+    foam.connect(foamBP); foamBP.connect(foamG); foamG.connect(master);
+    foam.start(t); foamLFO.start(t);
+    nodes.push(foam,foamLFO);
+    /* Deep sub-bass drone */
+    var sub=ctx.createOscillator(),subG=ctx.createGain();
+    sub.type='sine'; sub.frequency.value=55;
+    subG.gain.value=0.04;
+    sub.connect(subG); subG.connect(master);
+    sub.start(t);
+    nodes.push(sub);
   }
 
-  /* 2. Pad — sustained warm wash, slow breathing */
-  function streamPad(){
-    if(!running||muted) return;
-    var sc=SCALES[currentMood];
-    var notes=inRange(sc,48,62);
-    if(notes.length){ pad(pick(notes),rnd(.025,.045),rnd(8.0,14.0)); }
-    sched("pad",streamPad,rnd(6000,12000));
+  /* ── SCENE 3: Minimal Drone ── */
+  function startDrone(){
+    var t=ctx.currentTime;
+    /* Warm drone — two detuned sines */
+    var o1=ctx.createOscillator(),o2=ctx.createOscillator();
+    var g1=ctx.createGain(),g2=ctx.createGain();
+    o1.type='sine'; o1.frequency.value=110;
+    o2.type='sine'; o2.frequency.value=110.8; /* slight detune for warmth */
+    g1.gain.value=0.06; g2.gain.value=0.05;
+    o1.connect(g1); g1.connect(master);
+    o2.connect(g2); g2.connect(master);
+    o1.start(t); o2.start(t);
+    nodes.push(o1,o2);
+    /* Upper partial — fifth above, very soft */
+    var o3=ctx.createOscillator(),g3=ctx.createGain();
+    o3.type='sine'; o3.frequency.value=165; g3.gain.value=0.025;
+    o3.connect(g3); g3.connect(master);
+    o3.start(t); nodes.push(o3);
+    /* Slow breathing LFO on volume */
+    var lfo=ctx.createOscillator(),lfoG=ctx.createGain();
+    lfo.type='sine'; lfo.frequency.value=0.05;
+    lfoG.gain.value=0.02;
+    lfo.connect(lfoG); lfoG.connect(g1.gain); lfoG.connect(g2.gain);
+    lfo.start(t); nodes.push(lfo);
+    /* Soft filtered noise bed */
+    var noiseBuf=makeNoise(4);
+    var bed=ctx.createBufferSource(); bed.buffer=noiseBuf; bed.loop=true;
+    var bedF=ctx.createBiquadFilter(); bedF.type='lowpass'; bedF.frequency.value=300;
+    var bedG=ctx.createGain(); bedG.gain.value=0.035;
+    bed.connect(bedF); bedF.connect(bedG); bedG.connect(master);
+    bed.start(t); nodes.push(bed);
   }
 
-  /* 3. Bass — deep gentle anchor */
-  function streamBass(){
-    if(!running||muted) return;
-    var sc=SCALES[currentMood];
-    var notes=inRange(sc,48,57);
-    if(notes.length){ bass(pick(notes),rnd(.035,.060),rnd(6.0,10.0)); }
-    sched("bass",streamBass,rnd(5000,10000));
-  }
+  var SCENES=[startForest,startRain,startOcean,startDrone];
 
-  /* 4. High chimes — occasional sparkle, very sparse */
-  function streamChime(){
-    if(!running||muted) return;
-    var sc=SCALES[currentMood];
-    var notes=inRange(sc,72,86);
-    if(notes.length&&Math.random()<0.5){
-      chime(pick(notes),rnd(.020,.040),rnd(4.0,8.0));
-    }
-    sched("chime",streamChime,rnd(5000,12000));
-  }
-
-  /* 5. Shimmer — rare ambient wash */
-  function streamShimmer(){
-    if(!running||muted) return;
-    var sc=SCALES[currentMood];
-    var notes=inRange(sc,60,72);
-    if(notes.length&&Math.random()<0.4){
-      shimmer(pick(notes),rnd(.020,.038),rnd(6.0,10.0));
-    }
-    sched("shimmer",streamShimmer,rnd(8000,18000));
-  }
   function stopAll(){
     running=false;
-    Object.keys(streams).forEach(function(k){clearTimeout(streams[k]);});
-    streams={};
+    nodes.forEach(function(n){ try{n.stop();}catch(e){} try{n.disconnect();}catch(e){} });
+    nodes=[];
   }
 
   function startStreams(){
     running=true;
-    /* Gentle staggered entry — like dawn slowly brightening */
-    sched('pad',     streamPad,     rnd(200,800));
-    sched('bass',    streamBass,    rnd(1000,3000));
-    sched('melody',  streamMelody,  rnd(2000,5000));
-    sched('chime',   streamChime,   rnd(4000,8000));
-    sched('shimmer', streamShimmer, rnd(6000,12000));
+    SCENES[currentMood%SCENES.length]();
   }
 
   function toastMsg(msg){
@@ -5526,7 +5515,7 @@ var MUSIC=(function(){
     play:function(lv){
       if(muted) return;
       if(!ec()) return;
-      var mood=lv%SCALES.length;
+      var mood=lv%SCENES.length;
       var changed=(mood!==currentMood);
       currentMood=mood;
       if(running){
