@@ -1451,7 +1451,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
         <div class="modal-gem-lbl">Gems</div>
       </div>
     </div>
-    <button class="btn-retry" onclick="BB.retry()">🔄 RETRY</button>
+    <div id="goMomentum" style="font-family:'Fredoka One';font-size:15px;color:#90caf9;text-align:center;margin:10px 0 4px;min-height:20px;opacity:0.9"></div>
+    <button class="btn-retry" onclick="BB.retry()" style="font-size:22px;padding:16px 0;width:100%;margin-bottom:10px;background:linear-gradient(180deg,#00c853,#009624);box-shadow:0 6px 0 #007934,0 8px 24px rgba(0,200,100,0.4)">▶ PLAY AGAIN</button>
     <div class="btn-row">
       <button class="btn-half btn-menu" onclick="BB.goMenu()">🏠 Menu</button>
       <button class="btn-half btn-pro"  onclick="BB.openShop()">👑 Pro</button>
@@ -5299,6 +5300,45 @@ function showInterstitialAd(){
   console.log('[AdMob] Show interstitial ad here');
 }
 
+/* ── MOMENTUM MESSAGES — encourage replay ── */
+function getMomentumMessage(isNewBest, fillPct, score, prevBest, wasLeague, leagueStage){
+  /* Priority 1: New high score */
+  if(isNewBest && score>0) return pick_mm([
+    '\u{1F31F} New high score! Can you beat '+score+'?',
+    '\u{1F3C6} Personal best! Go for '+Math.ceil(score*1.2)+'!',
+    '\u{1F525} You crushed it! One more round?',
+  ]);
+  /* Priority 2: Board was almost full (close call) */
+  if(fillPct>=0.80) return pick_mm([
+    '\u{1F62C} You were 1 move away!',
+    '\u{1F494} So close! That was a tight finish.',
+    '\u{1F4AA} Almost survived! Try a different strategy.',
+    '\u{1F3AF} One more piece would have saved you!',
+  ]);
+  /* Priority 3: Good score (within 20% of best) */
+  if(prevBest>0 && score>=prevBest*0.8) return pick_mm([
+    '\u{26A1} Almost beat your best! Just '+Math.max(1,prevBest-score)+' more.',
+    '\u{1F4A5} That was close to your record!',
+    '\u{1F60E} Great run! You can top this.',
+  ]);
+  /* Priority 4: League-specific */
+  if(wasLeague) return pick_mm([
+    '\u{1F3C6} Stage '+(leagueStage+1)+' reached! Push further!',
+    '\u{1F525} Climb the leaderboard — one more try!',
+    '\u{26A1} Every game counts for this week\'s ranking!',
+  ]);
+  /* Priority 5: General encouragement */
+  return pick_mm([
+    '\u{1F4AA} Try again — you can beat this!',
+    '\u{1F680} One more round? You\'re getting better!',
+    '\u{2728} Every game sharpens your strategy.',
+    '\u{1F3AE} The best players never stop trying!',
+    '\u{1F331} Practice makes perfect — go again!',
+    '\u{1F60A} That was fun! Ready for another?',
+  ]);
+}
+function pick_mm(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
 function doGameOver(){
   if(gameEnded) return; /* stage already cleared — don't show game over */
   gameEnded = true;
@@ -5329,13 +5369,21 @@ function doGameOver(){
     document.querySelector('.board-wrap').classList.remove('daily-mode');
     var _dchud=document.getElementById('dcHud'); if(_dchud) _dchud.classList.remove('visible');
   }
+  var prevBest=parseInt(lsGet('bbscore','0'));
+  var isNewBest=score>prevBest;
   document.getElementById('goTitle').textContent = _wasLeague
     ? 'Stage '+(_leagueStageReached+1)+' | '+score.toLocaleString()+' pts'
-    : score>parseInt(lsGet('bbscore','0'))?'New Best! 🎉':'Game Over';
-  if(score>parseInt(lsGet('bbscore','0'))) lsSet('bbscore',score);
+    : isNewBest?'New Best! \u{1F389}':'Game Over';
+  if(isNewBest) lsSet('bbscore',score);
   document.getElementById('goScore').textContent  = score;
   document.getElementById('goStars').textContent  = totalStars-starsLeft;
   document.getElementById('goPentas').textContent = totalPentas-pentasLeft;
+
+  /* ── Momentum message — encourage replay ── */
+  var msg = getMomentumMessage(isNewBest, boardFillPct(), score, prevBest, _wasLeague, _leagueStageReached);
+  var mEl = document.getElementById('goMomentum');
+  if(mEl) mEl.textContent = msg;
+
   document.getElementById('goModal').classList.add('on');
   /* ── Interstitial ad (frequency scales with level) ── */
   if(shouldShowInterstitialAd()) showInterstitialAd();
