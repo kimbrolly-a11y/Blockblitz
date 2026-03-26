@@ -352,14 +352,25 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .cell.land{animation:cellLand .14s ease}
 @keyframes cellLand{from{transform:scale(0) rotate(-8deg);opacity:0}to{transform:scale(1);opacity:1}}
 
-/* ══ BOARD DANGER PULSE ══ */
+/* ══ BOARD WARNING & DANGER STATES ══ */
+.board-wrap.warning{
+  animation:warnPulse 1.4s ease-in-out infinite alternate;
+}
+@keyframes warnPulse{
+  from{box-shadow:0 0 0 0 rgba(255,180,0,0)}
+  to{box-shadow:0 0 12px 3px rgba(255,180,0,0.35)}
+}
 .board-wrap.danger{
-  animation: dangerPulse 0.9s ease-in-out infinite alternate;
+  animation:dangerPulse 0.7s ease-in-out infinite alternate;
+  border-color:rgba(255,50,50,0.6)!important;
 }
 @keyframes dangerPulse{
-  from{box-shadow:0 0 0 0 rgba(255,60,60,0);}
-  to{box-shadow:0 0 10px 4px rgba(255,60,60,0.45);}
+  from{box-shadow:0 0 8px 2px rgba(255,50,50,0.2)}
+  to{box-shadow:0 0 20px 8px rgba(255,50,50,0.55)}
 }
+/* Heartbeat throb for critical danger (85%+) */
+.board-wrap.danger .cell.empty{animation:cellHeartbeat 0.7s ease-in-out infinite alternate}
+@keyframes cellHeartbeat{from{opacity:1}to{opacity:0.7}}
 
 /* ══ TRAY ══ */
 .tray{
@@ -4547,8 +4558,29 @@ function dealPieces(){
     return c;
   }
 
-  /* Shuffle groups and pick one piece from each of 3 different groups */
-  var shuffled   = eligGroups.slice().sort(function(){ return Math.random()-0.5; });
+  /* ── CLUTCH ASSIST: in danger state, bias toward smaller helpful pieces ──
+     Warning (70%): 40% chance to prefer small pieces (size 1-2)
+     Danger  (85%): 65% chance to prefer small pieces
+     Not guaranteed — keeps tension while giving hope */
+  var dangerTier = _lastDangerTier;
+  var clutchActive = false;
+  var clutchChance = dangerTier===2 ? 0.65 : dangerTier===1 ? 0.40 : 0;
+  if(clutchChance>0 && Math.random()<clutchChance){
+    clutchActive = true;
+    /* Cap large pieces: in danger only allow 0-1 large piece */
+    largeCap = dangerTier===2 ? 0 : 1;
+  }
+
+  /* Shuffle groups — clutch mode: bias small groups to front */
+  var shuffled;
+  if(clutchActive){
+    /* Small groups first (gi 0-3), then shuffle within tiers */
+    var small=eligGroups.filter(function(g){return g.gi<4;}).sort(function(){return Math.random()-0.5;});
+    var large=eligGroups.filter(function(g){return g.gi>=4;}).sort(function(){return Math.random()-0.5;});
+    shuffled=small.concat(large);
+  } else {
+    shuffled=eligGroups.slice().sort(function(){return Math.random()-0.5;});
+  }
   var picked     = [], largeUsed = 0, usedColors = [];
 
   for(var i=0; i < shuffled.length && picked.length < 3; i++){
@@ -4597,10 +4629,19 @@ function dealPieces(){
   updateDangerState();
 }
 
+var _lastDangerTier=0; /* 0=safe, 1=warning, 2=danger */
 function updateDangerState(){
   var pct = boardFillPct();
   var bw = document.querySelector('.board-wrap');
-  if(bw) bw.classList.toggle('danger', pct >= 0.70);
+  if(!bw) return;
+  var tier = pct>=0.85?2 : pct>=0.70?1 : 0;
+  bw.classList.toggle('warning', tier===1);
+  bw.classList.toggle('danger',  tier===2);
+  /* Hamster reacts when entering a new danger tier */
+  if(tier>_lastDangerTier && tier>=1 && !gameEnded){
+    hamsterReact('danger');
+  }
+  _lastDangerTier=tier;
 }
 
 /* ── SHUFFLE PIECES ── */
