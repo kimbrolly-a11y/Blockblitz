@@ -6949,11 +6949,13 @@ function updateLeagueXPBar(){
   var pct=Math.min(100,Math.round((leagueLinesCleared/LEAGUE_LINES_PER_STAGE)*100));
   var fill=document.getElementById('xpFill');
   var lbl=document.getElementById('xpLabel');
+  var lvlLbl=document.getElementById('xpLevelLbl');
   if(fill){
     fill.style.width=pct+'%';
     fill.style.background='linear-gradient(90deg,#ff8f00,#ffd700,#ff6f00)';
   }
-  if(lbl) lbl.textContent='LV '+(leagueStage+1)+' | '+leagueLinesCleared+'/'+LEAGUE_LINES_PER_STAGE+' lines';
+  if(lbl) lbl.textContent=leagueLinesCleared+'/'+LEAGUE_LINES_PER_STAGE+' lines';
+  if(lvlLbl) lvlLbl.textContent='LV '+(leagueStage+1);
 }
 
 /* ── ICE / OBSTACLE SPAWNING ── */
