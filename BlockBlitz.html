@@ -346,7 +346,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 }
 
 /* Animations */
-.cell.pop{animation:cellPop .28s ease forwards;z-index:10}
+.cell.pop{animation:cellPop .25s ease forwards;z-index:10}
 @keyframes cellPop{0%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.6}100%{transform:scale(0);opacity:0}}
 @keyframes leagueShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-4px) rotate(-0.5deg)}30%{transform:translateX(4px) rotate(0.5deg)}45%{transform:translateX(-3px)}60%{transform:translateX(3px)}75%{transform:translateX(-1px)}}
 .cell.land{animation:cellLand .14s ease}
@@ -4173,8 +4173,8 @@ function startLevel(lv){
   advLevelConfig = null;
   movesLeft = -1;
   combosClearedThisLevel = 0;
-  if(isAdventureMode && typeof ADV_LEVELS!=='undefined' && ADV_LEVELS[level]){
-    advLevelConfig = ADV_LEVELS[level];
+  if(isAdventureMode && typeof ADV_LEVELS!=='undefined' && ADV_LEVELS[level%ADV_LEVELS.length]){
+    advLevelConfig = ADV_LEVELS[level%ADV_LEVELS.length];
     layout = advLevelConfig.grid;
     if(advLevelConfig.moves) movesLeft = advLevelConfig.moves;
   } else if(isDailyChallenge){
@@ -4835,17 +4835,25 @@ function onUp(e,_move,_up){
 /* ── HIGHLIGHT ── */
 function clearLit(){
   document.querySelectorAll('.cell.lit,.cell.bad-lit').forEach(function(el){
+    var wasLit=el.classList.contains('lit');
     el.classList.remove('lit','bad-lit');
+    /* Only clear inline styles on cells that had the lit color applied (empty cells) */
+    if(wasLit){ el.style.background=''; el.style.boxShadow=''; el.style.border=''; }
   });
 }
 
-function litCells(shape,r0,c0,cls){
+function litCells(shape,r0,c0,cls,color){
   for(var r=0;r<shape.length;r++) for(var c=0;c<shape[0].length;c++){
     if(!shape[r][c]) continue;
     var nr=r0+r, nc=c0+c;
     if(nr<0||nr>=ROWS||nc<0||nc>=COLS) continue;
     var el=cellEl(nr,nc); if(!el) continue;
     el.classList.add(cls);
+    if(cls==='lit'&&color){
+      el.style.background=color;
+      el.style.boxShadow='0 0 10px '+color;
+      el.style.border='2px solid rgba(255,255,255,0.5)';
+    }
   }
 }
 
@@ -4936,6 +4944,8 @@ function checkLines(){
     var ct=board[r][c].type; if(ct===T.EMPTY) return;
     popSet[k]=true;
     if(ct===T.BOMB_GEM) bombQueue.push({r:r,c:c}); /* chain bombs */
+    /* Locked gems with HP>1: don't pop-animate, just mark for HP decrement */
+    if(ct===T.LOCKED_GEM && (board[r][c].lockHP||2)>1) return;
     var el=cellEl(r,c);
     if(el){el.classList.remove('filled');el.style.background='';el.style.boxShadow='';el.innerHTML='';el.classList.add('pop');popEls.push(el);}
   }
