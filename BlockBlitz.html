@@ -1457,10 +1457,15 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <span id="goCoinBonus" style="font-size:13px;color:#ff9800;display:none;background:rgba(255,152,0,0.2);padding:2px 8px;border-radius:10px"></span>
     </div>
     <div id="goMomentum" style="font-family:'Fredoka One';font-size:15px;color:#90caf9;text-align:center;margin:6px 0 4px;min-height:20px;opacity:0.9"></div>
+    <!-- Rewarded ad buttons (hidden for Pro users) -->
+    <div id="goAdBtns" style="display:flex;gap:8px;margin-bottom:8px;width:100%">
+      <button id="goReviveBtn" onclick="BB.reviveWithAd()" style="flex:1;font-family:'Fredoka One';font-size:13px;padding:10px 6px;border:none;border-radius:12px;color:#fff;cursor:pointer;background:linear-gradient(180deg,#7c4dff,#512da8);box-shadow:0 4px 0 #311b92,0 6px 16px rgba(124,77,255,0.4)">🎬 Revive<br><span style="font-size:10px;opacity:0.7">Watch Ad</span></button>
+      <button id="goDoubleBtn" onclick="BB.doubleCoinsWithAd()" style="flex:1;font-family:'Fredoka One';font-size:13px;padding:10px 6px;border:none;border-radius:12px;color:#fff;cursor:pointer;background:linear-gradient(180deg,#ff8f00,#e65100);box-shadow:0 4px 0 #bf360c,0 6px 16px rgba(255,143,0,0.4)">🪙 x2 Coins<br><span style="font-size:10px;opacity:0.7">Watch Ad</span></button>
+    </div>
     <button class="btn-retry" onclick="BB.retry()" style="font-size:22px;padding:16px 0;width:100%;margin-bottom:10px;background:linear-gradient(180deg,#00c853,#009624);box-shadow:0 6px 0 #007934,0 8px 24px rgba(0,200,100,0.4)">▶ PLAY AGAIN</button>
     <div class="btn-row">
       <button class="btn-half btn-menu" onclick="BB.goMenu()">🏠 Menu</button>
-      <button class="btn-half btn-pro"  onclick="BB.openShop()">👑 Pro</button>
+      <button class="btn-half btn-pro"  onclick="BB.openShop()">🛒 Shop</button>
     </div>
   </div>
 </div>
@@ -1636,6 +1641,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
         <button class="shop-buy-btn" id="shopBuyPro" onclick="BB.shopBuyPro()">Buy</button>
       </div>
     </div>
+    <!-- COSMETIC SKINS -->
+    <div style="font-family:'Fredoka One';font-size:14px;color:#ffd700;margin:14px 0 8px;letter-spacing:1px">🎨 BOARD SKINS</div>
+    <div id="shopSkinsGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;margin-bottom:12px"></div>
     <button class="btn-retry" style="background:rgba(255,255,255,.15);box-shadow:none" onclick="BB.closeShop()">Close</button>
   </div>
 </div>
@@ -4198,7 +4206,7 @@ function startLevel(lv){
   }
   score = 0; combo = 0; undoUsed = false; gameEnded = false; puUsed = false;
   shufflesLeft = 1; rescueUsed = false;
-  piecesPlacedThisLevel = 0; firstClearDone = false;
+  piecesPlacedThisLevel = 0; firstClearDone = false; _reviveUsedThisGame = false;
   starsLeft = 0; pentasLeft = 0;
   var bombGems = 0, lockedGems = 0, frozenCells = 0;
   board = [];
@@ -5290,8 +5298,8 @@ function shouldShowInterstitialAd(){
   if(isPro) return false;           /* paid users never see ads */
   if(classicLevel < 5) return false; /* levels 1-5: no ads, hook first */
   _gameOverCount++;
-  /* frequency scales with level */
-  var every = classicLevel >= 31 ? 2 : classicLevel >= 16 ? 3 : 5;
+  /* Show interstitial every 3-5 games (random within range for unpredictability) */
+  var every = 3 + Math.floor(Math.random()*3); /* 3, 4, or 5 */
   if(_gameOverCount >= every){
     _gameOverCount = 0;
     return true;
@@ -5344,9 +5352,73 @@ function getMomentumMessage(isNewBest, fillPct, score, prevBest, wasLeague, leag
 }
 function pick_mm(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
+/* ── REWARDED AD SYSTEM ── */
+var _reviveUsedThisGame=false;
+var _doubleUsedThisGame=false;
+var _lastCoinEarned=0; /* stored for doubling */
+
+/* Simulate rewarded ad (replace with real ad SDK later) */
+function showRewardedAd(callback){
+  /* TODO: Replace with real ad SDK call:
+     e.g. admob.showRewarded().then(callback)
+     For now, simulate 1.5s "ad" then reward */
+  showToast('\u{1F3AC} Watching ad...');
+  setTimeout(function(){
+    showToast('\u{2705} Reward earned!');
+    if(callback) callback();
+  },1500);
+}
+
+function reviveWithAd(){
+  if(_reviveUsedThisGame) return;
+  _reviveUsedThisGame=true;
+  showRewardedAd(function(){
+    /* Close game over modal and resume play */
+    document.getElementById('goModal').classList.remove('on');
+    gameEnded=false;
+    /* Clear 2 random rows to give breathing room */
+    var filledRows=[];
+    for(var r=0;r<ROWS;r++){
+      var cnt=0;
+      for(var c=0;c<COLS;c++) if(board[r][c].type===T.FILLED) cnt++;
+      if(cnt>=3) filledRows.push({r:r,cnt:cnt});
+    }
+    filledRows.sort(function(a,b){return b.cnt-a.cnt;}); /* most filled first */
+    var toClear=Math.min(2,filledRows.length);
+    for(var i=0;i<toClear;i++){
+      var row=filledRows[i].r;
+      for(var c=0;c<COLS;c++){
+        if(board[row][c].type===T.FILLED) board[row][c]={type:T.EMPTY,color:null};
+      }
+    }
+    syncBoard();
+    dealPieces();
+    updateDangerState();
+    MUSIC.play(level);
+    hamsterReact('clear2');
+    showToast('\u{2764}\u{FE0F} Revived! 2 rows cleared!');
+  });
+}
+
+function doubleCoinsWithAd(){
+  if(_doubleUsedThisGame||_lastCoinEarned<=0) return;
+  _doubleUsedThisGame=true;
+  showRewardedAd(function(){
+    var bonus=_lastCoinEarned;
+    awardCoins(bonus);
+    var el=document.getElementById('goCoinCount');
+    if(el) el.textContent='+'+(_lastCoinEarned+bonus);
+    var bEl=document.getElementById('goCoinBonus');
+    if(bEl){ bEl.textContent='\u{1F4B0} Doubled!'; bEl.style.display='inline-block'; }
+    document.getElementById('goDoubleBtn').disabled=true;
+    document.getElementById('goDoubleBtn').style.opacity='0.4';
+  });
+}
+
 function doGameOver(){
   if(gameEnded) return; /* stage already cleared — don't show game over */
   gameEnded = true;
+  _doubleUsedThisGame=false; /* reset per-game ad flags */
   rounds++; lsSet('bbrounds',rounds);
   levelStreak=0; lsSet('bbstreak',0);
   updateStreakBadge();
@@ -5362,6 +5434,7 @@ function doGameOver(){
     coinEarned = Math.floor(coinEarned * (1.5 + Math.random()*0.5));
   }
   awardCoins(coinEarned);
+  _lastCoinEarned=coinEarned;
   /* Leaderboard */
   submitToLeaderboard(score,level);
   /* Blitz League */
@@ -5417,6 +5490,14 @@ function doGameOver(){
   var msg = getMomentumMessage(isNewBest, boardFillPct(), score, prevBest, _wasLeague, _leagueStageReached);
   var mEl = document.getElementById('goMomentum');
   if(mEl) mEl.textContent = msg;
+
+  /* ── Ad button visibility ── */
+  var adBtns=document.getElementById('goAdBtns');
+  var revBtn=document.getElementById('goReviveBtn');
+  var dblBtn=document.getElementById('goDoubleBtn');
+  if(adBtns) adBtns.style.display=isPro?'none':'flex';
+  if(revBtn){ revBtn.disabled=_reviveUsedThisGame; revBtn.style.opacity=_reviveUsedThisGame?'0.4':'1'; }
+  if(dblBtn){ dblBtn.disabled=false; dblBtn.style.opacity='1'; }
 
   document.getElementById('goModal').classList.add('on');
   /* ── Interstitial ad (frequency scales with level) ── */
@@ -6381,7 +6462,31 @@ function openShop(){
     if(btn) btn.disabled=(coins<priceMap[k]);
   });
   var pBtn=document.getElementById('shopBuyPro');
-  if(pBtn){ pBtn.disabled=isPro||(coins<999); if(isPro) pBtn.textContent='✅ Owned'; }
+  if(pBtn){ pBtn.disabled=isPro||(coins<999); if(isPro) pBtn.textContent='\u{2705} Owned'; }
+  /* Render cosmetic skins grid */
+  var skGrid=document.getElementById('shopSkinsGrid');
+  if(skGrid){
+    skGrid.innerHTML='';
+    var allSkins=[{id:'default',name:'Default',color:'#1a1040',price:0}];
+    WORLD_BADGES.forEach(function(b){ allSkins.push({id:b.skin,name:b.skinName,color:b.color,accent:b.accent,price:b.coins}); });
+    allSkins.forEach(function(sk){
+      var owned=isSkinUnlocked(sk.id);
+      var active=currentSkin===sk.id;
+      var canBuy=!owned&&coins>=sk.price;
+      var card=document.createElement('div');
+      card.style.cssText='background:'+(sk.color||'#1a1040')+';border:2px solid '+(active?'#ffd700':owned?'rgba(255,255,255,0.2)':'rgba(255,255,255,0.08)')+';border-radius:12px;padding:10px;text-align:center;cursor:pointer;position:relative';
+      card.innerHTML='<div style="font-family:Fredoka One;font-size:12px;color:'+(sk.accent||'#fff')+'">'+sk.name+'</div>'
+        +(active?'<div style="font-size:10px;color:#ffd700;margin-top:4px">\u{2705} Active</div>'
+        :owned?'<div style="font-size:10px;color:#90caf9;margin-top:4px;cursor:pointer" onclick="BB.applySkin(\''+sk.id+'\')">Use</div>'
+        :sk.price>0?'<div style="font-size:10px;color:'+(canBuy?'#ffd700':'#666')+';margin-top:4px">\u{1FA99} '+sk.price+'</div>':'');
+      if(!owned&&sk.price>0&&canBuy){
+        card.onclick=function(){ if(confirm('Buy '+sk.name+' for '+sk.price+' coins?')){ coins-=sk.price; lsSet('bbcoins',coins); unlockedSkins[sk.id]=true; lsSet('bbskins',JSON.stringify(unlockedSkins)); applySkinClass(sk.id); openShop(); } };
+      } else if(owned&&!active){
+        card.onclick=function(){ applySkinClass(sk.id); openShop(); };
+      }
+      skGrid.appendChild(card);
+    });
+  }
   document.getElementById('shopModal').classList.add('on');
 }
 function closeShop(){ document.getElementById('shopModal').classList.remove('on'); }
@@ -7480,6 +7585,9 @@ return{
   shopBuy:           shopBuy,
   shopBuyPro:        shopBuyPro,
   shopConfirmYes:    shopConfirmYes,
+  reviveWithAd:      reviveWithAd,
+  doubleCoinsWithAd: doubleCoinsWithAd,
+  applySkin:         applySkinClass,
   shopConfirmCancel: shopConfirmCancel,
   setCS:             setCS,
   openMenu:          openMenu,
