@@ -6446,180 +6446,166 @@ var SND=(function(){
    shimmer, pulse, and sparkle. 6 mood scales per world.        */
 var MUSIC=(function(){
   var ctx=null,master=null,muted=true,running=false,currentMood=-1;
-  var nodes=[]; /* active audio nodes for cleanup */
+  var nodes=[], timers=[];
 
   var MOOD_NAMES=[
-    '🌲 Forest Breeze','🌧️ Gentle Rain','🌊 Ocean Waves','🧘 Deep Calm'
+    '🎹 Peaceful Garden','🌧️ Rainy Evening','🌊 Ocean Calm','✨ Starlit Night'
   ];
 
   /* ── helpers ── */
   function rnd(lo,hi){return lo+Math.random()*(hi-lo);}
+  function pick(a){return a[Math.floor(Math.random()*a.length)];}
+  function freq(m){return 440*Math.pow(2,(m-69)/12);}
 
   /* ── boot ── */
   function boot(){
     if(ctx) return true;
     try{ ctx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){ return false; }
     master=ctx.createGain(); master.gain.value=0.35; master.connect(ctx.destination);
+    /* Reverb for piano warmth */
+    var d1=ctx.createDelay(0.5); d1.delayTime.value=0.18;
+    var d2=ctx.createDelay(0.5); d2.delayTime.value=0.31;
+    var fb1=ctx.createGain(); fb1.gain.value=0.25;
+    var fb2=ctx.createGain(); fb2.gain.value=0.20;
+    var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2200;
+    var rvbMix=ctx.createGain(); rvbMix.gain.value=0.22;
+    d1.connect(fb1); fb1.connect(d1); d1.connect(d2);
+    d2.connect(fb2); fb2.connect(d2); d2.connect(lp);
+    lp.connect(rvbMix); rvbMix.connect(master);
+    ctx._rvb=d1;
     return true;
   }
   function resume(){if(ctx&&ctx.state==='suspended')ctx.resume();}
   function ec(){return boot()&&(resume(),true);}
 
-  /* ── Create noise buffer (white noise source) ── */
+  /* ── Noise buffer ── */
   function makeNoise(dur){
-    var sr=ctx.sampleRate, len=Math.floor(sr*dur);
-    var buf=ctx.createBuffer(1,len,sr);
-    var data=buf.getChannelData(0);
-    for(var i=0;i<len;i++) data[i]=Math.random()*2-1;
+    var sr=ctx.sampleRate,len=Math.floor(sr*dur),buf=ctx.createBuffer(1,len,sr),d=buf.getChannelData(0);
+    for(var i=0;i<len;i++) d[i]=Math.random()*2-1;
     return buf;
   }
 
-  /* ── SCENE 0: Forest Breeze ── */
-  function startForest(){
-    var t=ctx.currentTime;
-    /* Wind: pink-ish filtered noise */
-    var noiseBuf=makeNoise(4);
-    var wind=ctx.createBufferSource(); wind.buffer=noiseBuf; wind.loop=true;
-    var windF=ctx.createBiquadFilter(); windF.type='lowpass'; windF.frequency.value=800; windF.Q.value=0.5;
-    var windG=ctx.createGain(); windG.gain.value=0.12;
-    /* Slow wind modulation */
-    var windLFO=ctx.createOscillator(); windLFO.type='sine'; windLFO.frequency.value=0.15;
-    var windLFOG=ctx.createGain(); windLFOG.gain.value=300;
-    windLFO.connect(windLFOG); windLFOG.connect(windF.frequency);
-    wind.connect(windF); windF.connect(windG); windG.connect(master);
-    wind.start(t); windLFO.start(t);
-    nodes.push(wind,windLFO);
-    /* Soft bird chirps — occasional sine blips */
-    (function chirpLoop(){
-      if(!running||muted) return;
-      if(Math.random()<0.3){
-        var o=ctx.createOscillator(),g=ctx.createGain();
-        var f=rnd(2200,4800), ct=ctx.currentTime;
-        o.type='sine'; o.frequency.setValueAtTime(f,ct);
-        o.frequency.exponentialRampToValueAtTime(f*rnd(0.7,1.4),ct+0.15);
-        g.gain.setValueAtTime(0,ct);
-        g.gain.linearRampToValueAtTime(rnd(0.008,0.018),ct+0.03);
-        g.gain.exponentialRampToValueAtTime(0.0001,ct+rnd(0.1,0.25));
-        o.connect(g); g.connect(master);
-        o.start(ct); o.stop(ct+0.3);
-      }
-      setTimeout(chirpLoop, rnd(3000,8000));
-    })();
+  /* ── Soft piano tone (sine + 2nd harmonic + gentle decay) ── */
+  function piano(midi,vol,dur){
+    try{
+      var f=freq(midi),t=ctx.currentTime;
+      var o=ctx.createOscillator(),o2=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine'; o.frequency.value=f;
+      o2.type='sine'; o2.frequency.value=f*2.001; /* 2nd harmonic, slight detune */
+      var g2=ctx.createGain(); g2.gain.value=0.08; o2.connect(g2); g2.connect(g);
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(vol,t+0.015); /* fast attack like piano hammer */
+      g.gain.setValueAtTime(vol*0.7,t+0.08);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g); g.connect(ctx._rvb); g.connect(master);
+      o.start(t); o.stop(t+dur+0.3);
+      o2.start(t); o2.stop(t+dur+0.3);
+    }catch(e){}
   }
 
-  /* ── SCENE 1: Gentle Rain ── */
-  function startRain(){
-    var t=ctx.currentTime;
-    /* Rain: band-passed noise */
-    var noiseBuf=makeNoise(4);
-    var rain=ctx.createBufferSource(); rain.buffer=noiseBuf; rain.loop=true;
-    var rainBP=ctx.createBiquadFilter(); rainBP.type='bandpass'; rainBP.frequency.value=3000; rainBP.Q.value=0.3;
-    var rainG=ctx.createGain(); rainG.gain.value=0.10;
-    rain.connect(rainBP); rainBP.connect(rainG); rainG.connect(master);
-    rain.start(t);
-    nodes.push(rain);
-    /* Deeper rain layer */
-    var rain2=ctx.createBufferSource(); rain2.buffer=noiseBuf; rain2.loop=true;
-    var rainLP=ctx.createBiquadFilter(); rainLP.type='lowpass'; rainLP.frequency.value=600;
-    var rainG2=ctx.createGain(); rainG2.gain.value=0.08;
-    rain2.connect(rainLP); rainLP.connect(rainG2); rainG2.connect(master);
-    rain2.start(t);
-    nodes.push(rain2);
-    /* Distant rumble — very low sine, occasional */
-    (function rumbleLoop(){
-      if(!running||muted) return;
-      if(Math.random()<0.25){
-        var o=ctx.createOscillator(),g=ctx.createGain();
-        var ct=ctx.currentTime;
-        o.type='sine'; o.frequency.value=rnd(30,60);
-        g.gain.setValueAtTime(0,ct);
-        g.gain.linearRampToValueAtTime(rnd(0.03,0.06),ct+1.5);
-        g.gain.linearRampToValueAtTime(0,ct+4);
-        o.connect(g); g.connect(master);
-        o.start(ct); o.stop(ct+4.5);
-      }
-      setTimeout(rumbleLoop, rnd(8000,20000));
-    })();
+  /* ── Warm pad (very soft sine wash) ── */
+  function pad(midi,vol,dur){
+    try{
+      var f=freq(midi),t=ctx.currentTime;
+      var o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine'; o.frequency.value=f;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(vol,t+dur*0.3);
+      g.gain.linearRampToValueAtTime(0,t+dur);
+      o.connect(g); g.connect(master);
+      o.start(t); o.stop(t+dur+0.2);
+    }catch(e){}
   }
 
-  /* ── SCENE 2: Ocean Waves ── */
-  function startOcean(){
-    var t=ctx.currentTime;
-    /* Wave noise */
-    var noiseBuf=makeNoise(4);
-    var wave=ctx.createBufferSource(); wave.buffer=noiseBuf; wave.loop=true;
-    var waveF=ctx.createBiquadFilter(); waveF.type='lowpass'; waveF.frequency.value=500; waveF.Q.value=0.3;
-    var waveG=ctx.createGain(); waveG.gain.value=0.14;
-    /* Slow wave rhythm via LFO on gain */
-    var waveLFO=ctx.createOscillator(); waveLFO.type='sine'; waveLFO.frequency.value=0.08;
-    var waveLFOG=ctx.createGain(); waveLFOG.gain.value=0.08;
-    waveLFO.connect(waveLFOG); waveLFOG.connect(waveG.gain);
-    wave.connect(waveF); waveF.connect(waveG); waveG.connect(master);
-    wave.start(t); waveLFO.start(t);
-    nodes.push(wave,waveLFO);
-    /* Higher hiss layer — foam */
-    var foam=ctx.createBufferSource(); foam.buffer=noiseBuf; foam.loop=true;
-    var foamBP=ctx.createBiquadFilter(); foamBP.type='highpass'; foamBP.frequency.value=2000;
-    var foamG=ctx.createGain(); foamG.gain.value=0.04;
-    var foamLFO=ctx.createOscillator(); foamLFO.type='sine'; foamLFO.frequency.value=0.08;
-    var foamLFOG=ctx.createGain(); foamLFOG.gain.value=0.03;
-    foamLFO.connect(foamLFOG); foamLFOG.connect(foamG.gain);
-    foam.connect(foamBP); foamBP.connect(foamG); foamG.connect(master);
-    foam.start(t); foamLFO.start(t);
-    nodes.push(foam,foamLFO);
-    /* Deep sub-bass drone */
-    var sub=ctx.createOscillator(),subG=ctx.createGain();
-    sub.type='sine'; sub.frequency.value=55;
-    subG.gain.value=0.04;
-    sub.connect(subG); subG.connect(master);
-    sub.start(t);
-    nodes.push(sub);
+  /* ── 4 Pentatonic scales (calming keys) ── */
+  var SCALES=[
+    [48,50,52,55,57,60,62,64,67,69,72,74,76,79], /* C maj pent */
+    [43,45,47,50,52,55,57,59,62,64,67,69,71,74], /* G maj pent */
+    [50,53,55,57,60,62,65,67,69,72,74,77,79,81], /* D min pent */
+    [45,48,50,52,55,57,60,62,64,67,69,72,74,76], /* A min pent */
+  ];
+
+  /* ── Ambient bed layers per scene ── */
+  function startAmbientBed(scene){
+    var t=ctx.currentTime, noiseBuf=makeNoise(4);
+    if(scene===0||scene===3){
+      /* Garden / Starlit: soft filtered wind */
+      var w=ctx.createBufferSource();w.buffer=noiseBuf;w.loop=true;
+      var wf=ctx.createBiquadFilter();wf.type='lowpass';wf.frequency.value=600;
+      var wg=ctx.createGain();wg.gain.value=0.06;
+      var lfo=ctx.createOscillator();lfo.type='sine';lfo.frequency.value=0.1;
+      var lg=ctx.createGain();lg.gain.value=200;
+      lfo.connect(lg);lg.connect(wf.frequency);
+      w.connect(wf);wf.connect(wg);wg.connect(master);
+      w.start(t);lfo.start(t);nodes.push(w,lfo);
+    }
+    if(scene===1){
+      /* Rain */
+      var r=ctx.createBufferSource();r.buffer=noiseBuf;r.loop=true;
+      var rbp=ctx.createBiquadFilter();rbp.type='bandpass';rbp.frequency.value=3500;rbp.Q.value=0.4;
+      var rg=ctx.createGain();rg.gain.value=0.08;
+      r.connect(rbp);rbp.connect(rg);rg.connect(master);r.start(t);nodes.push(r);
+      var r2=ctx.createBufferSource();r2.buffer=noiseBuf;r2.loop=true;
+      var rlp=ctx.createBiquadFilter();rlp.type='lowpass';rlp.frequency.value=500;
+      var rg2=ctx.createGain();rg2.gain.value=0.05;
+      r2.connect(rlp);rlp.connect(rg2);rg2.connect(master);r2.start(t);nodes.push(r2);
+    }
+    if(scene===2){
+      /* Ocean waves */
+      var oc=ctx.createBufferSource();oc.buffer=noiseBuf;oc.loop=true;
+      var of2=ctx.createBiquadFilter();of2.type='lowpass';of2.frequency.value=400;
+      var og=ctx.createGain();og.gain.value=0.09;
+      var olfo=ctx.createOscillator();olfo.type='sine';olfo.frequency.value=0.07;
+      var olg=ctx.createGain();olg.gain.value=0.05;
+      olfo.connect(olg);olg.connect(og.gain);
+      oc.connect(of2);of2.connect(og);og.connect(master);
+      oc.start(t);olfo.start(t);nodes.push(oc,olfo);
+    }
   }
 
-  /* ── SCENE 3: Minimal Drone ── */
-  function startDrone(){
-    var t=ctx.currentTime;
-    /* Warm drone — two detuned sines */
-    var o1=ctx.createOscillator(),o2=ctx.createOscillator();
-    var g1=ctx.createGain(),g2=ctx.createGain();
-    o1.type='sine'; o1.frequency.value=110;
-    o2.type='sine'; o2.frequency.value=110.8; /* slight detune for warmth */
-    g1.gain.value=0.06; g2.gain.value=0.05;
-    o1.connect(g1); g1.connect(master);
-    o2.connect(g2); g2.connect(master);
-    o1.start(t); o2.start(t);
-    nodes.push(o1,o2);
-    /* Upper partial — fifth above, very soft */
-    var o3=ctx.createOscillator(),g3=ctx.createGain();
-    o3.type='sine'; o3.frequency.value=165; g3.gain.value=0.025;
-    o3.connect(g3); g3.connect(master);
-    o3.start(t); nodes.push(o3);
-    /* Slow breathing LFO on volume */
-    var lfo=ctx.createOscillator(),lfoG=ctx.createGain();
-    lfo.type='sine'; lfo.frequency.value=0.05;
-    lfoG.gain.value=0.02;
-    lfo.connect(lfoG); lfoG.connect(g1.gain); lfoG.connect(g2.gain);
-    lfo.start(t); nodes.push(lfo);
-    /* Soft filtered noise bed */
-    var noiseBuf=makeNoise(4);
-    var bed=ctx.createBufferSource(); bed.buffer=noiseBuf; bed.loop=true;
-    var bedF=ctx.createBiquadFilter(); bedF.type='lowpass'; bedF.frequency.value=300;
-    var bedG=ctx.createGain(); bedG.gain.value=0.035;
-    bed.connect(bedF); bedF.connect(bedG); bedG.connect(master);
-    bed.start(t); nodes.push(bed);
+  /* ── Piano melody stream — sparse, floating notes ── */
+  function streamMelody(){
+    if(!running||muted) return;
+    var sc=SCALES[currentMood%SCALES.length];
+    var hi=sc.filter(function(m){return m>=60&&m<=79;});
+    if(hi.length && Math.random()<0.65){
+      piano(pick(hi), rnd(0.025,0.045), rnd(3,6));
+    }
+    timers.push(setTimeout(streamMelody, rnd(2500,6000)));
   }
 
-  var SCENES=[startForest,startRain,startOcean,startDrone];
+  /* ── Bass notes — deep gentle anchor ── */
+  function streamBass(){
+    if(!running||muted) return;
+    var sc=SCALES[currentMood%SCALES.length];
+    var lo=sc.filter(function(m){return m>=43&&m<=55;});
+    if(lo.length){ pad(pick(lo), rnd(0.02,0.04), rnd(6,12)); }
+    timers.push(setTimeout(streamBass, rnd(6000,14000)));
+  }
+
+  /* ── High sparkle — occasional chime ── */
+  function streamChime(){
+    if(!running||muted) return;
+    var sc=SCALES[currentMood%SCALES.length];
+    var top=sc.filter(function(m){return m>=72&&m<=81;});
+    if(top.length && Math.random()<0.4){
+      piano(pick(top), rnd(0.015,0.030), rnd(4,8));
+    }
+    timers.push(setTimeout(streamChime, rnd(5000,12000)));
+  }
 
   function stopAll(){
     running=false;
-    nodes.forEach(function(n){ try{n.stop();}catch(e){} try{n.disconnect();}catch(e){} });
-    nodes=[];
+    timers.forEach(function(t){clearTimeout(t);}); timers=[];
+    nodes.forEach(function(n){try{n.stop();}catch(e){}try{n.disconnect();}catch(e){}}); nodes=[];
   }
 
   function startStreams(){
     running=true;
-    SCENES[currentMood%SCENES.length]();
+    startAmbientBed(currentMood%4);
+    timers.push(setTimeout(streamBass, rnd(300,1000)));
+    timers.push(setTimeout(streamMelody, rnd(1500,3500)));
+    timers.push(setTimeout(streamChime, rnd(4000,8000)));
   }
 
   function toastMsg(msg){
@@ -6633,7 +6619,7 @@ var MUSIC=(function(){
     play:function(lv){
       if(muted) return;
       if(!ec()) return;
-      var mood=lv%SCENES.length;
+      var mood=lv%4;
       var changed=(mood!==currentMood);
       currentMood=mood;
       if(running){
