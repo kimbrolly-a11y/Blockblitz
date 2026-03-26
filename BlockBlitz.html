@@ -4388,6 +4388,14 @@ function updateXPBar(){
     return;
   }
 
+  /* ── DAILY CHALLENGE: hide level XP bar ── */
+  if(isDailyChallenge){
+    if(xpWrap) xpWrap.style.display='none';
+    if(advDisp) advDisp.classList.remove('visible');
+    if(advProg) advProg.classList.remove('visible');
+    return;
+  }
+
   /* ── CLASSIC / ADVENTURE-NO-GEMS: standard XP bar ── */
   if(xpWrap)  xpWrap.style.display  = '';
   if(advDisp) advDisp.classList.remove('visible');
@@ -4403,7 +4411,7 @@ function updateXPBar(){
   }
   if(sco) sco.textContent = score;
   if(tgt) tgt.textContent = target;
-  if(lbl) lbl.textContent = isAdventureMode ? '⚔️' : 'LV ' + (level + 1);
+  if(lbl) lbl.textContent = isAdventureMode ? '\u{2694}\u{FE0F}' : 'LV ' + (level + 1);
 }
 
 function updateStreakBadge(){
