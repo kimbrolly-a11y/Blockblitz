@@ -3264,9 +3264,6 @@ function updateGemUI(){
   if(typeof isDailyChallenge!=='undefined' && isDailyChallenge){
     if(lblTxt) lblTxt.textContent='DAILY';
     if(lbl) lbl.textContent='\u{1F4C5}';
-  } else if(isLeagueMode){
-    if(lblTxt) lblTxt.textContent='STAGE';
-    if(lbl) lbl.textContent=leagueStage+1;
   } else {
     if(lblTxt) lblTxt.textContent='LEVEL';
     if(lbl) lbl.textContent=level+1;
@@ -3358,7 +3355,7 @@ function updateStreakBadge(){
 function updateModeBadge(){
   var el=document.getElementById('modeBadge'); if(!el) return;
   if(isLeagueMode){
-    el.textContent='🏆 STAGE '+(leagueStage+1);
+    el.textContent='\u{1F3C6} BLITZ LEAGUE';
     el.classList.remove('adv');
     el.style.background='rgba(255,215,0,0.25)'; el.style.borderColor='rgba(255,215,0,0.4)'; el.style.color='#ffd700';
   } else if(isAdventureMode){
@@ -3715,7 +3712,7 @@ function onMove(e,_move,_up){
   var valid=canPlace(dragPiece.shape,snap.r,snap.c);
   document.getElementById('ghost').classList.toggle('invalid',!valid);
   clearLit();
-  litCells(dragPiece.shape, snap.r, snap.c, valid?'lit':'bad-lit');
+  litCells(dragPiece.shape, snap.r, snap.c, valid?'lit':'bad-lit', valid?dragPiece.color:null);
 }
 
 function onUp(e,_move,_up){
@@ -5861,7 +5858,7 @@ function updateLeagueXPBar(){
   }
   var cName=LEAGUE_COLOR_NAMES[leagueTargetColor]||'?';
   var emoji=LEAGUE_COLOR_EMOJI[leagueTargetColor]||'';
-  if(lbl) lbl.textContent=emoji+' Clear '+leagueTargetCount+' '+cName+' | '+leagueTargetCleared+'/'+leagueTargetCount+(blitzModeActive?' | BLITZ!':'');
+  if(lbl) lbl.textContent='LV '+(level+1)+' | '+emoji+' '+leagueTargetCleared+'/'+leagueTargetCount+' '+cName+(blitzModeActive?' BLITZ!':'');
 }
 
 /* ── COLOR CLUSTER DETECTION (flood-fill BFS) ── */
@@ -5961,8 +5958,9 @@ function leagueCascade(chainLevel){
   if(leagueTargetCleared>=leagueTargetCount){
     setTimeout(function(){
       leagueStage++;
+      level = leagueStage; /* keep level in sync for header */
       pickLeagueTarget();
-      showToast('Stage '+(leagueStage+1)+'!');
+      showToast('Level '+(level+1)+'!');
       SND.stageWin();
       var iceCount=leagueIceCount();
       if(iceCount>0) spawnLeagueIce(iceCount);
