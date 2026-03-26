@@ -570,6 +570,23 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 }
 @keyframes comboPop{from{transform:translateX(-50%) scale(0) rotate(-8deg)}to{transform:translateX(-50%) scale(1) rotate(0)}}
 
+/* ══ COMBO VISUAL FX ══ */
+/* Screen flash */
+.combo-flash{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:750;animation:comboFlash var(--fd) ease-out forwards}
+@keyframes comboFlash{0%{opacity:var(--fo)}100%{opacity:0}}
+/* Golden sparkle particles */
+.sparkle{position:fixed;pointer-events:none;z-index:810;border-radius:50%;animation:sparkleAnim var(--sd) ease-out forwards}
+@keyframes sparkleAnim{0%{transform:translate(0,0) scale(1);opacity:1}40%{opacity:1}100%{transform:translate(var(--sx),var(--sy)) scale(0);opacity:0}}
+/* Shockwave ring */
+.shockwave{position:fixed;pointer-events:none;z-index:790;border-radius:50%;border:3px solid;animation:shockAnim var(--skd) ease-out forwards}
+@keyframes shockAnim{0%{transform:translate(-50%,-50%) scale(0);opacity:0.9}40%{opacity:0.6}100%{transform:translate(-50%,-50%) scale(1);opacity:0}}
+/* Streak lines (speed lines radiating from center) */
+.streak-line{position:fixed;pointer-events:none;z-index:780;transform-origin:center center;animation:streakAnim var(--sld) ease-out forwards}
+@keyframes streakAnim{0%{transform:rotate(var(--sa)) scaleY(0);opacity:0.8}40%{transform:rotate(var(--sa)) scaleY(1);opacity:0.7}100%{transform:rotate(var(--sa)) scaleY(1.5);opacity:0}}
+/* Board glow pulse on combo */
+.board-wrap.combo-glow{animation:boardComboGlow var(--gd) ease-out forwards!important}
+@keyframes boardComboGlow{0%{box-shadow:0 0 40px var(--gc),0 0 80px var(--gc)}50%{box-shadow:0 0 60px var(--gc),0 0 120px var(--gc)}100%{box-shadow:none}}
+
 #stageBanner{
   position:fixed;pointer-events:none;z-index:700;
   left:50%;transform:translateX(-50%);top:38%;
@@ -4989,6 +5006,7 @@ function checkLines(){
   else if(isCombo)  hamsterReact('clear2');
   else              hamsterReact('clear1');
   spawnConfetti(popEls);
+  spawnComboFX(cleared, popEls); /* Vita Mahjong-style combo visuals */
   /* League stage progression — simple lines-based */
   if(isLeagueMode){
     leagueLinesCleared+=cleared;
@@ -6363,6 +6381,101 @@ function spawnOneSquare(cx,cy){
   sq.style.cssText='width:'+sz+'px;height:'+sz+'px;background:'+col+';left:'+cx+'px;top:'+cy+'px;--tx:'+tx+'px;--ty:'+ty+'px;--rot:'+rot+';--dur:'+dur;
   document.body.appendChild(sq);
   setTimeout(function(){if(sq.parentNode)sq.parentNode.removeChild(sq);},parseFloat(dur)*1000+100);
+}
+
+/* ── COMBO VISUAL EFFECTS (Vita Mahjong-inspired) ── */
+function spawnComboFX(linesCleared, popEls){
+  var br=document.getElementById('board').getBoundingClientRect();
+  var cx=br.left+br.width/2, cy=br.top+br.height/2;
+  var tier = linesCleared>=4?4:linesCleared; /* 1,2,3,4 */
+
+  /* ── 1. Screen flash — white for normal, gold for combo, hot for mega ── */
+  var flash=document.createElement('div');
+  flash.className='combo-flash';
+  var fColors=['','rgba(255,255,255,0.15)','rgba(255,215,0,0.2)','rgba(255,140,0,0.25)','rgba(255,60,0,0.3)'];
+  flash.style.cssText='background:'+fColors[tier]+';--fd:'+(0.3+tier*0.15)+'s;--fo:'+(0.15+tier*0.1);
+  document.body.appendChild(flash);
+  setTimeout(function(){if(flash.parentNode)flash.parentNode.removeChild(flash);},800);
+
+  /* ── 2. Golden sparkle particles from cleared cells ── */
+  var sparkleCount = [0,4,12,24,40][tier];
+  var sparkleColors = tier>=3?['#ffd700','#ff6d00','#ff4081','#7c4dff','#00e5ff']:['#ffd700','#ffecb3','#fff176'];
+  for(var i=0;i<sparkleCount;i++){
+    (function(i){setTimeout(function(){
+      var sp=document.createElement('div');
+      sp.className='sparkle';
+      var sz=4+Math.random()*(tier>=3?10:6);
+      var col=sparkleColors[Math.floor(Math.random()*sparkleColors.length)];
+      var sx=(Math.random()-0.5)*(100+tier*50);
+      var sy=-(30+Math.random()*(60+tier*30));
+      var dur=(0.6+Math.random()*0.5).toFixed(2);
+      /* Spawn from random cleared cell or board center */
+      var origin;
+      if(popEls.length>0){
+        var pel=popEls[Math.floor(Math.random()*popEls.length)];
+        var pr=pel.getBoundingClientRect();
+        origin={x:pr.left+pr.width/2, y:pr.top+pr.height/2};
+      } else { origin={x:cx,y:cy}; }
+      sp.style.cssText='width:'+sz+'px;height:'+sz+'px;background:'+col+';left:'+origin.x+'px;top:'+origin.y+'px;--sx:'+sx+'px;--sy:'+sy+'px;--sd:'+dur+'s;box-shadow:0 0 '+(sz*2)+'px '+col;
+      document.body.appendChild(sp);
+      setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp);},parseFloat(dur)*1000+100);
+    },i*25);})(i);
+  }
+
+  /* ── 3. Shockwave rings (bigger with tier) ── */
+  if(tier>=2){
+    var ringCount=tier>=4?3:tier>=3?2:1;
+    var ringColors=['','','#ffd700','#ff6d00','#ff1744'];
+    for(var r=0;r<ringCount;r++){
+      (function(r){setTimeout(function(){
+        var ring=document.createElement('div');
+        ring.className='shockwave';
+        var size=(120+r*80+tier*40);
+        ring.style.cssText='left:'+cx+'px;top:'+cy+'px;width:'+size+'px;height:'+size+'px;border-color:'+ringColors[tier]+';--skd:'+(0.5+r*0.15)+'s';
+        document.body.appendChild(ring);
+        setTimeout(function(){if(ring.parentNode)ring.parentNode.removeChild(ring);},1000);
+      },r*120);})(r);
+    }
+  }
+
+  /* ── 4. Speed streaks for Combo x3+ ── */
+  if(tier>=3){
+    var streakCount=tier>=4?16:8;
+    for(var s=0;s<streakCount;s++){
+      var st=document.createElement('div');
+      st.className='streak-line';
+      var angle=(s/streakCount)*360;
+      var len=40+tier*15+Math.random()*30;
+      var col2=tier>=4?'rgba(255,60,0,0.5)':'rgba(255,215,0,0.4)';
+      st.style.cssText='left:'+cx+'px;top:'+cy+'px;width:3px;height:'+len+'px;background:'+col2+';--sa:'+angle+'deg;--sld:'+(0.4+Math.random()*0.3)+'s';
+      document.body.appendChild(st);
+      setTimeout(function(){if(st.parentNode)st.parentNode.removeChild(st);},900);
+    }
+  }
+
+  /* ── 5. Board glow pulse ── */
+  if(tier>=2){
+    var bw=document.querySelector('.board-wrap');
+    if(bw){
+      var glowColors=['','','rgba(255,215,0,0.4)','rgba(255,140,0,0.5)','rgba(255,60,0,0.6)'];
+      bw.classList.remove('combo-glow');
+      void bw.offsetWidth;
+      bw.style.setProperty('--gc',glowColors[tier]);
+      bw.style.setProperty('--gd',(0.6+tier*0.2)+'s');
+      bw.classList.add('combo-glow');
+      setTimeout(function(){bw.classList.remove('combo-glow');},1500);
+    }
+  }
+
+  /* ── 6. Camera shake for Combo x3+ ── */
+  if(tier>=3){
+    var intensity=tier>=4?6:3;
+    var bw2=document.querySelector('.board-wrap');
+    if(bw2){
+      bw2.style.animation='leagueShake '+(0.3+tier*0.1)+'s ease';
+      setTimeout(function(){bw2.style.animation='';},500);
+    }
+  }
 }
 
 /* ══ SOUND ══ */
