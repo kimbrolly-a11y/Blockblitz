@@ -1451,7 +1451,12 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
         <div class="modal-gem-lbl">Gems</div>
       </div>
     </div>
-    <div id="goMomentum" style="font-family:'Fredoka One';font-size:15px;color:#90caf9;text-align:center;margin:10px 0 4px;min-height:20px;opacity:0.9"></div>
+    <div id="goCoinRow" style="display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 2px;font-family:'Fredoka One'">
+      <span style="font-size:20px">🪙</span>
+      <span id="goCoinCount" style="font-size:22px;color:#ffd700;min-width:30px">0</span>
+      <span id="goCoinBonus" style="font-size:13px;color:#ff9800;display:none;background:rgba(255,152,0,0.2);padding:2px 8px;border-radius:10px"></span>
+    </div>
+    <div id="goMomentum" style="font-family:'Fredoka One';font-size:15px;color:#90caf9;text-align:center;margin:6px 0 4px;min-height:20px;opacity:0.9"></div>
     <button class="btn-retry" onclick="BB.retry()" style="font-size:22px;padding:16px 0;width:100%;margin-bottom:10px;background:linear-gradient(180deg,#00c853,#009624);box-shadow:0 6px 0 #007934,0 8px 24px rgba(0,200,100,0.4)">▶ PLAY AGAIN</button>
     <div class="btn-row">
       <button class="btn-half btn-menu" onclick="BB.goMenu()">🏠 Menu</button>
@@ -5212,8 +5217,8 @@ function checkStageClear(){
   levelStreak++; lsSet('bbstreak', levelStreak);
   updateStreakBadge();
 
-  /* Award coins (multiplied by DC modifier) */
-  var coinEarned = Math.floor(score / 150);
+  /* Award coins — tiered (multiplied by DC modifier) */
+  var coinEarned = score>=5000?30 : score>=3000?20 : score>=1000?10 : 5;
   if(isDailyChallenge){ var _mod=getDCMod(); coinEarned *= (_mod.coinMult||3); }
   awardCoins(coinEarned);
 
@@ -5348,8 +5353,15 @@ function doGameOver(){
   SND.gameOver(); MUSIC.stop();
   /* XP */
   playerXP+=score; lsSet('bbxp',playerXP); updateRankBadge();
-  /* Coins */
-  var coinEarned=Math.floor(score/150); awardCoins(coinEarned);
+  /* Coins — tiered reward system */
+  var coinEarned = score>=5000?30 : score>=3000?20 : score>=1000?10 : 5;
+  var bonusTriggered = false;
+  /* 15% chance of bonus reward (extra 50-100% coins) */
+  if(Math.random()<0.15){
+    bonusTriggered = true;
+    coinEarned = Math.floor(coinEarned * (1.5 + Math.random()*0.5));
+  }
+  awardCoins(coinEarned);
   /* Leaderboard */
   submitToLeaderboard(score,level);
   /* Blitz League */
@@ -5378,6 +5390,28 @@ function doGameOver(){
   document.getElementById('goScore').textContent  = score;
   document.getElementById('goStars').textContent  = totalStars-starsLeft;
   document.getElementById('goPentas').textContent = totalPentas-pentasLeft;
+
+  /* ── Coin count-up animation ── */
+  var goCoinEl = document.getElementById('goCoinCount');
+  var goBonusEl = document.getElementById('goCoinBonus');
+  if(goCoinEl){
+    goCoinEl.textContent='0';
+    var _coinTarget=coinEarned, _coinCur=0;
+    var _coinStep=Math.max(1,Math.floor(_coinTarget/15));
+    var _coinInt=setInterval(function(){
+      _coinCur=Math.min(_coinCur+_coinStep,_coinTarget);
+      goCoinEl.textContent='+'+_coinCur;
+      if(_coinCur>=_coinTarget) clearInterval(_coinInt);
+    },50);
+  }
+  if(goBonusEl){
+    if(bonusTriggered){
+      goBonusEl.textContent='\u{1F381} Bonus!';
+      goBonusEl.style.display='inline-block';
+    } else {
+      goBonusEl.style.display='none';
+    }
+  }
 
   /* ── Momentum message — encourage replay ── */
   var msg = getMomentumMessage(isNewBest, boardFillPct(), score, prevBest, _wasLeague, _leagueStageReached);
