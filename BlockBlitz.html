@@ -83,7 +83,7 @@ body>*{position:relative;z-index:1}
 .mini-stat.gold{color:#ffd700;border-color:rgba(255,215,0,0.25)}
 .mini-stat-icon{font-size:14px;line-height:1}
 .streak-badge{font-family:'Fredoka One';font-size:12px;color:#ff9800;line-height:1;text-shadow:0 1px 4px rgba(0,0,0,.4)}
-#rankBadge{font-family:'Fredoka One';font-size:10px;border-radius:8px;padding:2px 7px;letter-spacing:.5px}
+#rankBadge{display:none}
 .settings-btn-sm{
   background:none;border:none;color:rgba(255,255,255,.7);
   font-size:15px;padding:2px 5px;cursor:pointer;flex-shrink:0;
@@ -1340,7 +1340,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <div class="mini-stat">🔶 <span id="pentaCount">0</span></div>
     <div class="mini-stat gold">🪙 <span id="coinCount">0</span></div>
     <div class="streak-badge" id="streakBadge"></div>
-    <div id="rankBadge">Rookie</div>
     <div class="mode-badge" id="modeBadge">⚡ CLASSIC</div>
     <div class="top-row2-right">
       <button class="settings-btn-sm" onclick="BB.openDailyChallenge()" title="Daily">📅</button>
