@@ -272,6 +272,13 @@ body>*{position:relative;z-index:1}
   border:1.5px solid rgba(255,255,255,0.6);
   box-shadow:0 3px 0 #0097a7,0 4px 10px rgba(0,188,212,0.4),inset 0 1px 0 rgba(255,255,255,0.5);
 }
+/* Bomb gem */
+.cell.bomb-gem{position:relative;background:linear-gradient(145deg,#ff6f00,#ff8f00,#ffa000)!important;border:1.5px solid rgba(255,200,0,0.7);box-shadow:0 3px 0 #e65100,0 0 12px rgba(255,111,0,0.5)}
+/* Locked gem */
+.cell.locked-gem{position:relative;background:linear-gradient(145deg,#78909c,#90a4ae,#b0bec5)!important;border:1.5px solid rgba(255,255,255,0.4);box-shadow:0 3px 0 #546e7a,0 0 8px rgba(120,144,156,0.5)}
+/* Frozen cell */
+.cell.frozen{position:relative;background:linear-gradient(145deg,#b3e5fc,#81d4fa,#4fc3f7);border:1.5px solid rgba(255,255,255,0.7);box-shadow:0 3px 0 #0288d1,0 0 10px rgba(79,195,247,0.4);animation:frozenShimmer 3s ease-in-out infinite}
+@keyframes frozenShimmer{0%,100%{opacity:1}50%{opacity:0.85}}
 .cell.ice::after{content:'❄';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cs)*.52);opacity:.85;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,0.3)}
 
 /* Filled player block — 3D raised */
@@ -1626,7 +1633,7 @@ var ROWS=8, COLS=8;
 var CS=42, GAP=4, STEP=46;
 
 /* ── CELL TYPES ── */
-var T = { EMPTY:0, GOLD:1, GOLD_STAR:2, GOLD_PENTA:3, FILLED:4, ICE:5 };
+var T = { EMPTY:0, GOLD:1, GOLD_STAR:2, GOLD_PENTA:3, FILLED:4, ICE:5, BOMB_GEM:6, LOCKED_GEM:7, FROZEN:8 };
 
 /* ── COLOURS for placed blocks (bright, matches video) ── */
 var COLORS = ['#e53935','#1e88e5','#ab47bc','#00acc1','#43a047','#ff8f00','#5c6bc0'];
@@ -1723,6 +1730,1011 @@ var SHAPE_GROUPS = [
    L29 Iron Cage       ⚫ Extreme     – Very tight, 8 gems
    L30 Ultimate        ⚫ Extreme     – Final challenge, 8 gems
 */
+/* ══ ADVENTURE LEVEL CONFIGS ══ */
+var ADV_STAGE_NAMES=['Getting Started','Move Limits','Combo Challenge','Tight Boards','Bomb Gems','Mixed Gems','Multi Objectives','High Pressure','Advanced Strategy','Endgame'];
+var ADV_LEVELS=[
+{stage:1,objectives:{"gems":true},star2:{"score":200},star3:{"score":500},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,2,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,3,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:1,objectives:{"gems":true},star2:{"score":250},star3:{"score":600},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,1,0,0,0,0,1,0],
+  [0,0,0,2,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,3,0,0,0],
+  [0,1,0,0,0,0,1,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:1,objectives:{"gems":true},star2:{"score":400},star3:{"score":900},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,0,0,0],
+  [0,0,2,0,0,3,0,0],
+  [0,1,0,0,0,0,1,0],
+  [0,1,0,0,0,0,1,0],
+  [0,0,3,0,0,2,0,0],
+  [0,0,0,1,1,0,0,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:1,objectives:{"gems":true},star2:{"score":500},star3:{"score":1200},grid:[
+  [1,0,0,0,0,0,0,1],
+  [0,0,0,2,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,2,0,0,0,0,3,0],
+  [0,3,0,0,0,0,2,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,3,0,0,0,0],
+  [1,0,0,0,0,0,0,1]
+]},
+{stage:1,objectives:{"gems":true},star2:{"score":600},star3:{"score":1500},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,0,1,0,0,1,0,0],
+  [0,1,2,0,0,3,1,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,1,3,0,0,2,1,0],
+  [0,0,1,0,0,1,0,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:1,objectives:{"gems":true},star2:{"score":700},star3:{"score":1800},grid:[
+  [0,0,0,1,1,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,2,0,0,2,0,0],
+  [1,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,1],
+  [0,0,3,0,0,3,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,0,0,0]
+]},
+{stage:1,objectives:{"gems":true},star2:{"score":800},star3:{"score":2000},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,2,0,0,0,0,3,0],
+  [0,0,1,1,1,1,0,0],
+  [0,0,1,0,0,1,0,0],
+  [0,0,1,0,0,1,0,0],
+  [0,0,1,1,1,1,0,0],
+  [0,3,0,0,0,0,2,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:1,objectives:{"gems":true},star2:{"score":900},star3:{"score":2300},grid:[
+  [1,1,0,0,0,0,1,1],
+  [1,0,0,0,0,0,0,1],
+  [0,0,2,0,0,3,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,3,0,0,2,0,0],
+  [1,0,0,0,0,0,0,1],
+  [1,1,0,0,0,0,1,1]
+]},
+{stage:1,objectives:{"gems":true},star2:{"score":1000},star3:{"score":2800},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,1,1,0,0,1,1,0],
+  [0,1,2,0,0,3,1,0],
+  [0,0,0,2,3,0,0,0],
+  [0,0,0,3,2,0,0,0],
+  [0,1,3,0,0,2,1,0],
+  [0,1,1,0,0,1,1,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:1,objectives:{"gems":true},star2:{"score":1200},star3:{"score":3200},grid:[
+  [1,0,0,0,0,0,0,1],
+  [0,2,0,0,0,0,3,0],
+  [0,0,1,0,0,1,0,0],
+  [0,0,0,2,3,0,0,0],
+  [0,0,0,3,2,0,0,0],
+  [0,0,1,0,0,1,0,0],
+  [0,3,0,0,0,0,2,0],
+  [1,0,0,0,0,0,0,1]
+]},
+{stage:2,moves:30,objectives:{"gems":true},star2:{"score":300},star3:{"score":800},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,2,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,3,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:2,moves:28,objectives:{"gems":true},star2:{"score":400},star3:{"score":1000},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,1,0,0,0,0,0,0],
+  [0,0,2,0,0,3,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,3,0,0,2,0,0],
+  [0,0,0,0,0,0,1,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:2,moves:25,objectives:{"gems":true},star2:{"score":500},star3:{"score":1300},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,1,1,0,0,1,1,0],
+  [0,1,2,0,0,3,1,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,1,3,0,0,2,1,0],
+  [0,1,1,0,0,1,1,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:2,moves:24,objectives:{"gems":true},star2:{"score":600},star3:{"score":1500},grid:[
+  [1,0,0,0,0,0,0,1],
+  [0,0,0,2,0,0,0,0],
+  [0,0,1,0,0,1,0,0],
+  [0,2,0,0,0,0,3,0],
+  [0,3,0,0,0,0,2,0],
+  [0,0,1,0,0,1,0,0],
+  [0,0,0,3,0,0,0,0],
+  [1,0,0,0,0,0,0,1]
+]},
+{stage:2,moves:22,objectives:{"gems":true},star2:{"score":800},star3:{"score":2000},grid:[
+  [1,1,0,0,0,0,1,1],
+  [1,0,0,0,0,0,0,1],
+  [0,0,2,0,0,2,0,0],
+  [0,0,0,3,3,0,0,0],
+  [0,0,0,2,2,0,0,0],
+  [0,0,3,0,0,3,0,0],
+  [1,0,0,0,0,0,0,1],
+  [1,1,0,0,0,0,1,1]
+]},
+{stage:2,moves:20,objectives:{"gems":true},star2:{"score":600},star3:{"score":1600},grid:[
+  [0,0,1,0,0,1,0,0],
+  [0,0,0,0,0,0,0,0],
+  [1,0,2,0,0,3,0,1],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [1,0,3,0,0,2,0,1],
+  [0,0,0,0,0,0,0,0],
+  [0,0,1,0,0,1,0,0]
+]},
+{stage:2,moves:20,objectives:{"gems":true},star2:{"score":900},star3:{"score":2300},grid:[
+  [0,0,0,1,1,0,0,0],
+  [0,1,0,0,0,0,1,0],
+  [0,0,2,0,0,2,0,0],
+  [1,0,0,3,3,0,0,1],
+  [1,0,0,2,2,0,0,1],
+  [0,0,3,0,0,3,0,0],
+  [0,1,0,0,0,0,1,0],
+  [0,0,0,1,1,0,0,0]
+]},
+{stage:2,moves:18,objectives:{"gems":true},star2:{"score":1000},star3:{"score":2800},grid:[
+  [1,0,0,0,0,0,0,1],
+  [0,1,0,2,3,0,1,0],
+  [0,0,1,0,0,1,0,0],
+  [0,2,0,0,0,0,3,0],
+  [0,3,0,0,0,0,2,0],
+  [0,0,1,0,0,1,0,0],
+  [0,1,0,3,2,0,1,0],
+  [1,0,0,0,0,0,0,1]
+]},
+{stage:2,moves:18,objectives:{"gems":true},star2:{"score":1200},star3:{"score":3200},grid:[
+  [1,1,1,0,0,1,1,1],
+  [1,0,0,0,0,0,0,1],
+  [1,0,2,0,0,3,0,1],
+  [0,0,0,2,3,0,0,0],
+  [0,0,0,3,2,0,0,0],
+  [1,0,3,0,0,2,0,1],
+  [1,0,0,0,0,0,0,1],
+  [1,1,1,0,0,1,1,1]
+]},
+{stage:2,moves:15,objectives:{"gems":true},star2:{"score":1500},star3:{"score":3800},grid:[
+  [1,1,0,0,0,0,1,1],
+  [1,0,0,2,3,0,0,1],
+  [0,0,2,0,0,3,0,0],
+  [0,2,0,1,1,0,3,0],
+  [0,3,0,1,1,0,2,0],
+  [0,0,3,0,0,2,0,0],
+  [1,0,0,3,2,0,0,1],
+  [1,1,0,0,0,0,1,1]
+]},
+{stage:3,moves:25,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":500},star3:{"score":1200},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,2,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,3,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:3,moves:25,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":600},star3:{"score":1500},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,1,0,0,0,0,1,0],
+  [0,0,2,0,0,3,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,3,0,0,2,0,0],
+  [0,1,0,0,0,0,1,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:3,moves:22,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":800},star3:{"score":2000},grid:[
+  [0,0,0,1,1,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,2,0,0,3,0,0],
+  [1,0,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,1],
+  [0,0,3,0,0,2,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,0,0,0]
+]},
+{stage:3,moves:22,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":1000},star3:{"score":2500},grid:[
+  [1,0,0,0,0,0,0,1],
+  [0,0,0,2,0,0,0,0],
+  [0,0,1,0,0,1,0,0],
+  [0,2,0,0,0,0,3,0],
+  [0,3,0,0,0,0,2,0],
+  [0,0,1,0,0,1,0,0],
+  [0,0,0,3,0,0,0,0],
+  [1,0,0,0,0,0,0,1]
+]},
+{stage:3,moves:20,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":1200},star3:{"score":3000},grid:[
+  [0,0,1,0,0,1,0,0],
+  [0,0,0,0,0,0,0,0],
+  [1,0,2,0,0,2,0,1],
+  [0,0,0,3,3,0,0,0],
+  [0,0,0,2,2,0,0,0],
+  [1,0,3,0,0,3,0,1],
+  [0,0,0,0,0,0,0,0],
+  [0,0,1,0,0,1,0,0]
+]},
+{stage:3,moves:20,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":1500},star3:{"score":3500},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,1,0,2,3,0,1,0],
+  [0,0,0,0,0,0,0,0],
+  [0,2,0,0,0,0,3,0],
+  [0,3,0,0,0,0,2,0],
+  [0,0,0,0,0,0,0,0],
+  [0,1,0,3,2,0,1,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:3,moves:18,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":1800},star3:{"score":4000},grid:[
+  [1,0,0,0,0,0,0,1],
+  [0,1,0,0,0,0,1,0],
+  [0,0,2,0,0,3,0,0],
+  [0,0,0,2,3,0,0,0],
+  [0,0,0,3,2,0,0,0],
+  [0,0,3,0,0,2,0,0],
+  [0,1,0,0,0,0,1,0],
+  [1,0,0,0,0,0,0,1]
+]},
+{stage:3,moves:18,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":2000},star3:{"score":4500},grid:[
+  [1,1,0,0,0,0,1,1],
+  [1,0,0,2,3,0,0,1],
+  [0,0,1,0,0,1,0,0],
+  [0,2,0,0,0,0,3,0],
+  [0,3,0,0,0,0,2,0],
+  [0,0,1,0,0,1,0,0],
+  [1,0,0,3,2,0,0,1],
+  [1,1,0,0,0,0,1,1]
+]},
+{stage:3,moves:15,comboGoal:4,objectives:{"gems":true,"combos":true},star2:{"score":2500},star3:{"score":5500},grid:[
+  [1,1,1,0,0,1,1,1],
+  [1,0,0,0,0,0,0,1],
+  [1,0,2,0,0,3,0,1],
+  [0,0,0,2,3,0,0,0],
+  [0,0,0,3,2,0,0,0],
+  [1,0,3,0,0,2,0,1],
+  [1,0,0,0,0,0,0,1],
+  [1,1,1,0,0,1,1,1]
+]},
+{stage:3,moves:15,comboGoal:4,objectives:{"gems":true,"combos":true},star2:{"score":3000},star3:{"score":6000},grid:[
+  [1,1,0,1,1,0,1,1],
+  [1,0,0,0,0,0,0,1],
+  [0,0,2,0,0,2,0,0],
+  [1,0,0,3,3,0,0,1],
+  [1,0,0,2,2,0,0,1],
+  [0,0,3,0,0,3,0,0],
+  [1,0,0,0,0,0,0,1],
+  [1,1,0,1,1,0,1,1]
+]},
+{stage:4,moves:25,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":2900},star3:{"score":6380},grid:[
+  [3,3,0,0,1,0,0,0],
+  [0,0,1,1,0,0,0,1],
+  [0,0,0,0,1,0,0,0],
+  [0,0,0,0,0,0,1,0],
+  [3,0,0,0,0,0,0,1],
+  [0,0,0,0,1,0,0,0],
+  [3,0,0,0,0,0,0,0],
+  [0,0,1,0,0,0,0,0]
+]},
+{stage:4,moves:25,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":2980},star3:{"score":6556},grid:[
+  [0,0,0,0,0,2,0,0],
+  [0,0,2,0,1,1,0,0],
+  [0,1,0,0,0,0,0,3],
+  [1,0,0,0,0,0,0,0],
+  [0,1,0,0,0,1,0,0],
+  [1,0,0,0,0,0,0,0],
+  [1,0,0,0,0,0,3,0],
+  [0,0,0,1,0,0,0,0]
+]},
+{stage:4,moves:25,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":3060},star3:{"score":6732},grid:[
+  [0,0,0,0,0,0,1,0],
+  [0,0,0,0,0,0,0,0],
+  [1,2,0,0,0,0,0,0],
+  [0,0,0,0,0,1,0,0],
+  [1,0,0,0,0,1,0,0],
+  [0,0,2,0,0,0,0,0],
+  [1,1,0,1,0,0,0,0],
+  [2,0,0,0,1,0,3,0]
+]},
+{stage:4,moves:25,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":3140},star3:{"score":6908},grid:[
+  [0,1,0,0,0,0,0,0],
+  [1,0,0,1,0,0,0,0],
+  [0,0,1,2,3,0,0,0],
+  [0,0,0,1,0,0,0,0],
+  [0,0,1,0,0,1,0,0],
+  [0,0,0,0,0,1,2,0],
+  [0,0,0,0,0,2,0,0],
+  [0,0,1,0,0,0,0,0]
+]},
+{stage:4,moves:24,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":3220},star3:{"score":7084},grid:[
+  [0,0,0,1,1,0,0,0],
+  [0,0,0,2,0,0,1,0],
+  [0,0,0,0,0,0,0,0],
+  [0,1,0,1,1,0,0,0],
+  [0,0,0,1,0,0,0,0],
+  [0,0,0,0,0,1,2,3],
+  [0,0,3,0,0,0,1,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:4,moves:24,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":3300},star3:{"score":7260},grid:[
+  [0,0,0,1,0,0,3,0],
+  [0,0,1,0,1,0,2,0],
+  [0,0,1,0,1,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,3,0,0,0,1,0],
+  [0,1,0,0,0,0,1,0],
+  [0,0,0,1,0,2,0,0],
+  [0,0,0,1,0,0,0,0]
+]},
+{stage:4,moves:24,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":3380},star3:{"score":7436},grid:[
+  [1,0,0,2,0,0,0,0],
+  [1,1,0,0,0,1,0,1],
+  [0,0,0,0,0,3,0,1],
+  [0,0,1,0,0,0,0,0],
+  [0,0,0,0,0,0,1,0],
+  [0,0,2,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,1,1,0,0,3]
+]},
+{stage:4,moves:24,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":3460},star3:{"score":7612},grid:[
+  [0,0,0,0,1,1,0,0],
+  [0,0,3,0,0,0,0,0],
+  [3,0,0,1,1,0,0,3],
+  [2,0,0,1,0,0,0,0],
+  [0,0,0,1,1,0,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,1,1,0,0,0,0],
+  [0,0,0,0,0,0,0,1]
+]},
+{stage:4,moves:24,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":3540},star3:{"score":7788},grid:[
+  [0,2,0,0,0,0,0,0],
+  [0,2,0,0,0,0,0,0],
+  [0,0,0,0,0,1,0,1],
+  [0,0,0,0,0,0,0,1],
+  [0,1,0,0,0,0,3,0],
+  [3,0,1,1,0,0,0,0],
+  [0,0,1,0,0,0,0,1],
+  [0,3,0,1,0,0,0,1]
+]},
+{stage:4,moves:23,comboGoal:4,objectives:{"gems":true,"combos":true},star2:{"score":3620},star3:{"score":7964},grid:[
+  [0,0,0,0,0,0,0,0],
+  [0,1,1,0,0,3,0,0],
+  [0,0,1,3,0,0,0,0],
+  [0,1,2,1,0,0,1,0],
+  [0,0,3,1,0,0,0,0],
+  [0,0,0,0,1,0,1,0],
+  [0,0,0,0,2,0,0,0],
+  [0,0,1,0,0,0,0,0]
+]},
+{stage:5,moves:23,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":3700},star3:{"score":8140},grid:[
+  [0,0,0,0,0,0,0,0],
+  [1,0,0,0,0,0,0,2],
+  [0,1,0,0,0,1,0,2],
+  [0,0,0,1,1,2,0,0],
+  [0,0,0,3,0,6,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,1,1,0,0,0,0,0],
+  [1,0,3,0,0,1,1,0]
+]},
+{stage:5,moves:23,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":3780},star3:{"score":8316},grid:[
+  [0,1,0,0,0,0,0,0],
+  [0,0,0,1,0,0,0,1],
+  [6,0,0,0,0,0,0,0],
+  [1,3,1,0,6,1,0,0],
+  [0,2,0,0,0,1,1,0],
+  [0,2,0,0,0,0,1,1],
+  [0,0,3,0,0,2,0,0],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:5,moves:23,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":3860},star3:{"score":8492},grid:[
+  [1,0,0,0,0,0,2,0],
+  [2,1,0,6,6,2,0,0],
+  [0,1,0,1,1,6,1,0],
+  [0,0,0,2,0,0,0,0],
+  [0,0,0,1,1,0,1,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,2,0,0,0,0],
+  [1,0,1,0,0,0,0,0]
+]},
+{stage:5,moves:23,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":3940},star3:{"score":8668},grid:[
+  [1,0,2,3,0,0,6,0],
+  [0,2,3,0,0,0,6,0],
+  [0,0,0,0,0,0,0,0],
+  [0,0,6,1,1,0,1,0],
+  [0,0,1,0,0,0,0,6],
+  [0,0,0,0,1,3,0,0],
+  [0,0,0,0,1,0,0,0],
+  [1,0,1,1,0,0,0,1]
+]},
+{stage:5,moves:23,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":4020},star3:{"score":8844},grid:[
+  [6,0,0,0,0,0,1,0],
+  [0,0,1,0,0,0,0,0],
+  [1,0,0,0,1,1,1,2],
+  [0,1,0,0,0,1,0,6],
+  [0,0,0,6,0,0,2,0],
+  [1,0,0,1,0,0,6,0],
+  [0,0,3,0,2,1,0,0],
+  [0,0,0,0,0,3,0,0]
+]},
+{stage:5,moves:22,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":4100},star3:{"score":9020},grid:[
+  [0,0,0,2,0,6,0,0],
+  [0,0,0,0,0,1,0,0],
+  [0,0,0,0,6,1,0,1],
+  [2,0,0,0,0,0,0,0],
+  [3,6,1,0,1,1,0,0],
+  [0,2,1,0,0,0,0,0],
+  [0,0,1,1,0,3,0,0],
+  [1,0,0,0,0,1,6,0]
+]},
+{stage:5,moves:22,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":4180},star3:{"score":9196},grid:[
+  [0,2,0,0,3,0,0,0],
+  [6,0,0,1,0,0,0,0],
+  [0,0,1,0,0,1,1,0],
+  [0,0,0,0,6,0,1,0],
+  [0,6,0,2,0,3,0,0],
+  [1,0,0,0,0,0,1,0],
+  [6,2,1,1,0,0,0,1],
+  [0,0,0,1,0,0,0,0]
+]},
+{stage:5,moves:22,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":4260},star3:{"score":9372},grid:[
+  [0,0,1,1,0,0,0,0],
+  [1,1,0,0,0,0,0,0],
+  [0,6,3,0,0,0,0,0],
+  [0,0,0,0,1,6,0,0],
+  [1,0,0,0,0,2,0,0],
+  [0,3,0,1,0,0,0,1],
+  [0,3,0,1,6,6,0,0],
+  [1,0,0,1,0,0,0,2]
+]},
+{stage:5,moves:22,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":4340},star3:{"score":9548},grid:[
+  [0,0,1,1,0,0,1,3],
+  [1,3,0,0,0,0,0,0],
+  [0,1,6,0,1,0,1,0],
+  [1,0,1,1,0,0,0,0],
+  [0,2,0,1,0,0,0,0],
+  [0,6,6,0,0,0,0,0],
+  [0,0,0,0,0,0,2,0],
+  [0,0,0,0,0,6,0,2]
+]},
+{stage:5,moves:22,comboGoal:4,objectives:{"gems":true,"combos":true},star2:{"score":4420},star3:{"score":9724},grid:[
+  [0,0,0,0,1,6,2,6],
+  [0,0,1,0,1,1,0,0],
+  [0,0,0,0,0,0,0,0],
+  [0,6,0,2,0,2,6,0],
+  [0,0,0,1,1,0,0,0],
+  [1,0,0,0,0,0,1,0],
+  [0,1,2,0,0,0,3,1],
+  [0,0,1,0,0,0,1,0]
+]},
+{stage:6,moves:21,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":4500},star3:{"score":9900},grid:[
+  [1,1,0,1,0,0,0,1],
+  [0,2,0,0,0,0,0,0],
+  [1,0,0,2,0,1,1,0],
+  [0,0,3,0,0,0,0,0],
+  [0,0,0,0,0,0,0,1],
+  [0,0,0,6,1,1,3,2],
+  [0,0,0,2,1,0,0,0],
+  [0,0,0,1,0,0,0,0]
+]},
+{stage:6,moves:21,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":4580},star3:{"score":10076},grid:[
+  [0,0,1,1,0,1,0,2],
+  [3,0,2,1,0,0,0,0],
+  [3,0,0,0,0,0,1,2],
+  [7,6,1,0,0,1,6,0],
+  [0,0,0,0,0,0,1,3],
+  [0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,1,0,1],
+  [0,0,0,1,1,0,0,0]
+]},
+{stage:6,moves:21,comboGoal:1,objectives:{"gems":true,"combos":true},star2:{"score":4660},star3:{"score":10252},grid:[
+  [0,0,0,1,1,0,2,0],
+  [7,1,0,0,1,1,1,0],
+  [0,3,0,0,2,0,0,0],
+  [0,2,0,6,0,1,0,0],
+  [0,0,0,6,0,7,1,0],
+  [0,1,0,0,3,6,0,0],
+  [0,1,0,0,1,0,0,0],
+  [1,0,0,0,3,0,0,0]
+]},
+{stage:6,moves:21,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":4740},star3:{"score":10428},grid:[
+  [0,0,6,1,1,1,6,0],
+  [2,0,0,7,0,1,3,0],
+  [0,1,0,1,0,1,2,7],
+  [0,0,0,6,0,1,0,0],
+  [0,2,0,1,0,0,7,0],
+  [0,0,0,0,0,0,0,0],
+  [2,0,3,1,0,0,0,0],
+  [1,6,0,0,0,1,0,0]
+]},
+{stage:6,moves:21,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":4820},star3:{"score":10604},grid:[
+  [0,0,0,0,7,0,3,0],
+  [1,0,0,1,0,1,6,0],
+  [0,0,0,6,0,3,0,6],
+  [0,2,0,3,0,1,0,0],
+  [0,0,0,0,1,1,0,0],
+  [0,0,6,7,2,0,0,0],
+  [7,0,0,3,1,1,0,0],
+  [0,1,1,0,1,0,1,0]
+]},
+{stage:6,moves:21,comboGoal:2,objectives:{"gems":true,"combos":true},star2:{"score":4900},star3:{"score":10780},grid:[
+  [0,1,3,7,0,0,0,3],
+  [0,0,0,1,1,7,0,3],
+  [0,3,1,0,0,0,3,0],
+  [1,1,0,1,6,0,0,0],
+  [0,0,2,1,0,0,0,0],
+  [0,1,0,0,0,6,0,0],
+  [6,0,0,0,0,0,0,0],
+  [0,1,0,1,0,1,6,7]
+]},
+{stage:6,moves:20,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":4980},star3:{"score":10956},grid:[
+  [0,0,0,6,0,0,0,1],
+  [0,6,0,0,0,0,1,0],
+  [0,0,0,0,0,1,1,7],
+  [1,1,1,0,0,0,2,0],
+  [0,0,1,6,6,1,0,3],
+  [1,2,0,1,2,0,7,0],
+  [1,0,0,0,1,3,7,0],
+  [0,0,0,0,2,0,0,0]
+]},
+{stage:6,moves:20,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":5060},star3:{"score":11132},grid:[
+  [7,0,0,0,1,1,0,0],
+  [0,1,7,6,0,0,1,0],
+  [0,2,0,0,0,0,1,0],
+  [0,0,0,0,0,6,3,2],
+  [0,0,0,6,3,1,1,0],
+  [1,0,6,0,0,0,0,0],
+  [7,2,1,0,0,0,3,0],
+  [0,1,0,1,0,1,0,1]
+]},
+{stage:6,moves:20,comboGoal:3,objectives:{"gems":true,"combos":true},star2:{"score":5140},star3:{"score":11308},grid:[
+  [0,0,3,0,7,0,0,0],
+  [0,0,1,0,0,0,0,0],
+  [0,1,0,6,6,1,1,2],
+  [0,0,0,7,3,0,0,0],
+  [3,0,1,1,0,1,0,0],
+  [0,1,0,0,0,1,1,0],
+  [6,1,1,0,2,0,6,0],
+  [7,0,0,3,0,0,0,1]
+]},
+{stage:6,moves:20,comboGoal:4,objectives:{"gems":true,"combos":true},star2:{"score":5220},star3:{"score":11484},grid:[
+  [0,1,1,0,0,1,1,0],
+  [0,0,0,3,0,0,2,0],
+  [0,0,0,0,0,0,0,1],
+  [0,7,2,0,0,0,1,0],
+  [0,6,7,0,0,0,0,0],
+  [6,1,1,1,0,0,6,3],
+  [0,0,1,0,1,6,0,0],
+  [0,0,1,7,3,1,0,3]
+]},
+{stage:7,moves:20,scoreGoal:8000,objectives:{"gems":true,"scoreGoal":8000},star2:{"score":5300},star3:{"score":11660},grid:[
+  [0,0,0,1,1,0,0,0],
+  [0,1,0,1,0,0,0,0],
+  [0,1,0,1,0,0,0,0],
+  [0,1,0,3,1,3,0,0],
+  [0,0,1,0,1,2,0,3],
+  [0,6,0,0,3,0,0,0],
+  [0,3,1,0,1,0,0,0],
+  [0,0,0,0,0,0,0,1]
+]},
+{stage:7,moves:20,scoreGoal:8100,objectives:{"gems":true,"scoreGoal":8100},star2:{"score":5380},star3:{"score":11836},grid:[
+  [0,1,0,1,8,1,0,2],
+  [0,0,0,6,2,1,0,0],
+  [0,0,0,3,1,0,1,0],
+  [0,1,0,0,2,0,0,0],
+  [0,6,0,1,0,0,0,0],
+  [0,1,3,0,7,0,1,0],
+  [0,2,0,0,0,0,1,0],
+  [0,1,0,0,0,1,0,0]
+]},
+{stage:7,moves:19,scoreGoal:8200,objectives:{"gems":true,"scoreGoal":8200},star2:{"score":5460},star3:{"score":12012},grid:[
+  [0,0,0,0,0,1,1,0],
+  [0,1,3,0,7,1,1,0],
+  [0,0,2,0,0,6,0,0],
+  [0,0,0,8,0,1,1,0],
+  [7,1,2,0,6,0,0,1],
+  [1,0,0,6,0,1,0,2],
+  [0,1,0,0,3,0,0,0],
+  [0,8,0,1,2,0,0,0]
+]},
+{stage:7,moves:19,scoreGoal:8300,objectives:{"gems":true,"scoreGoal":8300},star2:{"score":5540},star3:{"score":12188},grid:[
+  [0,1,0,7,0,1,0,6],
+  [1,0,0,6,0,0,0,0],
+  [6,1,3,0,0,0,1,1],
+  [1,2,2,1,0,1,1,0],
+  [7,2,0,8,7,1,0,1],
+  [0,0,0,0,2,0,0,2],
+  [0,0,6,0,0,0,0,0],
+  [3,1,8,0,0,0,0,0]
+]},
+{stage:7,moves:19,scoreGoal:8400,objectives:{"gems":true,"scoreGoal":8400},star2:{"score":5620},star3:{"score":12364},grid:[
+  [2,6,0,1,7,0,7,1],
+  [0,0,1,0,0,2,0,1],
+  [0,0,0,1,1,3,0,0],
+  [1,0,0,1,1,8,0,1],
+  [0,0,1,6,0,0,0,0],
+  [0,3,2,0,0,1,0,0],
+  [6,0,1,3,0,3,0,0],
+  [0,6,1,0,7,8,0,0]
+]},
+{stage:7,moves:19,scoreGoal:8500,objectives:{"gems":true,"scoreGoal":8500},star2:{"score":5700},star3:{"score":12540},grid:[
+  [8,6,0,1,0,1,7,2],
+  [0,8,0,6,1,6,0,0],
+  [1,0,0,0,1,1,0,3],
+  [0,0,2,0,0,0,0,0],
+  [0,7,0,0,0,0,1,0],
+  [0,2,6,1,1,0,1,2],
+  [0,2,7,1,0,0,1,0],
+  [0,2,0,0,1,1,0,0]
+]},
+{stage:7,moves:19,scoreGoal:8600,objectives:{"gems":true,"scoreGoal":8600},star2:{"score":5780},star3:{"score":12716},grid:[
+  [3,1,0,6,0,1,2,0],
+  [0,0,0,6,0,0,1,2],
+  [1,0,0,0,1,0,1,0],
+  [0,0,7,1,6,0,0,1],
+  [3,0,0,0,7,0,0,0],
+  [0,3,0,1,3,7,0,8],
+  [6,0,0,0,0,0,1,1],
+  [0,2,1,1,0,1,0,8]
+]},
+{stage:7,moves:18,scoreGoal:8700,objectives:{"gems":true,"scoreGoal":8700},star2:{"score":5860},star3:{"score":12892},grid:[
+  [3,0,0,3,0,8,1,0],
+  [0,0,0,0,0,1,7,1],
+  [0,1,1,0,0,0,0,1],
+  [0,1,0,1,0,0,0,1],
+  [0,6,0,0,0,0,1,3],
+  [6,3,0,8,2,0,0,1],
+  [0,3,7,0,0,7,0,1],
+  [0,0,1,6,0,3,1,6]
+]},
+{stage:7,moves:18,scoreGoal:8800,objectives:{"gems":true,"scoreGoal":8800},star2:{"score":5940},star3:{"score":13068},grid:[
+  [0,0,6,8,0,3,0,0],
+  [0,0,1,0,1,0,0,0],
+  [2,1,0,0,1,1,0,3],
+  [6,0,0,0,2,1,1,0],
+  [8,0,0,1,0,1,3,0],
+  [1,0,0,0,1,3,1,0],
+  [0,0,1,0,7,2,1,6],
+  [6,0,0,0,0,7,7,0]
+]},
+{stage:7,moves:18,scoreGoal:8900,objectives:{"gems":true,"scoreGoal":8900},star2:{"score":6020},star3:{"score":13244},grid:[
+  [1,0,0,0,6,1,0,2],
+  [0,0,0,1,0,8,0,1],
+  [0,0,1,2,0,0,1,1],
+  [6,3,0,7,0,0,0,0],
+  [0,0,8,1,0,6,0,7],
+  [0,0,1,1,1,7,6,0],
+  [0,1,0,0,0,0,0,1],
+  [2,0,1,0,0,3,3,3]
+]},
+{stage:8,moves:18,scoreGoal:9000,objectives:{"gems":true,"scoreGoal":9000},star2:{"score":6100},star3:{"score":13420},grid:[
+  [0,1,0,0,0,0,0,1],
+  [0,0,0,0,1,0,0,0],
+  [0,0,0,1,2,0,0,2],
+  [6,0,1,3,0,0,0,1],
+  [0,1,0,0,0,0,1,0],
+  [0,1,0,1,0,3,0,0],
+  [0,0,1,1,2,3,3,1],
+  [0,0,1,0,0,0,0,0]
+]},
+{stage:8,moves:18,scoreGoal:9100,objectives:{"gems":true,"scoreGoal":9100},star2:{"score":6180},star3:{"score":13596},grid:[
+  [0,0,1,1,1,0,1,0],
+  [0,1,0,0,0,0,0,0],
+  [6,6,0,3,0,0,1,0],
+  [0,0,1,0,1,1,0,0],
+  [2,0,1,0,1,0,2,0],
+  [0,1,0,1,1,3,0,0],
+  [0,0,2,8,0,0,7,3],
+  [0,0,3,0,1,0,0,0]
+]},
+{stage:8,moves:18,scoreGoal:9200,objectives:{"gems":true,"scoreGoal":9200},star2:{"score":6260},star3:{"score":13772},grid:[
+  [3,0,0,0,0,0,1,1],
+  [1,1,0,0,0,2,0,0],
+  [1,0,3,0,2,0,0,0],
+  [6,0,1,0,0,6,0,7],
+  [0,1,0,7,1,0,0,1],
+  [0,2,0,1,6,0,1,1],
+  [0,0,0,0,0,0,1,0],
+  [2,0,1,1,8,8,2,0]
+]},
+{stage:8,moves:17,scoreGoal:9300,objectives:{"gems":true,"scoreGoal":9300},star2:{"score":6340},star3:{"score":13948},grid:[
+  [0,0,0,0,1,6,0,0],
+  [0,0,1,1,0,3,7,0],
+  [0,1,8,1,0,6,0,6],
+  [0,1,1,0,0,3,0,0],
+  [1,0,0,6,0,3,2,1],
+  [1,0,0,0,7,1,0,2],
+  [2,0,7,0,8,0,0,1],
+  [0,1,0,0,2,1,0,1]
+]},
+{stage:8,moves:17,scoreGoal:9400,objectives:{"gems":true,"scoreGoal":9400},star2:{"score":6420},star3:{"score":14124},grid:[
+  [7,0,1,1,1,2,1,0],
+  [1,8,0,0,1,0,0,0],
+  [0,6,6,3,1,3,0,0],
+  [0,0,0,0,0,7,0,0],
+  [0,1,1,0,6,0,1,7],
+  [0,1,0,0,1,0,6,0],
+  [0,2,0,0,0,2,1,8],
+  [3,1,0,1,0,3,0,0]
+]},
+{stage:8,moves:17,scoreGoal:9500,objectives:{"gems":true,"scoreGoal":9500},star2:{"score":6500},star3:{"score":14300},grid:[
+  [2,0,2,1,0,0,1,1],
+  [0,1,3,7,1,1,0,1],
+  [1,2,1,3,3,0,0,0],
+  [0,6,2,1,0,3,0,0],
+  [0,1,8,6,0,8,0,0],
+  [0,1,1,0,0,0,6,0],
+  [0,0,6,0,0,7,0,0],
+  [0,0,0,0,1,0,7,1]
+]},
+{stage:8,moves:17,scoreGoal:9600,objectives:{"gems":true,"scoreGoal":9600},star2:{"score":6580},star3:{"score":14476},grid:[
+  [0,0,8,1,1,1,0,1],
+  [7,3,0,0,0,1,6,3],
+  [0,6,1,0,0,1,0,0],
+  [1,1,1,0,0,0,1,0],
+  [0,2,1,0,6,2,1,0],
+  [0,0,7,0,0,2,7,6],
+  [0,0,0,0,8,0,0,1],
+  [3,2,0,0,0,2,1,0]
+]},
+{stage:8,moves:17,scoreGoal:9700,objectives:{"gems":true,"scoreGoal":9700},star2:{"score":6660},star3:{"score":14652},grid:[
+  [6,2,0,0,0,2,0,0],
+  [3,0,8,0,1,0,6,1],
+  [0,0,1,2,2,8,0,0],
+  [0,0,0,0,0,7,1,1],
+  [1,6,1,1,0,1,1,2],
+  [7,0,0,7,2,0,0,1],
+  [0,0,1,2,0,0,1,0],
+  [0,0,6,0,1,0,1,0]
+]},
+{stage:8,moves:16,scoreGoal:9800,objectives:{"gems":true,"scoreGoal":9800},star2:{"score":6740},star3:{"score":14828},grid:[
+  [0,1,1,7,1,2,0,0],
+  [3,1,8,0,6,0,0,0],
+  [0,0,3,0,0,0,0,0],
+  [1,1,8,3,0,0,0,2],
+  [1,3,6,0,1,1,1,1],
+  [0,0,1,6,3,7,0,0],
+  [3,0,0,7,0,0,0,0],
+  [1,6,0,1,1,1,0,0]
+]},
+{stage:8,moves:16,scoreGoal:9900,objectives:{"gems":true,"scoreGoal":9900},star2:{"score":6820},star3:{"score":15004},grid:[
+  [0,0,7,3,3,3,0,0],
+  [0,0,1,6,2,0,0,8],
+  [0,0,1,0,0,0,2,3],
+  [0,0,1,1,0,0,0,1],
+  [1,0,0,1,1,1,1,0],
+  [0,0,8,0,0,1,7,0],
+  [3,1,6,6,1,0,7,3],
+  [1,0,6,0,1,0,1,0]
+]},
+{stage:9,moves:16,scoreGoal:10000,objectives:{"gems":true,"scoreGoal":10000},star2:{"score":6900},star3:{"score":15180},grid:[
+  [0,0,1,1,0,1,3,0],
+  [0,0,3,0,1,0,1,0],
+  [0,3,0,1,0,0,0,0],
+  [1,1,0,0,3,0,1,0],
+  [1,1,0,0,0,1,0,0],
+  [0,0,1,2,2,0,3,6],
+  [0,1,0,0,3,1,0,1],
+  [0,0,0,0,0,0,0,0]
+]},
+{stage:9,moves:16,scoreGoal:10100,objectives:{"gems":true,"scoreGoal":10100},star2:{"score":6980},star3:{"score":15356},grid:[
+  [1,0,0,1,0,0,0,0],
+  [2,1,2,1,0,1,1,1],
+  [1,0,1,1,0,0,7,1],
+  [0,0,0,6,0,0,0,0],
+  [0,0,0,0,1,0,3,0],
+  [2,1,8,3,0,0,0,0],
+  [0,0,0,1,2,3,0,0],
+  [1,0,1,0,0,0,3,6]
+]},
+{stage:9,moves:16,scoreGoal:10200,objectives:{"gems":true,"scoreGoal":10200},star2:{"score":7060},star3:{"score":15532},grid:[
+  [7,0,1,0,3,1,0,1],
+  [0,0,0,3,0,0,2,0],
+  [0,1,1,1,6,1,1,8],
+  [0,0,2,0,0,0,0,0],
+  [7,6,0,0,0,3,1,0],
+  [2,0,6,1,0,2,3,0],
+  [1,1,0,0,0,0,0,0],
+  [0,1,1,8,0,1,1,0]
+]},
+{stage:9,moves:16,scoreGoal:10300,objectives:{"gems":true,"scoreGoal":10300},star2:{"score":7140},star3:{"score":15708},grid:[
+  [0,0,0,0,1,0,1,0],
+  [0,0,0,8,3,7,1,3],
+  [2,0,1,0,1,0,0,1],
+  [0,1,0,0,1,0,3,0],
+  [0,1,7,3,2,1,0,6],
+  [0,0,0,1,0,0,0,7],
+  [1,0,1,0,0,1,1,6],
+  [0,6,3,0,1,8,3,6]
+]},
+{stage:9,moves:15,scoreGoal:10400,objectives:{"gems":true,"scoreGoal":10400},star2:{"score":7220},star3:{"score":15884},grid:[
+  [0,0,0,0,0,6,1,7],
+  [6,3,0,2,1,0,0,1],
+  [0,1,2,1,1,0,2,0],
+  [0,1,0,1,0,7,0,1],
+  [0,0,2,0,0,1,8,0],
+  [8,0,0,0,2,1,0,2],
+  [1,1,1,6,0,6,3,0],
+  [1,0,7,1,0,0,0,0]
+]},
+{stage:9,moves:15,scoreGoal:10500,objectives:{"gems":true,"scoreGoal":10500},star2:{"score":7300},star3:{"score":16060},grid:[
+  [0,1,1,1,2,3,0,0],
+  [0,1,0,6,1,0,6,0],
+  [3,1,1,6,0,1,0,3],
+  [7,0,1,0,2,1,0,0],
+  [7,1,0,1,0,0,1,3],
+  [0,0,7,0,1,0,0,0],
+  [0,1,8,0,8,6,0,0],
+  [0,0,1,2,1,2,0,0]
+]},
+{stage:9,moves:15,scoreGoal:10600,objectives:{"gems":true,"scoreGoal":10600},star2:{"score":7380},star3:{"score":16236},grid:[
+  [8,0,0,0,6,0,1,0],
+  [0,0,1,1,1,0,2,0],
+  [0,7,7,0,2,0,1,1],
+  [0,3,0,0,0,1,0,6],
+  [0,0,0,1,0,1,1,3],
+  [1,1,3,0,2,1,3,1],
+  [0,1,0,0,7,3,8,6],
+  [0,0,1,0,1,0,6,0]
+]},
+{stage:9,moves:15,scoreGoal:10700,objectives:{"gems":true,"scoreGoal":10700},star2:{"score":7460},star3:{"score":16412},grid:[
+  [0,1,3,0,1,0,1,1],
+  [1,0,2,3,7,0,7,8],
+  [0,1,1,0,0,0,0,1],
+  [0,0,0,6,6,0,1,0],
+  [1,6,0,1,0,2,6,3],
+  [1,2,0,1,0,1,0,0],
+  [0,0,1,7,1,1,0,8],
+  [0,0,2,0,0,0,2,0]
+]},
+{stage:9,moves:15,scoreGoal:10800,objectives:{"gems":true,"scoreGoal":10800},star2:{"score":7540},star3:{"score":16588},grid:[
+  [1,1,1,2,0,0,1,7],
+  [7,0,6,0,0,0,0,0],
+  [0,0,0,6,1,2,8,3],
+  [0,0,0,1,3,3,0,1],
+  [1,2,0,6,0,2,1,1],
+  [0,2,0,0,0,0,0,2],
+  [0,0,1,1,1,7,0,1],
+  [1,0,1,0,0,1,6,8]
+]},
+{stage:9,moves:14,scoreGoal:10900,objectives:{"gems":true,"scoreGoal":10900},star2:{"score":7620},star3:{"score":16764},grid:[
+  [0,0,2,0,0,1,8,2],
+  [1,0,1,2,1,1,0,0],
+  [0,0,2,0,1,8,1,0],
+  [6,7,0,0,1,0,1,0],
+  [0,0,3,6,7,0,1,6],
+  [0,1,2,1,0,1,0,7],
+  [0,0,0,6,0,2,3,0],
+  [1,1,1,0,2,0,1,0]
+]},
+{stage:10,moves:14,scoreGoal:11000,objectives:{"gems":true,"scoreGoal":11000},star2:{"score":7700},star3:{"score":16940},grid:[
+  [1,0,0,0,1,0,0,3],
+  [0,1,0,1,1,0,0,0],
+  [1,0,1,1,0,0,0,1],
+  [2,1,2,0,0,0,0,3],
+  [6,0,0,0,1,0,0,0],
+  [0,0,0,0,1,0,1,2],
+  [0,0,0,1,1,1,3,3],
+  [0,0,1,0,0,0,3,2]
+]},
+{stage:10,moves:14,scoreGoal:11100,objectives:{"gems":true,"scoreGoal":11100},star2:{"score":7780},star3:{"score":17116},grid:[
+  [0,0,0,1,0,1,0,0],
+  [0,1,1,8,0,3,0,1],
+  [0,1,6,1,1,0,0,0],
+  [7,0,2,0,2,1,0,0],
+  [1,0,1,0,0,0,3,1],
+  [0,1,0,0,0,2,0,1],
+  [1,0,6,0,0,0,0,0],
+  [2,1,0,0,3,3,1,2]
+]},
+{stage:10,moves:14,scoreGoal:11200,objectives:{"gems":true,"scoreGoal":11200},star2:{"score":7860},star3:{"score":17292},grid:[
+  [1,6,0,0,6,1,0,0],
+  [8,2,0,0,1,0,1,7],
+  [0,1,0,2,0,0,0,0],
+  [1,1,1,0,2,1,0,0],
+  [0,1,1,0,1,1,0,1],
+  [0,2,6,0,2,1,7,0],
+  [3,0,2,3,1,0,1,1],
+  [0,2,0,0,0,8,0,0]
+]},
+{stage:10,moves:14,scoreGoal:11300,objectives:{"gems":true,"scoreGoal":11300},star2:{"score":7940},star3:{"score":17468},grid:[
+  [0,7,1,0,1,1,1,2],
+  [1,0,0,1,0,0,0,6],
+  [1,0,0,1,0,0,3,0],
+  [0,1,0,0,0,1,1,0],
+  [3,0,0,1,7,0,0,1],
+  [3,2,6,0,6,8,8,0],
+  [1,6,2,0,0,1,1,1],
+  [1,0,0,0,2,2,2,7]
+]},
+{stage:10,moves:14,scoreGoal:11400,objectives:{"gems":true,"scoreGoal":11400},star2:{"score":8020},star3:{"score":17644},grid:[
+  [0,1,0,0,0,0,1,0],
+  [1,0,0,1,2,0,7,1],
+  [1,1,6,0,0,8,2,6],
+  [0,0,2,1,3,0,1,2],
+  [0,2,0,7,0,1,0,1],
+  [1,3,3,0,0,1,0,0],
+  [6,8,6,0,0,0,7,0],
+  [1,1,1,1,0,3,1,0]
+]},
+{stage:10,moves:13,scoreGoal:11500,objectives:{"gems":true,"scoreGoal":11500},star2:{"score":8100},star3:{"score":17820},grid:[
+  [7,0,0,1,8,2,1,1],
+  [3,7,0,3,2,0,2,0],
+  [0,1,1,3,0,1,6,1],
+  [1,1,1,0,0,3,0,0],
+  [0,1,1,0,0,2,0,1],
+  [0,0,3,7,0,0,6,6],
+  [0,1,1,0,0,6,0,8],
+  [0,1,0,0,0,0,1,1]
+]},
+{stage:10,moves:13,scoreGoal:11600,objectives:{"gems":true,"scoreGoal":11600},star2:{"score":8180},star3:{"score":17996},grid:[
+  [1,0,0,0,0,1,0,0],
+  [1,0,2,0,0,1,2,8],
+  [0,8,1,7,1,6,1,1],
+  [6,1,0,0,6,0,2,2],
+  [3,7,3,1,0,1,6,0],
+  [1,7,1,3,0,3,1,0],
+  [0,0,0,1,0,0,2,1],
+  [0,0,0,0,0,1,1,0]
+]},
+{stage:10,moves:13,scoreGoal:11700,objectives:{"gems":true,"scoreGoal":11700},star2:{"score":8260},star3:{"score":18172},grid:[
+  [0,0,1,1,2,1,0,1],
+  [0,6,0,1,7,0,1,0],
+  [2,0,1,1,1,0,1,1],
+  [3,7,0,1,0,0,0,0],
+  [1,0,0,0,2,1,3,8],
+  [0,1,0,1,1,2,0,8],
+  [0,0,0,0,0,1,6,6],
+  [2,0,0,0,2,7,6,3]
+]},
+{stage:10,moves:13,scoreGoal:11800,objectives:{"gems":true,"scoreGoal":11800},star2:{"score":8340},star3:{"score":18348},grid:[
+  [0,3,0,0,1,3,3,0],
+  [0,1,0,1,7,8,7,6],
+  [0,6,1,1,1,0,0,0],
+  [1,0,0,0,8,1,0,1],
+  [3,1,0,0,0,0,0,2],
+  [0,1,7,1,2,3,0,3],
+  [0,0,0,6,0,1,0,1],
+  [0,1,0,2,1,6,1,1]
+]},
+{stage:10,moves:13,scoreGoal:11900,objectives:{"gems":true,"scoreGoal":11900},star2:{"score":8420},star3:{"score":18524},grid:[
+  [1,0,1,1,1,3,1,1],
+  [7,1,2,6,3,0,1,0],
+  [7,0,1,3,1,2,0,1],
+  [3,1,6,0,0,1,0,0],
+  [0,1,1,0,0,1,3,0],
+  [0,0,2,1,1,0,0,7],
+  [3,0,6,0,0,0,0,1],
+  [8,0,8,0,0,6,0,0]
+]}
+];
+
 var LEVELS = [
 
   /* ══ LEVEL 1 — SUPER EASY ══
@@ -2990,6 +4002,9 @@ var advLevel = 0;              /* last adventure level played */
 var advMaxLevel = 0;           /* highest adventure level unlocked */
 var advLevelStars = [];        /* star ratings per level for adventure */
 var mapMode = 'classic';       /* which tab is active in map modal */
+var movesLeft = -1;            /* -1 = no limit; >0 = moves remaining */
+var combosClearedThisLevel = 0;/* multi-line clears achieved this level */
+var advLevelConfig = null;     /* current ADV_LEVELS config for adventure */
 var menuVisible = true; /* whether menu screen is shown */
 
 /* ── RANKS ── */
@@ -3137,21 +4152,38 @@ function startLevel(lv){
   var _hri=document.getElementById('hamsterReactImg');
   if(_hri&&!_hri.innerHTML) _hri.innerHTML=buildHamsterSVG('happy');
   level = lv % 100; /* cap at 100 levels */
-  var layout = isDailyChallenge
-    ? DC_LEVELS[lv % DC_LEVELS.length]
-    : LEVELS[level];
+  /* Load layout — adventure uses ADV_LEVELS config, others use raw LEVELS array */
+  var layout;
+  advLevelConfig = null;
+  movesLeft = -1;
+  combosClearedThisLevel = 0;
+  if(isAdventureMode && typeof ADV_LEVELS!=='undefined' && ADV_LEVELS[level]){
+    advLevelConfig = ADV_LEVELS[level];
+    layout = advLevelConfig.grid;
+    if(advLevelConfig.moves) movesLeft = advLevelConfig.moves;
+  } else if(isDailyChallenge){
+    layout = DC_LEVELS[lv % DC_LEVELS.length];
+  } else {
+    layout = LEVELS[level % LEVELS.length];
+  }
   score = 0; combo = 0; undoUsed = false; gameEnded = false; puUsed = false;
   shufflesLeft = 1; rescueUsed = false;
   starsLeft = 0; pentasLeft = 0;
+  var bombGems = 0, lockedGems = 0, frozenCells = 0;
   board = [];
   for(var r=0;r<ROWS;r++){
     board.push([]);
     for(var c=0;c<COLS;c++){
       var v = layout[r][c];
-      var t = v===0?T.EMPTY: v===1?T.GOLD: v===2?T.GOLD_STAR: v===3?T.GOLD_PENTA: v===5?T.ICE: T.EMPTY;
-      board[r].push({type:t, color:null});
+      var t = v===0?T.EMPTY: v===1?T.GOLD: v===2?T.GOLD_STAR: v===3?T.GOLD_PENTA: v===5?T.ICE: v===6?T.BOMB_GEM: v===7?T.LOCKED_GEM: v===8?T.FROZEN: T.EMPTY;
+      var cell = {type:t, color:null};
+      if(v===7) cell.lockHP = 2; /* locked gems need 2 hits */
+      board[r].push(cell);
       if(v===2) starsLeft++;
       if(v===3) pentasLeft++;
+      if(v===6) bombGems++;
+      if(v===7) lockedGems++;
+      if(v===8) frozenCells++;
     }
   }
   totalStars = starsLeft;
@@ -3232,6 +4264,16 @@ function applyCell(el, cell){
     el.style.boxShadow='0 4px 0 '+darken(cell.color)+',0 5px 10px rgba(0,0,0,.3)';
   } else if(cell.type===T.ICE){
     el.classList.add('ice');
+  } else if(cell.type===T.BOMB_GEM){
+    el.classList.add('gold','bomb-gem');
+    el.innerHTML='<span style="font-size:'+Math.max(12,CS*0.55)+'px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none">\u{1F4A3}</span>';
+  } else if(cell.type===T.LOCKED_GEM){
+    el.classList.add('gold','locked-gem');
+    var hp=cell.lockHP||2;
+    el.innerHTML='<span style="font-size:'+Math.max(10,CS*0.45)+'px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none">'+(hp>1?'\u{1F512}':'\u{1F513}')+'</span>';
+  } else if(cell.type===T.FROZEN){
+    el.classList.add('frozen');
+    el.innerHTML='<span style="font-size:'+Math.max(12,CS*0.5)+'px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:0.7">\u{2744}\u{FE0F}</span>';
   }
 }
 
@@ -3313,6 +4355,14 @@ function updateXPBar(){
     var remaining = starsLeft + pentasLeft;
     var pct = totalGems > 0 ? Math.round((remaining / totalGems) * 100) : 0;
     if(advFill) advFill.style.width = pct + '%';
+    /* Show move counter + objectives if applicable */
+    if(lbl && advLevelConfig){
+      var info=[];
+      if(movesLeft>=0) info.push('\u{1F3AF} '+movesLeft+' moves');
+      if(advLevelConfig.comboGoal) info.push('\u{26A1} '+combosClearedThisLevel+'/'+advLevelConfig.comboGoal+' combos');
+      if(advLevelConfig.scoreGoal) info.push('\u{1F3C6} '+score+'/'+advLevelConfig.scoreGoal);
+      if(info.length) lbl.textContent=info.join(' | ');
+    }
     return;
   }
 
@@ -3727,6 +4777,8 @@ function onUp(e,_move,_up){
   if(canPlace(dragPiece.shape,snap.r,snap.c)){
     SND.place();
     placePiece(dragPiece,snap.r,snap.c);
+    /* Adventure move counter */
+    if(movesLeft>0){ movesLeft--; updateXPBar(); }
     /* Precision mode: count down placements */
     if(isDailyChallenge && dcModId==='precision'){
       dcPiecesLeft--;
@@ -3740,6 +4792,8 @@ function onUp(e,_move,_up){
       /* Precision: ran out of moves without winning → game over */
       if(isDailyChallenge && dcModId==='precision' && dcPiecesLeft<=0 && !gameEnded){ doGameOver(); return; }
       if(pieces.every(function(p){return p===null;})) dealPieces();
+      /* Adventure: moves exhausted without winning → game over */
+      if(movesLeft===0&&!gameEnded){ doGameOver(); return; }
       updateDangerState();
       if(!anyMovePossible()){
         /* Rescue: levels 0-4 get one free 1×1 lifeline per level */
@@ -3827,16 +4881,18 @@ function checkLines(){
   for(var r=0;r<ROWS;r++){
     var hasEmpty=false, hasFilled=false;
     for(var c=0;c<COLS;c++){
-      if(board[r][c].type===T.EMPTY){hasEmpty=true;break;}
-      if(board[r][c].type===T.FILLED) hasFilled=true;
+      var ct=board[r][c].type;
+      if(ct===T.EMPTY||ct===T.FROZEN){hasEmpty=true;break;} /* frozen blocks line completion */
+      if(ct===T.FILLED) hasFilled=true;
     }
     if(!hasEmpty && hasFilled) fullRows.push(r);
   }
   for(var c=0;c<COLS;c++){
     var hasEmpty=false, hasFilled=false;
     for(var r=0;r<ROWS;r++){
-      if(board[r][c].type===T.EMPTY){hasEmpty=true;break;}
-      if(board[r][c].type===T.FILLED) hasFilled=true;
+      var ct=board[r][c].type;
+      if(ct===T.EMPTY||ct===T.FROZEN){hasEmpty=true;break;} /* frozen blocks line completion */
+      if(ct===T.FILLED) hasFilled=true;
     }
     if(!hasEmpty && hasFilled) fullCols.push(c);
   }
@@ -3851,41 +4907,70 @@ function checkLines(){
   if(isLeagueMode) pts=Math.round(pts*leagueMultiplier());
   score+=pts;
 
+  /* Track combos for adventure objectives */
+  if(cleared>=2) combosClearedThisLevel++;
+
   /* Collect gems in cleared rows/cols */
   var gemsGot=0;
   var toKeepGold={}; /* track gold cells that remain */
-  /* Animate cleared cells BEFORE modifying board — include gold blocks */
-  var popSet={}, popEls=[];
-  fullRows.forEach(function(r){for(var c=0;c<COLS;c++){var k=r+'_'+c;var ct=board[r][c].type;if(!popSet[k]&&ct!==T.EMPTY){popSet[k]=true;var el=cellEl(r,c);if(el){el.classList.remove('filled');el.style.background='';el.style.boxShadow='';el.innerHTML='';el.classList.add('pop');popEls.push(el);}}}});
-  fullCols.forEach(function(c){for(var r=0;r<ROWS;r++){var k=r+'_'+c;var ct=board[r][c].type;if(!popSet[k]&&ct!==T.EMPTY){popSet[k]=true;var el=cellEl(r,c);if(el){el.classList.remove('filled');el.style.background='';el.style.boxShadow='';el.innerHTML='';el.classList.add('pop');popEls.push(el);}}}});
+  /* Build set of all cells to clear */
+  var popSet={}, popEls=[], bombQueue=[];
+  function markPop(r,c){
+    var k=r+'_'+c; if(popSet[k]) return;
+    var ct=board[r][c].type; if(ct===T.EMPTY) return;
+    popSet[k]=true;
+    if(ct===T.BOMB_GEM) bombQueue.push({r:r,c:c}); /* chain bombs */
+    var el=cellEl(r,c);
+    if(el){el.classList.remove('filled');el.style.background='';el.style.boxShadow='';el.innerHTML='';el.classList.add('pop');popEls.push(el);}
+  }
+  /* Mark cleared rows/cols */
+  fullRows.forEach(function(r){for(var c=0;c<COLS;c++) markPop(r,c);});
+  fullCols.forEach(function(c){for(var r=0;r<ROWS;r++) markPop(r,c);});
+  /* Bomb chain: explode 3x3 around each bomb, chain if another bomb found */
+  while(bombQueue.length){
+    var b=bombQueue.shift();
+    for(var dr=-1;dr<=1;dr++) for(var dc=-1;dc<=1;dc++){
+      var br=b.r+dr, bc=b.c+dc;
+      if(br>=0&&br<ROWS&&bc>=0&&bc<COLS) markPop(br,bc);
+    }
+    score+=50; /* bonus per bomb */
+  }
 
-  fullRows.forEach(function(r){
-    for(var c=0;c<COLS;c++){
-      var cell=board[r][c];
-      if(cell.type===T.GOLD_STAR){
-        starsLeft--;gemsGot++;flyGem('⭐',r,c);SND.gem();
-        board[r][c]={type:T.EMPTY,color:null};   /* gem collected → clear */
-      } else if(cell.type===T.GOLD_PENTA){
-        pentasLeft--;gemsGot++;flyGem('🔶',r,c);SND.gem();
-        board[r][c]={type:T.EMPTY,color:null};   /* gem collected → clear */
-      } else {
-        board[r][c]={type:T.EMPTY,color:null};   /* GOLD / FILLED / ICE → clear */
+  /* Process cleared cells — collect gems, handle locked gems */
+  Object.keys(popSet).forEach(function(k){
+    var parts=k.split('_'), r=+parts[0], c=+parts[1];
+    var cell=board[r][c];
+    if(cell.type===T.GOLD_STAR){
+      starsLeft--;gemsGot++;flyGem('\u{2B50}',r,c);SND.gem();
+      board[r][c]={type:T.EMPTY,color:null};
+    } else if(cell.type===T.GOLD_PENTA){
+      pentasLeft--;gemsGot++;flyGem('\u{1F536}',r,c);SND.gem();
+      board[r][c]={type:T.EMPTY,color:null};
+    } else if(cell.type===T.BOMB_GEM){
+      gemsGot++;flyGem('\u{1F4A3}',r,c);SND.gem();
+      board[r][c]={type:T.EMPTY,color:null};
+    } else if(cell.type===T.LOCKED_GEM){
+      cell.lockHP=(cell.lockHP||2)-1;
+      if(cell.lockHP<=0){
+        gemsGot++;flyGem('\u{1F513}',r,c);SND.gem();
+        board[r][c]={type:T.EMPTY,color:null};
       }
+      /* else stays as locked with lower HP — don't clear */
+    } else {
+      board[r][c]={type:T.EMPTY,color:null}; /* GOLD / FILLED / ICE / FROZEN → clear */
     }
   });
-  fullCols.forEach(function(c){
-    for(var r=0;r<ROWS;r++){
-      var cell=board[r][c];
-      if(cell.type===T.GOLD_STAR){
-        starsLeft--;gemsGot++;flyGem('⭐',r,c);SND.gem();
-        board[r][c]={type:T.EMPTY,color:null};   /* gem collected → clear */
-      } else if(cell.type===T.GOLD_PENTA){
-        pentasLeft--;gemsGot++;flyGem('🔶',r,c);SND.gem();
-        board[r][c]={type:T.EMPTY,color:null};   /* gem collected → clear */
-      } else {
-        board[r][c]={type:T.EMPTY,color:null};   /* GOLD / FILLED / ICE → clear */
+  /* Thaw frozen cells adjacent to cleared cells */
+  Object.keys(popSet).forEach(function(k){
+    var parts=k.split('_'), r=+parts[0], c=+parts[1];
+    [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(function(pos){
+      var nr=pos[0],nc=pos[1];
+      if(nr>=0&&nr<ROWS&&nc>=0&&nc<COLS&&board[nr][nc].type===T.FROZEN){
+        board[nr][nc]={type:T.EMPTY,color:null}; /* thaw */
+        var fe=cellEl(nr,nc);
+        if(fe){fe.classList.add('pop');popEls.push(fe);}
       }
-    }
+    });
   });
 
   updateGemUI();
@@ -3945,20 +5030,34 @@ function checkStageClear(){
       stars=3; gameEnded=true;
     } else { return; }
   } else if(isAdventureMode){
-    /* ── ADVENTURE WIN ──
-       Levels WITH gems: collect all gems to win (stars = score vs XP target)
-       Levels WITHOUT gems: fill XP bar to win (same as classic, 1-star minimum) */
-    if(totalGems > 0){
-      var allGemsCleared = (starsLeft === 0 && pentasLeft === 0);
-      if(!allGemsCleared) return; /* still gems remaining */
-      winConditionMet = true;
-      /* Stars based on score vs XP target */
-      stars = score >= target ? 3 : score >= Math.floor(target * 0.5) ? 2 : 1;
+    /* ── ADVENTURE WIN — objective-based ── */
+    var cfg = advLevelConfig;
+    var allMet = true;
+    /* Check all objectives */
+    if(cfg && cfg.objectives){
+      if(cfg.objectives.gems && totalGems>0){
+        if(starsLeft>0||pentasLeft>0) allMet=false; /* gems remaining */
+      }
+      if(cfg.objectives.combos && cfg.comboGoal){
+        if(combosClearedThisLevel<cfg.comboGoal) allMet=false;
+      }
+      if(cfg.objectives.scoreGoal){
+        if(score<cfg.objectives.scoreGoal) allMet=false;
+      }
     } else {
-      /* No gems: XP bar win, 1-star always */
-      if(score < target) return;
-      winConditionMet = true;
-      stars = score >= target ? 2 : 1; /* max 2 stars on no-gem adventure */
+      /* Legacy: no config — use gem clear */
+      if(totalGems>0 && (starsLeft>0||pentasLeft>0)) allMet=false;
+      if(totalGems===0 && score<target) allMet=false;
+    }
+    if(!allMet) return;
+    winConditionMet = true;
+    /* Stars based on config thresholds or fallback to score vs target */
+    if(cfg && cfg.star3 && cfg.star2){
+      stars = score>=cfg.star3.score ? 3 : score>=cfg.star2.score ? 2 : 1;
+      /* Bonus: extra star for moves remaining */
+      if(movesLeft>0 && stars<3) stars = Math.min(3, stars + (movesLeft>=5?1:0));
+    } else {
+      stars = score>=target ? 3 : score>=Math.floor(target*0.5) ? 2 : 1;
     }
     gameEnded = true;
     /* Save adventure stars */
@@ -5648,6 +6747,16 @@ function buildMapModal(mode){
     wtitle.style.color=w.color;
     wtitle.style.border='1px solid '+w.color+'55';
     wtitle.textContent=w.name;
+    /* Adventure: show stage subtitle from ADV_STAGE_NAMES */
+    if(isAdv && typeof ADV_STAGE_NAMES!=='undefined'){
+      var stIdx=worlds.indexOf(w);
+      if(stIdx>=0&&ADV_STAGE_NAMES[stIdx]){
+        var sub=document.createElement('div');
+        sub.style.cssText='font-size:10px;opacity:0.7;margin-top:2px';
+        sub.textContent=ADV_STAGE_NAMES[stIdx];
+        wtitle.appendChild(sub);
+      }
+    }
     sec.appendChild(wtitle);
     var grid=document.createElement('div');
     grid.className='map-grid';
