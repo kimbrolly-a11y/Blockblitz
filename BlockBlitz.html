@@ -4008,6 +4008,7 @@ var pieces, dragging, dragIdx, dragPiece;
 var prevBoard, prevScore;
 var combo, maxCombo, level, isPro;
 var rounds, levelStreak, undoCount, undoUsed, gameEnded;
+var piecesPlacedThisLevel=0, firstClearDone=false;
 var _gameOverCount = 0; /* tracks game overs for interstitial ad frequency */
 var coins, playerXP;
 var powerups, activePU;
@@ -4191,6 +4192,7 @@ function startLevel(lv){
   }
   score = 0; combo = 0; undoUsed = false; gameEnded = false; puUsed = false;
   shufflesLeft = 1; rescueUsed = false;
+  piecesPlacedThisLevel = 0; firstClearDone = false;
   starsLeft = 0; pentasLeft = 0;
   var bombGems = 0, lockedGems = 0, frozenCells = 0;
   board = [];
@@ -4537,8 +4539,30 @@ function embedGemInPiece(piece){
    4. COLOR:       3 different colors so pieces are visually distinct
    5. FALLBACK:    if < 3 groups available, pad from any eligible group        */
 function dealPieces(){
-  var maxSz    = level < 4 ? 3 : 99;
-  var largeCap = (level >= 4 && level < 10) ? 1 : 99;
+  /* ── FIRST TRAY HOOK: give helpful pieces for early success ──
+     First deal of a level: guaranteed straight-3 (h or v) + 2 small pieces
+     Second deal: bias toward size 2-3 pieces for easy combo setup
+     This ensures a line clear is achievable within first 2-3 moves */
+  if(piecesPlacedThisLevel===0){
+    /* First tray: straight-3 + domino + single/domino */
+    var ftPieces=[];
+    var ftColors=[];
+    function ftColor(){ var c=COLORS[Math.floor(Math.random()*COLORS.length)]; for(var t=0;t<5;t++){if(ftColors.indexOf(c)<0)break;c=COLORS[Math.floor(Math.random()*COLORS.length)];}ftColors.push(c);return c; }
+    /* Piece 1: straight-3 (horizontal or vertical) */
+    ftPieces.push({shape:SHAPES[Math.random()<0.5?3:4], color:ftColor(), gemCell:null});
+    /* Piece 2: straight-3 or domino */
+    ftPieces.push({shape:SHAPES[Math.random()<0.5?3:Math.random()<0.5?1:2], color:ftColor(), gemCell:null});
+    /* Piece 3: domino or single */
+    ftPieces.push({shape:SHAPES[Math.random()<0.5?1:Math.random()<0.5?2:0], color:ftColor(), gemCell:null});
+    pieces=ftPieces; renderTray(); updateShuffleBtn(); updateDangerState(); return;
+  }
+  if(piecesPlacedThisLevel<=6){
+    /* Second/third trays: cap at size 3 for easy gameplay */
+    var maxSz=3; var largeCap=0;
+  } else {
+    var maxSz    = level < 4 ? 3 : 99;
+    var largeCap = (level >= 4 && level < 10) ? 1 : 99;
+  }
 
   /* Build eligible groups: only shapes that fit size AND fit on the board NOW */
   var eligGroups = SHAPE_GROUPS.map(function(g, gi){
@@ -4837,6 +4861,7 @@ function onUp(e,_move,_up){
   var snap=cursorToSnap(ax,ay,dragPiece.shape);
   if(canPlace(dragPiece.shape,snap.r,snap.c)){
     SND.place();
+    piecesPlacedThisLevel++;
     placePiece(dragPiece,snap.r,snap.c);
     /* Adventure move counter */
     if(movesLeft>0){ movesLeft--; updateXPBar(); }
@@ -5056,11 +5081,22 @@ function checkLines(){
   if(isCombo) showComboBadge(cleared, isMega);
   spawnRings(isCombo, cleared);
   spawnReaction(isCombo, isMega);
-  if(isMega)        hamsterReact('clear3');
-  else if(isCombo)  hamsterReact('clear2');
-  else              hamsterReact('clear1');
+
+  /* ── FIRST CLEAR CELEBRATION — hook players in first 10 seconds ── */
+  if(!firstClearDone){
+    firstClearDone=true;
+    var fc=isCombo?'Great Start!':'Nice!';
+    showToast(fc);
+    hamsterReact(isCombo?'clear2':'clear1');
+    /* Extra sparkle burst for first clear */
+    spawnComboFX(Math.max(cleared,2), popEls);
+  } else {
+    if(isMega)        hamsterReact('clear3');
+    else if(isCombo)  hamsterReact('clear2');
+    else              hamsterReact('clear1');
+    spawnComboFX(cleared, popEls);
+  }
   spawnConfetti(popEls);
-  spawnComboFX(cleared, popEls); /* Vita Mahjong-style combo visuals */
   /* League stage progression — simple lines-based */
   if(isLeagueMode){
     leagueLinesCleared+=cleared;
