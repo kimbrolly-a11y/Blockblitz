@@ -382,7 +382,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   background:transparent;
   border-top:none;
   box-shadow:none;
-  touch-action:none;-webkit-touch-callout:none;
 }
 /* Shuffle row */
 .tray-actions{
@@ -405,18 +404,16 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   border-radius:8px;padding:2px 8px;margin-left:4px;
 }
 .slot{
-  flex:1;max-width:120px;min-height:68px;
+  flex:1;max-width:110px;min-height:64px;
   display:flex;align-items:center;justify-content:center;
-  cursor:grab;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
-  border-radius:14px;
+  cursor:grab;touch-action:none;border-radius:14px;
   background:transparent;
   border:none;
   box-shadow:none;
-  transition:transform .12s ease;
+  transition:transform .15s;
 }
 .slot:active,.slot.active{
-  transform:scale(0.85) translateY(-2px);
-  opacity:0.5;
+  transform:scale(1.1) translateY(-5px);
 }
 .slot.empty{opacity:.22;pointer-events:none}
 
@@ -448,8 +445,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 #hamsterReact.show .hamster-react-img{animation:hamsterBounce .7s ease}
 
 /* Ghost */
-#ghost{position:fixed;pointer-events:none;z-index:9999;display:none;opacity:.80;transition:opacity .08s;will-change:transform,left,top;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4))}
-#ghost.invalid{opacity:.18}
+#ghost{position:fixed;pointer-events:none;z-index:9999;display:none;opacity:.80;transition:opacity .08s;will-change:transform;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4))}
+#ghost.invalid{opacity:.20}
 .ghost-grid{display:grid;gap:var(--gap)}
 .ghost-cell{border-radius:8px;position:relative;overflow:hidden;}
 .ghost-cell::after{display:none}
@@ -1182,73 +1179,49 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   .board-wrap{padding:3px;border-radius:10px}
 }
 
-/* ═══ IMPROVEMENT 1: WIN STREAK ═══ */
-.win-streak-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Fredoka One';font-size:16px;color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.5)}
-.win-streak-badge.lost{color:#ff4444;text-shadow:0 0 8px rgba(255,0,0,0.4)}
-.streak-gold-border .board-wrap{box-shadow:0 0 20px rgba(255,215,0,0.5),0 0 40px rgba(255,215,0,0.2)!important}
-#goWinStreak{margin:6px 0;font-size:15px;text-align:center}
-#menuWinStreak{margin:4px 0;text-align:center}
-
-/* ═══ IMPROVEMENT 2: NEAR MISS ═══ */
+/* == NEAR MISS HIGHLIGHT == */
 @keyframes nearMissPulse{0%,100%{box-shadow:inset 0 0 6px rgba(255,215,0,0.3)}50%{box-shadow:inset 0 0 14px rgba(255,215,0,0.7)}}
 .cell.near-miss{animation:nearMissPulse .8s ease-in-out infinite!important;border-color:rgba(255,215,0,0.6)!important}
-.near-miss-label{position:fixed;pointer-events:none;z-index:900;font-family:'Fredoka One';font-size:14px;color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.8),0 2px 4px rgba(0,0,0,.5);animation:flyUp 1.5s ease forwards;white-space:nowrap}
-
-/* ═══ IMPROVEMENT 4: DAILY LOGIN STREAK ═══ */
-#menuLoginStreak{margin:8px auto;text-align:center;font-family:'Fredoka One';font-size:16px;color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,0.4)}
-#menuLoginStreak .streak-timer{font-size:11px;color:rgba(255,255,255,0.5);font-family:Nunito,sans-serif;margin-top:2px}
-#menuLoginStreak .streak-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px}
-.badge-warrior{background:rgba(255,215,0,0.2);color:#ffd700}
-.badge-legend{background:rgba(255,100,0,0.25);color:#ff6400}
-
-/* ═══ IMPROVEMENT 5: BLITZ RUSH ═══ */
-.menu-card-rush{background:linear-gradient(135deg,#ff6f00 0%,#ff3d00 100%)!important}
+/* == BLITZ RUSH == */
 #rushTimerHUD{position:absolute;top:2px;right:10px;font-family:'Fredoka One';font-size:20px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.5);z-index:50;display:none}
 #rushTimerHUD.urgent{color:#ff1744;animation:rushPulse .5s ease-in-out infinite}
 @keyframes rushPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-
-/* ═══ IMPROVEMENT 6: MYSTERY BONUS ═══ */
+/* == MYSTERY METER == */
 #mysteryMeter{display:none;position:relative;width:28px;height:28px;margin-left:8px;cursor:default}
 #mysteryMeter .meter-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,#ffd700,#ff8f00);border-radius:0 0 4px 4px;transition:height .3s ease}
 #mysteryMeter .meter-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;z-index:1}
-@keyframes mysteryExplode{0%{transform:scale(1)}50%{transform:scale(1.8);opacity:1}100%{transform:scale(2.2);opacity:0}}
-.mystery-explode{animation:mysteryExplode .6s ease forwards}
-
-/* ═══ IMPROVEMENT 8: MASTERY BADGES ═══ */
+/* == MASTERY BADGES == */
 .badge-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-60%);z-index:1000;text-align:center;pointer-events:none;animation:badgeIn .3s ease,badgeOut .3s ease 1.7s forwards}
 @keyframes badgeIn{from{transform:translate(-50%,-60%) scale(0);opacity:0}to{transform:translate(-50%,-60%) scale(1);opacity:1}}
 @keyframes badgeOut{to{transform:translate(-50%,-80%) scale(0.8);opacity:0}}
 .badge-popup-inner{background:rgba(10,15,40,0.92);border:2px solid #ffd700;border-radius:16px;padding:16px 24px;box-shadow:0 0 30px rgba(255,215,0,0.4)}
-.badge-popup-icon{font-size:40px}
-.badge-popup-name{font-family:'Fredoka One';font-size:18px;color:#ffd700;margin:4px 0}
+.badge-popup-icon{font-size:40px}.badge-popup-name{font-family:'Fredoka One';font-size:18px;color:#ffd700;margin:4px 0}
 .badge-popup-desc{font-size:12px;color:rgba(255,255,255,0.7)}
-
-/* ═══ IMPROVEMENT 9: GHOST OPPONENT ═══ */
+/* == GHOST HUD == */
 #ghostHUD{display:none;position:absolute;top:2px;left:10px;font-size:11px;font-family:Nunito,sans-serif;color:rgba(255,255,255,0.7);z-index:50;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#ghostHUD.ahead{color:#4caf50}
-#ghostHUD.behind{color:#ff9800}
-
-/* ═══ IMPROVEMENT 10: FLOOD ═══ */
-@keyframes floodWarn{0%,100%{background:rgba(0,100,255,0.15)}50%{background:rgba(0,100,255,0.35)}}
-.cell.flood-block{background:#546e7a!important;border:2px solid rgba(120,144,156,0.8)!important;box-shadow:inset 0 0 8px rgba(0,0,0,0.5)!important;pointer-events:none}
-.cell.flood-warn{animation:floodWarn 1s ease-in-out infinite}
+#ghostHUD.ahead{color:#4caf50}#ghostHUD.behind{color:#ff9800}
+/* == FLOOD == */
+.cell.flood-block{background:#546e7a!important;border:2px solid rgba(120,144,156,0.8)!important;box-shadow:inset 0 0 8px rgba(0,0,0,0.5)!important}
 #floodCounter{display:none;position:absolute;bottom:2px;left:10px;font-size:10px;color:rgba(100,181,246,0.7);font-family:Nunito;z-index:50}
-
-/* ═══ EDGE SPARKLES on mega combos ═══ */
+/* == EDGE SPARKLES + RIPPLE == */
 @keyframes edgeSparkle{0%{opacity:0;transform:scale(0)}30%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0.3) translateY(-30px)}}
 .edge-sparkle{position:fixed;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:800;animation:edgeSparkle .7s ease forwards}
-
-/* ═══ BOARD RIPPLE on chain clears ═══ */
 @keyframes boardRipple{0%{box-shadow:0 0 0 0 rgba(0,229,255,0.5)}50%{box-shadow:0 0 0 12px rgba(0,229,255,0.2)}100%{box-shadow:0 0 0 20px rgba(0,229,255,0)}}
 .board-wrap.ripple{animation:boardRipple .5s ease!important}
-
-/* ═══ LAST GEM SPOTLIGHT ═══ */
-@keyframes gemSpotlight{0%,100%{box-shadow:0 0 8px rgba(255,215,0,0.4),0 0 16px rgba(255,215,0,0.2)}50%{box-shadow:0 0 16px rgba(255,215,0,0.8),0 0 32px rgba(255,215,0,0.4)}}
+/* == GEM SPOTLIGHT == */
+@keyframes gemSpotlight{0%,100%{box-shadow:0 0 8px rgba(255,215,0,0.4)}50%{box-shadow:0 0 16px rgba(255,215,0,0.8)}}
 .cell.last-gem-glow{animation:gemSpotlight 1s ease-in-out infinite!important;border:2px solid rgba(255,215,0,0.7)!important;z-index:2;position:relative}
-
-/* ═══ DANGER HEARTBEAT ═══ */
+/* == HEARTBEAT == */
 @keyframes dangerHeartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.02)}30%{transform:scale(1)}45%{transform:scale(1.015)}60%{transform:scale(1)}}
 .board-wrap.heartbeat{animation:dangerHeartbeat 1.2s ease-in-out infinite!important}
+/* == LOGIN STREAK == */
+#menuLoginStreak{margin:8px auto;text-align:center;font-family:'Fredoka One';font-size:16px;color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,0.4)}
+#menuLoginStreak .streak-timer{font-size:11px;color:rgba(255,255,255,0.5);font-family:Nunito,sans-serif;margin-top:2px}
+/* == WIN STREAK == */
+.win-streak-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Fredoka One';font-size:16px;color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.5)}
+.streak-gold-border .board-wrap{box-shadow:0 0 20px rgba(255,215,0,0.5)!important}
+/* == BLITZ RUSH CARD == */
+.menu-card-rush{background:linear-gradient(135deg,#ff6f00 0%,#ff3d00 100%)!important}
 
 </style>
 </head>
@@ -1303,9 +1276,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
   <!-- Mode cards -->
   <div class="menu-cards">
-    <div class="menu-tagline">Choose Your Path</div>
-<div id="menuLoginStreak"></div>
-<div id="menuWinStreak"></div>
+    <div id="menuLoginStreak"></div>
+<div id="menuWinStreak" style="text-align:center;margin:4px 0"></div>
+<div class="menu-tagline">Choose Your Path</div>
     <!-- Classic Mode -->
     <div class="menu-mode-card menu-card-classic" onclick="BB.selectMode('classic')">
       <div class="menu-card-shine"></div>
@@ -1356,19 +1329,19 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     </div>
   </div>
 
-
     <!-- Blitz Rush Mode -->
     <div class="menu-mode-card menu-card-rush" onclick="BB.startBlitzRush()">
       <div class="menu-card-shine"></div>
       <div class="menu-card-left">
         <div class="menu-card-top">
-          <div class="menu-card-title">⚡ Blitz Rush</div>
+          <div class="menu-card-title">&#9889; Blitz Rush</div>
           <div class="menu-card-badge badge-league" style="background:rgba(255,61,0,0.3);border-color:rgba(255,61,0,0.5)">TIMED</div>
         </div>
-        <div class="menu-card-desc">90 seconds on the clock! Clear lines to add time. How long can you survive?</div>
+        <div class="menu-card-desc">120 seconds! Clear lines to add time. How long can you survive?</div>
       </div>
-      <div class="menu-card-cta">Play ›</div>
+      <div class="menu-card-cta">Play &#8250;</div>
     </div>
+
   <!-- Bottom action buttons -->
   <div class="menu-bottom">
     <button class="menu-bottom-btn" onclick="BB.openSpinFromMenu()">
@@ -4203,8 +4176,6 @@ function setCS(){
 
 /* ── INIT ── */
 function init(){
-  /* Check daily login streak on every app launch */
-  if(typeof checkDailyLogin==='function') checkDailyLogin();
   isPro = lsGet('bbpro','0')==='1';
   rounds = parseInt(lsGet('bbrounds','0'))||0;
   maxCombo = parseInt(lsGet('bbmaxcombo','0'))||0;
@@ -4302,7 +4273,7 @@ function startLevel(lv){
   score = 0; combo = 0; undoUsed = false; gameEnded = false; puUsed = false;
   shufflesLeft = 1; rescueUsed = false;
   piecesPlacedThisLevel = 0; firstClearDone = false; _reviveUsedThisGame = false; clearStreak = 0;
-  _onGameStart();
+  if(typeof _onGameStart==='function') _onGameStart();
   starsLeft = 0; pentasLeft = 0;
   var bombGems = 0, lockedGems = 0, frozenCells = 0;
   board = [];
@@ -4395,15 +4366,8 @@ function applyCell(el, cell){
     el.classList.add('gold','gold-penta');
   } else if(cell.type===T.FILLED){
     el.classList.add('filled');
-    if(cell.isFlood){
-      el.classList.add('flood-block');
-      el.style.background='#546e7a';
-      el.style.boxShadow='inset 0 0 8px rgba(0,0,0,0.5)';
-      el.innerHTML='<span style="font-size:'+Math.max(10,CS*0.4)+'px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:0.5">\u{1F30A}</span>';
-    } else {
-      el.style.background=cell.color;
-      el.style.boxShadow='0 4px 0 '+darken(cell.color)+',0 5px 10px rgba(0,0,0,.3)';
-    }
+    el.style.background=cell.color;
+    el.style.boxShadow='0 4px 0 '+darken(cell.color)+',0 5px 10px rgba(0,0,0,.3)';
   } else if(cell.type===T.ICE){
     el.classList.add('ice');
   } else if(cell.type===T.BOMB_GEM){
@@ -4552,10 +4516,10 @@ function updateStreakBadge(){
 }
 function updateModeBadge(){
   var el=document.getElementById('modeBadge'); if(!el) return;
-  if(isBlitzRush){
+  if(typeof isBlitzRush!=='undefined'&&isBlitzRush){
     el.textContent='\u26A1 BLITZ RUSH';
     el.classList.remove('adv');
-    el.style.background='rgba(255,61,0,0.25)'; el.style.borderColor='rgba(255,61,0,0.4)'; el.style.color='#ff3d00';
+    el.style.background='rgba(255,61,0,0.25)';el.style.borderColor='rgba(255,61,0,0.4)';el.style.color='#ff3d00';
   } else if(isLeagueMode){
     el.textContent='\u{1F3C6} BLITZ LEAGUE';
     el.classList.remove('adv');
@@ -4710,16 +4674,10 @@ function dealPieces(){
   var dangerTier = _lastDangerTier;
   var clutchActive = false;
   var clutchChance = dangerTier===2 ? 0.65 : dangerTier===1 ? 0.40 : 0;
-  /* Adaptive difficulty: boost clutch if recent placements had no clears */
-  var adaptBias = (typeof getAdaptiveBias==='function') ? getAdaptiveBias() : 'normal';
-  if(adaptBias==='small'||adaptBias==='line'){ clutchChance=Math.max(clutchChance,0.55); }
-  else if(adaptBias==='harder'){ maxSz=Math.min(maxSz+1,5); }
   if(clutchChance>0 && Math.random()<clutchChance){
     clutchActive = true;
     /* Cap large pieces: in danger only allow 0-1 large piece */
     largeCap = dangerTier===2 ? 0 : 1;
-    /* Adaptive: bias toward line shapes when board has line gaps */
-    if(adaptBias==='line') maxSz=Math.min(maxSz,3);
   }
 
   /* Shuffle groups — clutch mode: bias small groups to front */
@@ -4961,9 +4919,7 @@ function refreshGhost(mx,my){
   var pR=dragPiece.shape.length, pC=dragPiece.shape[0].length;
   var gx=ax-(pC*STEP)/2, gy=ay-(pR*STEP)/2;
   var g=document.getElementById('ghost');
-  /* Use transform for GPU-accelerated movement — much smoother on mobile */
-  g.style.left='0px'; g.style.top='0px';
-  g.style.transform='translate3d('+gx+'px,'+gy+'px,0)';
+  g.style.left='0';g.style.top='0';g.style.transform='translate3d('+gx+'px,'+gy+'px,0)';
   return snap;
 }
 
@@ -4992,17 +4948,6 @@ function onUp(e,_move,_up){
     SND.place();
     piecesPlacedThisLevel++;
     placePiece(dragPiece,snap.r,snap.c);
-    /* Golden Block: auto-clear the row+col of the first placed cell */
-    if(typeof _goldenBlockNext!=='undefined' && _goldenBlockNext){
-      _goldenBlockNext=false;
-      var gr=snap.r, gc=snap.c;
-      for(var _gc=0;_gc<COLS;_gc++) if(board[gr][_gc].type===T.FILLED) board[gr][_gc]={type:T.EMPTY,color:null};
-      for(var _gr=0;_gr<ROWS;_gr++) if(board[_gr][gc].type===T.FILLED) board[_gr][gc]={type:T.EMPTY,color:null};
-      syncBoard();
-      score+=COLS*10+ROWS*10;
-      showFlyScore('\u{2B50} GOLDEN CLEAR!',true);
-      tone(1047,'sine',.18,.005,.3);tone(1319,'sine',.15,.005,.25,.06);tone(1568,'sine',.12,.005,.20,.12);
-    }
     /* Adventure move counter */
     if(movesLeft>0){ movesLeft--; updateXPBar(); }
     /* Precision mode: count down placements */
@@ -5021,7 +4966,7 @@ function onUp(e,_move,_up){
       /* Adventure: moves exhausted without winning → game over */
       if(movesLeft===0&&!gameEnded){ doGameOver(); return; }
       updateDangerState();
-      if(!isBlitzRush && !anyMovePossible()){
+      if(!anyMovePossible()){
         /* Rescue: levels 0-4 get one free 1×1 lifeline per level */
         if(level <= 4 && !rescueUsed){
           rescueUsed = true;
@@ -5165,13 +5110,12 @@ function checkLines(){
     if(!hasEmpty && hasFilled) fullCols.push(c);
   }
   var cleared=fullRows.length+fullCols.length;
-  if(!cleared){ clearStreak=0; updateStreakUI(); _onPiecePlaced(false,0,[],[],[]); return; }
+  if(!cleared){ clearStreak=0; updateStreakUI(); if(typeof _onPiecePlaced==='function') _onPiecePlaced(false,0,[],[],[]); return; }
 
   /* ── Combo = multi-line clear in a single move ──
-     1 line = normal (1x), 2 = Combo x2 (2x), 3 = Combo x3 (3.5x), 4+ = Mega (6x)
-     Smoothed curve so single clears still feel rewarding */
+     1 line = normal (1x), 2 lines = Combo x2 (3x), 3 lines = Combo x3 (5x), 4+ = Mega Combo (8x) */
   var comboTier=cleared>=4?4:cleared; /* 1,2,3,4 */
-  var scoreMult=[0,1,2,3.5,6][comboTier]; /* multiplier by tier */
+  var scoreMult=[0,1,2,3.5,6][comboTier]; /* smoothed multiplier */
   var pts=cleared*COLS*10*scoreMult;
   if(isLeagueMode) pts=Math.round(pts*leagueMultiplier());
   score+=pts;
@@ -5273,10 +5217,10 @@ function checkLines(){
   }
   spawnConfetti(popEls);
 
-  /* ── 10 IMPROVEMENTS HOOK ── */
-  _onPiecePlaced(true, cleared, popEls, fullRows, fullCols);
-
   /* ── STREAK SYSTEM ── */
+  /* -- 10 IMPROVEMENTS HOOK -- */
+  if(typeof _onPiecePlaced==="function") _onPiecePlaced(true,cleared,popEls,fullRows,fullCols);
+
   clearStreak++;
   updateStreakUI();
   if(clearStreak>=2 && STREAK_LABELS[Math.min(clearStreak,STREAK_LABELS.length-1)]){
@@ -5402,7 +5346,6 @@ function checkStageClear(){
 
   /* Award coins — tiered (multiplied by DC modifier) */
   var coinEarned = score>=5000?30 : score>=3000?20 : score>=1000?10 : 5;
-  if(typeof getLoginStreakMultiplier==='function') coinEarned=Math.floor(coinEarned*getLoginStreakMultiplier());
   if(isDailyChallenge){ var _mod=getDCMod(); coinEarned *= (_mod.coinMult||3); }
   awardCoins(coinEarned);
 
@@ -5598,7 +5541,6 @@ function doubleCoinsWithAd(){
 function doGameOver(){
   if(gameEnded) return; /* stage already cleared — don't show game over */
   gameEnded = true;
-  if(isBlitzRush) stopBlitzRush();
   _doubleUsedThisGame=false; /* reset per-game ad flags */
   rounds++; lsSet('bbrounds',rounds);
   levelStreak=0; lsSet('bbstreak',0);
@@ -5641,7 +5583,7 @@ function doGameOver(){
     ? 'Stage '+(_leagueStageReached+1)+' | '+score.toLocaleString()+' pts'
     : isNewBest?'New Best! \u{1F389}':'Game Over';
   if(isNewBest) lsSet('bbscore',score);
-  _onGameOver(isNewBest);
+  if(typeof _onGameOver==='function') _onGameOver(isNewBest);
   document.getElementById('goScore').textContent  = score;
   document.getElementById('goStars').textContent  = totalStars-starsLeft;
   document.getElementById('goPentas').textContent = totalPentas-pentasLeft;
@@ -5672,11 +5614,9 @@ function doGameOver(){
   var msg = getMomentumMessage(isNewBest, boardFillPct(), score, prevBest, _wasLeague, _leagueStageReached);
   var mEl = document.getElementById('goMomentum');
   if(mEl) mEl.textContent = msg;
-
-  /* ── Win Streak display on game over ── */
   var wsEl=document.getElementById('goWinStreak');
-  if(!wsEl){ wsEl=document.createElement('div'); wsEl.id='goWinStreak'; var goM=document.getElementById('goMomentum'); if(goM) goM.parentNode.insertBefore(wsEl,goM.nextSibling); }
-  if(wsEl) wsEl.innerHTML=getWinStreakGameOverHTML(isNewBest, score, prevBest);
+  if(!wsEl){wsEl=document.createElement('div');wsEl.id='goWinStreak';wsEl.style.cssText='text-align:center;margin:6px 0';if(mEl&&mEl.parentNode)mEl.parentNode.insertBefore(wsEl,mEl.nextSibling);}
+  if(wsEl&&typeof getWinStreakGameOverHTML==='function') wsEl.innerHTML=getWinStreakGameOverHTML(isNewBest,score,prevBest);
 
   /* ── Ad button visibility ── */
   var adBtns=document.getElementById('goAdBtns');
@@ -6090,7 +6030,6 @@ function puPreview(e){
 
 function applyPUAt(e){
   if(!activePU) return;
-  if(typeof _sessionPUUsed!=='undefined') _sessionPUUsed++;
   var rc=puEventRC(e);
   if(rc.r<0||rc.r>=ROWS||rc.c<0||rc.c>=COLS) return;
   clearPUHighlight();
@@ -7553,7 +7492,7 @@ function spawnLeagueObstacles(count){
 
 
 function openMenu(){
-  _onMenuOpen();
+  if(typeof _onMenuOpen==="function") _onMenuOpen();
   var hr=document.getElementById('hamsterReact'); if(hr) hr.classList.remove('show');
   refreshPromo();
   refreshProfileBtn();
@@ -7714,674 +7653,139 @@ function applySpinPrize(idx){
   document.getElementById('spinBtn').disabled = spinsLeft<=0;
 }
 
-/* ── PUBLIC ── */
-   ║         10 GAMEPLAY IMPROVEMENTS                         ║
-   ╚═══════════════════════════════════════════════════════════╝ */
+/* == 10 GAMEPLAY IMPROVEMENTS == */
 
-/* ═══ IMPROVEMENT 1: WIN STREAK COUNTER ═══ */
-var _winStreak = parseInt(lsGet('bb_win_streak','0'));
-var _bestWinStreak = parseInt(lsGet('bb_best_win_streak','0'));
-var _streakGoldActive = false;
+/* == IMP 1: WIN STREAK == */
+var _winStreak=parseInt(lsGet('bb_win_streak','0'));
+var _bestWinStreak=parseInt(lsGet('bb_best_win_streak','0'));
+var _streakGoldActive=false;
+function updateWinStreak(nb){if(nb){_winStreak++;_streakGoldActive=true;lsSet('bb_win_streak',_winStreak);if(_winStreak>_bestWinStreak){_bestWinStreak=_winStreak;lsSet('bb_best_win_streak',_bestWinStreak);}}else{if(_winStreak>0)tone(150,'sawtooth',.15,.01,.3);_winStreak=0;_streakGoldActive=false;lsSet('bb_win_streak',0);}}
+function getWinStreakGameOverHTML(nb,sc,pb){if(nb&&_winStreak>0)return'<span style="color:#ffd700;font-family:Fredoka One">\u{1F525} STREAK x'+_winStreak+'!</span>';if(!nb&&_bestWinStreak>0)return'<span style="color:#ff4444;font-size:12px">\u{1F494} Streak lost (best: \u{1F525}x'+_bestWinStreak+')</span>';return'';}
+function updateMenuWinStreak(){var el=document.getElementById('menuWinStreak');if(!el)return;el.innerHTML=_winStreak>0?'<span style="color:#ffd700;font-family:Fredoka One;font-size:14px">\u{1F525}x'+_winStreak+' Win Streak</span>':_bestWinStreak>0?'<span style="font-size:11px;color:rgba(255,255,255,0.3)">Best: \u{1F525}x'+_bestWinStreak+'</span>':'';}
+function applyStreakGoldBorder(){var bo=document.querySelector('.board-outer');if(bo){if(_streakGoldActive)bo.classList.add('streak-gold-border');else bo.classList.remove('streak-gold-border');}}
 
-function updateWinStreak(isNewBest){
-  if(isNewBest){
-    _winStreak++;
-    _streakGoldActive = true;
-    lsSet('bb_win_streak', _winStreak);
-    if(_winStreak > _bestWinStreak){ _bestWinStreak=_winStreak; lsSet('bb_best_win_streak',_bestWinStreak); }
-  } else {
-    if(_winStreak>0){
-      /* Streak lost — sad sound */
-      tone(150,'sawtooth',.15,.01,.3);tone(120,'sine',.12,.01,.25,.1);
-    }
-    _winStreak=0; _streakGoldActive=false;
-    lsSet('bb_win_streak',0);
-  }
-}
+/* == IMP 2: NEAR MISS == */
+var _lastNearMissKey='',_nearMissClutchReady=false;
+function checkNearMiss(){clearNearMiss();var nR=[],nC=[];for(var r=0;r<ROWS;r++){var e=0;for(var c=0;c<COLS;c++)if(board[r][c].type===T.EMPTY||board[r][c].type===T.FROZEN)e++;if(e>=1&&e<=2)nR.push(r);}for(var c=0;c<COLS;c++){var e=0;for(var r=0;r<ROWS;r++)if(board[r][c].type===T.EMPTY||board[r][c].type===T.FROZEN)e++;if(e>=1&&e<=2)nC.push(c);}if(!nR.length&&!nC.length){_nearMissClutchReady=false;_lastNearMissKey='';return;}var k=nR.join(',')+':'+nC.join(',');_nearMissClutchReady=(k===_lastNearMissKey&&_lastNearMissKey!=='');_lastNearMissKey=k;nR.forEach(function(r){for(var c=0;c<COLS;c++){var el=cellEl(r,c);if(el&&board[r][c].type===T.EMPTY)el.classList.add('near-miss');}});nC.forEach(function(c){for(var r=0;r<ROWS;r++){var el=cellEl(r,c);if(el&&board[r][c].type===T.EMPTY)el.classList.add('near-miss');}});if(nR.length||nC.length)showToast('SO CLOSE! \u{1F3AF}');}
+function clearNearMiss(){document.querySelectorAll('.cell.near-miss').forEach(function(el){el.classList.remove('near-miss');});}
+function checkClutchClear(cl){if(_nearMissClutchReady&&cl>0){score+=50;showFlyScore('CLUTCH! +50',true);_nearMissClutchReady=false;}}
 
-function getWinStreakGameOverHTML(isNewBest, sc, prevBest){
-  if(isNewBest && _winStreak>0){
-    return '<div class="win-streak-badge">\u{1F525} STREAK EXTENDED! \u{1F525}\u00D7'+_winStreak+'</div>';
-  } else if(!isNewBest && parseInt(lsGet('bb_win_streak','0'))>0){
-    return '<div class="win-streak-badge lost">\u{1F494} Streak Lost! Best: \u{1F525}\u00D7'+_bestWinStreak+'</div>';
-  }
-  return _bestWinStreak>0?'<div style="font-size:11px;color:rgba(255,255,255,0.4)">Best streak: \u{1F525}\u00D7'+_bestWinStreak+'</div>':'';
-}
+/* == IMP 3: CASCADE VISUAL == */
+function cascadePopEffect(popEls,cl){if(cl<=1||!popEls.length)return;var d=0,cs=Math.max(1,Math.ceil(popEls.length/cl));for(var i=0;i<popEls.length;i+=cs){(function(chunk,dl,idx){setTimeout(function(){for(var j=0;j<chunk.length;j++){chunk[j].classList.remove('pop');void chunk[j].offsetWidth;chunk[j].classList.add('pop');}tone(261.63*Math.pow(1.26,idx),'sine',.12,.003,.15);},dl);})(popEls.slice(i,i+cs),d,Math.floor(i/cs));d+=150;}if(cl>=2)setTimeout(function(){showFlyScore('CHAIN x'+cl+'!',true);},d);}
 
-function updateMenuWinStreak(){
-  var el=document.getElementById('menuWinStreak');
-  if(!el) return;
-  if(_winStreak>0) el.innerHTML='<div class="win-streak-badge">\u{1F525}\u00D7'+_winStreak+' Win Streak</div>';
-  else if(_bestWinStreak>0) el.innerHTML='<div style="font-size:11px;color:rgba(255,255,255,0.3)">Best streak: \u{1F525}\u00D7'+_bestWinStreak+'</div>';
-  else el.innerHTML='';
-}
+/* == IMP 4: DAILY LOGIN == */
+var _loginStreak=parseInt(lsGet('bb_login_streak','0'));
+var _lastLoginDate=lsGet('bb_last_login','');
+function checkDailyLogin(){var t=new Date().toISOString().slice(0,10);if(_lastLoginDate===t)return;var y=new Date(Date.now()-86400000).toISOString().slice(0,10);_loginStreak=(_lastLoginDate===y)?_loginStreak+1:1;_lastLoginDate=t;lsSet('bb_login_streak',_loginStreak);lsSet('bb_last_login',t);}
+function getLoginStreakMultiplier(){return _loginStreak>=30?3:_loginStreak>=7?2:1;}
+function updateMenuLoginStreak(){var el=document.getElementById('menuLoginStreak');if(!el)return;checkDailyLogin();var b=_loginStreak>=30?' \u{1F451}':_loginStreak>=7?' \u{1F31F}':'';var now=new Date(),mn=new Date(now);mn.setHours(24,0,0,0);var df=mn-now,h=Math.floor(df/3600000),m=Math.floor((df%3600000)/60000);el.innerHTML='\u{1F525} Day '+_loginStreak+b+' <span style="font-size:11px;color:rgba(255,255,255,0.4);font-family:Nunito"> safe for '+h+'h '+m+'m</span>';}
 
-function applyStreakGoldBorder(){
-  var bo=document.querySelector('.board-outer');
-  if(bo){ if(_streakGoldActive) bo.classList.add('streak-gold-border'); else bo.classList.remove('streak-gold-border'); }
-}
+/* == IMP 5: BLITZ RUSH == */
+var isBlitzRush=false,rushTimeLeft=0,rushTimerInterval=null,rushTimeSurvived=0;
+function startBlitzRush(){closeMenu();isBlitzRush=true;isLeagueMode=false;isAdventureMode=false;isDailyChallenge=false;rushTimeLeft=120;rushTimeSurvived=0;setTimeout(function(){level=0;startLevel(0);document.getElementById('rushTimerHUD').style.display='block';updateRushTimer();clearInterval(rushTimerInterval);rushTimerInterval=setInterval(function(){rushTimeLeft--;rushTimeSurvived++;updateRushTimer();if(rushTimeLeft<=10)tone(800,'square',.08,.002,.06);if(rushTimeLeft<=0){clearInterval(rushTimerInterval);doGameOver();}},1000);updateModeBadge();},300);}
+function updateRushTimer(){var el=document.getElementById('rushTimerHUD');if(!el)return;var m=Math.floor(rushTimeLeft/60),s=rushTimeLeft%60;el.textContent='\u23F1 '+(m>0?m+':':'')+(s<10?'0':'')+s;el.classList.toggle('urgent',rushTimeLeft<=15);}
+function rushOnClear(cl){if(!isBlitzRush)return;var b=cl*5;if(cl>=2)b+=10;rushTimeLeft+=b;showToast('+'+b+'s');}
+function stopBlitzRush(){isBlitzRush=false;clearInterval(rushTimerInterval);var el=document.getElementById('rushTimerHUD');if(el)el.style.display='none';}
 
-/* ═══ IMPROVEMENT 2: NEAR MISS HIGHLIGHT ═══ */
-var _lastNearMissKey = '';
-var _nearMissClutchReady = false;
+/* == IMP 6: MYSTERY BONUS == */
+var mysteryMeterPct=0,_goldenBlockNext=false;
+function advanceMysteryMeter(){var m=document.getElementById('mysteryMeter');if(!m)return;m.style.display='inline-block';mysteryMeterPct=Math.min(100,mysteryMeterPct+(8+Math.random()*7));var f=m.querySelector('.meter-fill');if(f)f.style.height=mysteryMeterPct+'%';if(mysteryMeterPct>=100)triggerMysteryBonus();}
+function triggerMysteryBonus(){mysteryMeterPct=0;var m=document.getElementById('mysteryMeter');if(m){var f=m.querySelector('.meter-fill');if(f)f.style.height='0%';}var r=Math.random();if(r<0.40){score+=100;showFlyScore('\u2728 Mystery +100!',true);tone(523,'sine',.15,.005,.2);}else if(r<0.65){powerups.bomb=(powerups.bomb||0)+1;updatePUBar();showToast('\u{1F4A3} Free Bomb!');tone(440,'triangle',.15,.005,.2);}else if(r<0.85){awardCoins(50);showToast('\u{1F4B0} +50 Coins!');}else{_goldenBlockNext=true;showToast('\u{2B50} Golden Block!');tone(1047,'sine',.18,.005,.25);}}
 
-function checkNearMiss(){
-  clearNearMiss();
-  var nearRows=[], nearCols=[];
-  for(var r=0;r<ROWS;r++){
-    var empty=0;
-    for(var c=0;c<COLS;c++) if(board[r][c].type===T.EMPTY||board[r][c].type===T.FROZEN) empty++;
-    if(empty>=1 && empty<=2) nearRows.push(r);
-  }
-  for(var c=0;c<COLS;c++){
-    var empty=0;
-    for(var r=0;r<ROWS;r++) if(board[r][c].type===T.EMPTY||board[r][c].type===T.FROZEN) empty++;
-    if(empty>=1 && empty<=2) nearCols.push(c);
-  }
-  if(!nearRows.length && !nearCols.length){ _nearMissClutchReady=false; _lastNearMissKey=''; return; }
-  var key=nearRows.join(',')+':'+nearCols.join(',');
-  _nearMissClutchReady = (key===_lastNearMissKey && _lastNearMissKey!=='');
-  _lastNearMissKey = key;
-  nearRows.forEach(function(r){ for(var c=0;c<COLS;c++){ var el=cellEl(r,c); if(el&&board[r][c].type===T.EMPTY) el.classList.add('near-miss'); }});
-  nearCols.forEach(function(c){ for(var r=0;r<ROWS;r++){ var el=cellEl(r,c); if(el&&board[r][c].type===T.EMPTY) el.classList.add('near-miss'); }});
-  /* Show label */
-  if(nearRows.length||nearCols.length){
-    var br=document.getElementById('board').getBoundingClientRect();
-    var lbl=document.createElement('div');
-    lbl.className='near-miss-label';
-    lbl.textContent='SO CLOSE! \u{1F3AF}';
-    lbl.style.left=(br.left+br.width/2-50)+'px';
-    lbl.style.top=(br.top+20)+'px';
-    document.body.appendChild(lbl);
-    setTimeout(function(){if(lbl.parentNode)lbl.parentNode.removeChild(lbl);},1600);
-  }
-}
+/* == IMP 7: ADAPTIVE DIFFICULTY == */
+var _recentPlacements=[],_distressLevel=0,_assistMovesLeft=0,_debugMode=false;
+function updateAdaptiveDifficulty(dc){_recentPlacements.push(dc);if(_recentPlacements.length>5)_recentPlacements.shift();var nc=_recentPlacements.filter(function(x){return!x;}).length;if(nc>=3&&_assistMovesLeft<=0){_distressLevel=nc;_assistMovesLeft=3;}if(dc&&_assistMovesLeft>0)_assistMovesLeft--;}
+function getAdaptiveBias(){if(_assistMovesLeft>0)return'small';var cc=_recentPlacements.filter(function(x){return x;}).length;return cc>=3?'harder':'normal';}
 
-function clearNearMiss(){
-  document.querySelectorAll('.cell.near-miss').forEach(function(el){el.classList.remove('near-miss');});
-}
-
-function checkClutchClear(cleared){
-  if(_nearMissClutchReady && cleared>0){
-    score+=50;
-    showFlyScore('CLUTCH! +50',true);
-    _nearMissClutchReady=false;
-  }
-}
-
-/* ═══ IMPROVEMENT 3: CASCADING CHAIN REACTION ═══ */
-/* Note: The existing checkLines already processes all clears at once.
-   We add a visual cascade delay to the pop animations */
-var _cascadeQueue = [];
-
-function cascadePopEffect(popEls, cleared){
-  if(cleared<=1||popEls.length===0) return;
-  /* Group pops by row/col and stagger them */
-  var delay=0;
-  var chunkSize=Math.max(1, Math.ceil(popEls.length/cleared));
-  for(var i=0;i<popEls.length;i+=chunkSize){
-    (function(chunk,d,idx){
-      setTimeout(function(){
-        for(var j=0;j<chunk.length;j++){
-          chunk[j].classList.remove('pop');
-          void chunk[j].offsetWidth; /* reflow */
-          chunk[j].classList.add('pop');
-        }
-        /* Rising pitch sound for each cascade step */
-        var pitch=261.63*Math.pow(1.26,idx);
-        tone(pitch,'sine',.12,.003,.15);
-        tone(pitch*1.5,'triangle',.06,.003,.10);
-      },d);
-    })(popEls.slice(i,i+chunkSize), delay, Math.floor(i/chunkSize));
-    delay+=150;
-  }
-  /* Show chain label after all cascades */
-  if(cleared>=2){
-    setTimeout(function(){
-      showFlyScore('CHAIN \u00D7'+cleared+'!', true);
-    }, delay);
-  }
-}
-
-/* ═══ IMPROVEMENT 4: DAILY LOGIN STREAK ═══ */
-var _loginStreak = parseInt(lsGet('bb_login_streak','0'));
-var _lastLoginDate = lsGet('bb_last_login','');
-
-function checkDailyLogin(){
-  var today = new Date().toISOString().slice(0,10);
-  if(_lastLoginDate === today) return; /* already checked today */
-  var yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
-  if(_lastLoginDate === yesterday){
-    _loginStreak++;
-  } else if(_lastLoginDate !== today){
-    _loginStreak = 1; /* missed a day or first time */
-  }
-  _lastLoginDate = today;
-  lsSet('bb_login_streak', _loginStreak);
-  lsSet('bb_last_login', today);
-}
-
-function getLoginStreakMultiplier(){
-  if(_loginStreak>=30) return 3;
-  if(_loginStreak>=7) return 2;
-  return 1;
-}
-
-function updateMenuLoginStreak(){
-  var el=document.getElementById('menuLoginStreak');
-  if(!el) return;
-  checkDailyLogin();
-  var badge='';
-  if(_loginStreak>=30) badge='<span class="streak-badge badge-legend">\u{1F451} Legend</span>';
-  else if(_loginStreak>=7) badge='<span class="streak-badge badge-warrior">\u{1F31F} Week Warrior</span>';
-  /* Countdown to streak expiry (midnight) */
-  var now=new Date(), midnight=new Date(now); midnight.setHours(24,0,0,0);
-  var diff=midnight-now;
-  var hrs=Math.floor(diff/3600000), mins=Math.floor((diff%3600000)/60000);
-  el.innerHTML='\u{1F525} Day '+_loginStreak+' — Don\'t break it!'+badge+
-    '<div class="streak-timer">Streak safe for '+hrs+'h '+mins+'m</div>';
-}
-
-/* ═══ IMPROVEMENT 5: BLITZ RUSH MODE ═══ */
-var isBlitzRush = false;
-var rushTimeLeft = 0;
-var rushTimerInterval = null;
-var rushTimeSurvived = 0;
-
-function startBlitzRush(){
-  closeMenu();
-  isBlitzRush=true;
-  isLeagueMode=false; isAdventureMode=false; isDailyChallenge=false;
-  rushTimeLeft=120; rushTimeSurvived=0;
-  setTimeout(function(){
-    level=0; startLevel(0);
-    document.getElementById('rushTimerHUD').style.display='block';
-    updateRushTimer();
-    clearInterval(rushTimerInterval);
-    rushTimerInterval=setInterval(function(){
-      rushTimeLeft--; rushTimeSurvived++;
-      updateRushTimer();
-      if(rushTimeLeft<=10){
-        /* Ticking sound */
-        tone(800,'square',.08,.002,.06);
-      }
-      if(rushTimeLeft<=0){
-        clearInterval(rushTimerInterval);
-        doGameOver();
-      }
-    },1000);
-    updateModeBadge();
-  },300);
-}
-
-function updateRushTimer(){
-  var el=document.getElementById('rushTimerHUD');
-  if(!el) return;
-  var m=Math.floor(rushTimeLeft/60), s=rushTimeLeft%60;
-  el.textContent='\u23F1 '+(m>0?m+':':'')+(s<10?'0':'')+s;
-  el.classList.toggle('urgent', rushTimeLeft<=15);
-}
-
-function rushOnClear(cleared){
-  if(!isBlitzRush) return;
-  var bonus = cleared * 5;
-  if(cleared>=2) bonus += 10; /* combo time bonus */
-  rushTimeLeft += bonus;
-  showToast('+'+bonus+'s');
-}
-
-function stopBlitzRush(){
-  isBlitzRush=false;
-  clearInterval(rushTimerInterval);
-  var el=document.getElementById('rushTimerHUD');
-  if(el) el.style.display='none';
-}
-
-/* ═══ IMPROVEMENT 6: MYSTERY BONUS SYSTEM ═══ */
-var mysteryMeterPct = 0;
-var _goldenBlockNext = false;
-
-function advanceMysteryMeter(){
-  var meterEl=document.getElementById('mysteryMeter');
-  if(!meterEl) return;
-  meterEl.style.display='inline-block';
-  var inc = 8 + Math.random()*7; /* 8-15% per placement */
-  mysteryMeterPct = Math.min(100, mysteryMeterPct + inc);
-  var fill=meterEl.querySelector('.meter-fill');
-  if(fill) fill.style.height=mysteryMeterPct+'%';
-  if(mysteryMeterPct>=100) triggerMysteryBonus();
-}
-
-function triggerMysteryBonus(){
-  mysteryMeterPct=0;
-  var meterEl=document.getElementById('mysteryMeter');
-  if(meterEl){
-    var icon=meterEl.querySelector('.meter-icon');
-    if(icon){ icon.classList.add('mystery-explode'); setTimeout(function(){icon.classList.remove('mystery-explode');},700); }
-    var fill=meterEl.querySelector('.meter-fill');
-    if(fill) fill.style.height='0%';
-  }
-  /* Random reward */
-  var roll=Math.random();
-  if(roll<0.40){
-    /* +100 Bonus Points */
-    score+=100; showFlyScore('\u2728 Mystery +100!',true);
-    tone(523,'sine',.15,.005,.2);tone(659,'sine',.12,.005,.18,.05);tone(784,'sine',.10,.005,.15,.10);
-  } else if(roll<0.65){
-    /* +1 Bomb power-up */
-    powerups.bomb=(powerups.bomb||0)+1; updatePUBar();
-    showToast('\u{1F4A3} Free Bomb!');
-    tone(440,'triangle',.15,.005,.2);
-  } else if(roll<0.85){
-    /* +50 Coins */
-    awardCoins(50);
-    showToast('\u{1F4B0} +50 Coins!');
-    tone(880,'sine',.12,.005,.15);tone(1047,'sine',.10,.005,.12,.04);
-  } else {
-    /* Golden Block — next piece clears row+col */
-    _goldenBlockNext=true;
-    showToast('\u{2B50} Golden Block incoming!');
-    tone(1047,'sine',.18,.005,.25);tone(1319,'sine',.15,.005,.20,.05);tone(1568,'sine',.12,.005,.18,.10);
-  }
-}
-
-/* ═══ IMPROVEMENT 7: ADAPTIVE DIFFICULTY ═══ */
-var _recentPlacements = []; /* last 5: true=cleared, false=no clear */
-var _distressLevel = 0; /* 0-5 */
-var _assistMovesLeft = 0;
-var _debugMode = false;
-
-function updateAdaptiveDifficulty(didClear){
-  _recentPlacements.push(didClear);
-  if(_recentPlacements.length>5) _recentPlacements.shift();
-  var noClearCount=_recentPlacements.filter(function(x){return !x;}).length;
-  if(noClearCount>=3 && _assistMovesLeft<=0){
-    _distressLevel=noClearCount;
-    _assistMovesLeft=3;
-  }
-  if(didClear && _assistMovesLeft>0) _assistMovesLeft--;
-}
-
-function getAdaptiveBias(){
-  /* Returns shape size preference: smaller=easier */
-  if(_assistMovesLeft>0){
-    /* Find most common gap patterns on board */
-    var singleGaps=0, lineGaps=0;
-    for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
-      if(board[r][c].type===T.EMPTY){
-        singleGaps++;
-        /* Check if part of a line gap */
-        var hRun=0; for(var cc=c;cc<COLS&&board[r][cc].type===T.EMPTY;cc++) hRun++;
-        if(hRun>=3) lineGaps++;
-      }
-    }
-    return lineGaps>singleGaps*0.3 ? 'line' : 'small';
-  }
-  /* If clearing well, allow larger pieces */
-  var clearCount=_recentPlacements.filter(function(x){return x;}).length;
-  if(clearCount>=3) return 'harder';
-  return 'normal';
-}
-
-function showDebugOverlay(){
-  if(!_debugMode) return;
-  var existing=document.getElementById('debugOverlay');
-  if(existing) existing.remove();
-  var d=document.createElement('div');
-  d.id='debugOverlay';
-  d.style.cssText='position:fixed;top:60px;right:5px;background:rgba(0,0,0,0.85);color:#0f0;font-family:monospace;font-size:10px;padding:6px 8px;border-radius:6px;z-index:9999;pointer-events:none;max-width:180px';
-  d.innerHTML='DISTRESS: '+_distressLevel+'<br>ASSIST: '+_assistMovesLeft+'<br>BIAS: '+getAdaptiveBias()+'<br>RECENT: '+_recentPlacements.map(function(x){return x?'\u2713':'\u2717';}).join(' ')+'<br>FILL: '+Math.round(boardFillPct()*100)+'%';
-  document.body.appendChild(d);
-  setTimeout(function(){if(d.parentNode)d.remove();},3000);
-}
-
-/* ═══ IMPROVEMENT 8: MID-GAME MASTERY BADGES ═══ */
-var _badgesEarned = JSON.parse(lsGet('bb_badges','[]'));
-var _sessionBadges = {}; /* track per-session progress */
-var _sessionRowsCleared = 0;
-var _sessionConsecutiveClearMoves = 0;
-var _sessionPiecesPlaced = 0;
-var _sessionIsolatedCells = 0;
-var _sessionMovesUnder40 = 0;
-var _sessionStartTime = 0;
-var _sessionPUUsed = 0;
-
-var MASTERY_BADGES = [
+/* == IMP 8: MASTERY BADGES == */
+var _badgesEarned=JSON.parse(lsGet('bb_badges','[]'));
+var _sessionBadges={},_sessionRowsCleared=0,_sessionConsecutiveClearMoves=0,_sessionPiecesPlaced=0,_sessionMovesUnder40=0,_sessionStartTime=0,_sessionPUUsed=0;
+var MASTERY_BADGES=[
   {id:'inferno',icon:'\u{1F525}',name:'Inferno',desc:'Clear 5 rows in one game',check:function(){return _sessionRowsCleared>=5;},coins:25,xp:50},
-  {id:'speed_demon',icon:'\u26A1',name:'Speed Demon',desc:'Clear 3 rows in 3 consecutive moves',check:function(){return _sessionConsecutiveClearMoves>=3;},coins:30,xp:60},
-  {id:'sniper',icon:'\u{1F3AF}',name:'Sniper',desc:'Place 5 pieces and clear a line each time',check:function(){return _sessionPiecesPlaced>=5 && _sessionConsecutiveClearMoves>=5;},coins:40,xp:80},
-  {id:'ice_cold',icon:'\u{1F9CA}',name:'Ice Cold',desc:'Survive 50 moves under 40% full',check:function(){return _sessionMovesUnder40>=50;},coins:35,xp:70},
-  {id:'diamond_mind',icon:'\u{1F48E}',name:'Diamond Mind',desc:'Achieve a \u00D74 combo or higher',check:function(){return false;},coins:50,xp:100}, /* checked directly in checkLines */
-  {id:'ghost_mode',icon:'\u{1F47B}',name:'Ghost Mode',desc:'Play 2 min without power-ups',check:function(){return _sessionPUUsed===0 && (Date.now()-_sessionStartTime)>=120000;},coins:30,xp:60}
+  {id:'speed_demon',icon:'\u26A1',name:'Speed Demon',desc:'3 consecutive clear moves',check:function(){return _sessionConsecutiveClearMoves>=3;},coins:30,xp:60},
+  {id:'sniper',icon:'\u{1F3AF}',name:'Sniper',desc:'5 pieces each clearing a line',check:function(){return _sessionPiecesPlaced>=5&&_sessionConsecutiveClearMoves>=5;},coins:40,xp:80},
+  {id:'ice_cold',icon:'\u{1F9CA}',name:'Ice Cold',desc:'50 moves under 40% full',check:function(){return _sessionMovesUnder40>=50;},coins:35,xp:70},
+  {id:'diamond_mind',icon:'\u{1F48E}',name:'Diamond Mind',desc:'x4 combo or higher',check:function(){return false;},coins:50,xp:100},
+  {id:'ghost_mode',icon:'\u{1F47B}',name:'Ghost Mode',desc:'2min without power-ups',check:function(){return _sessionPUUsed===0&&(Date.now()-_sessionStartTime)>=120000;},coins:30,xp:60}
 ];
+function resetSessionBadges(){_sessionBadges={};_sessionRowsCleared=0;_sessionConsecutiveClearMoves=0;_sessionPiecesPlaced=0;_sessionMovesUnder40=0;_sessionStartTime=Date.now();_sessionPUUsed=0;}
+function checkMasteryBadges(xId){MASTERY_BADGES.forEach(function(b){if(_sessionBadges[b.id])return;var e=(xId===b.id)||b.check();if(e){_sessionBadges[b.id]=true;if(_badgesEarned.indexOf(b.id)<0){_badgesEarned.push(b.id);lsSet('bb_badges',JSON.stringify(_badgesEarned));}awardCoins(b.coins);playerXP+=b.xp;lsSet('bbxp',playerXP);showBadgePopup(b);}});}
+function showBadgePopup(b){var el=document.createElement('div');el.className='badge-popup';el.innerHTML='<div class="badge-popup-inner"><div class="badge-popup-icon">'+b.icon+'</div><div class="badge-popup-name">'+b.name+'</div><div class="badge-popup-desc">'+b.desc+'</div><div style="font-size:11px;color:#ffd700;margin-top:4px">+'+b.coins+' coins</div></div>';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.remove();},2100);}
 
-function resetSessionBadges(){
-  _sessionBadges={}; _sessionRowsCleared=0; _sessionConsecutiveClearMoves=0;
-  _sessionPiecesPlaced=0; _sessionIsolatedCells=0; _sessionMovesUnder40=0;
-  _sessionStartTime=Date.now(); _sessionPUUsed=0;
-}
-
-function checkMasteryBadges(extraId){
-  MASTERY_BADGES.forEach(function(b){
-    if(_sessionBadges[b.id]) return; /* already earned this session */
-    if(_badgesEarned.indexOf(b.id)>=0 && b.id!=='inferno' && b.id!=='speed_demon') return; /* permanent badges already earned (allow repeatable ones) */
-    var earned = (extraId===b.id) || b.check();
-    if(earned){
-      _sessionBadges[b.id]=true;
-      if(_badgesEarned.indexOf(b.id)<0){ _badgesEarned.push(b.id); lsSet('bb_badges',JSON.stringify(_badgesEarned)); }
-      awardCoins(b.coins);
-      playerXP+=b.xp; lsSet('bbxp',playerXP);
-      showBadgePopup(b);
-    }
-  });
-}
-
-function showBadgePopup(badge){
-  var el=document.createElement('div');
-  el.className='badge-popup';
-  el.innerHTML='<div class="badge-popup-inner"><div class="badge-popup-icon">'+badge.icon+'</div><div class="badge-popup-name">'+badge.name+'</div><div class="badge-popup-desc">'+badge.desc+'</div><div style="font-size:11px;color:#ffd700;margin-top:4px">+'+badge.coins+' coins | +'+badge.xp+' XP</div></div>';
-  document.body.appendChild(el);
-  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},2100);
-}
-
-/* ═══ IMPROVEMENT 9: GHOST OPPONENT ═══ */
-var _ghostName = '';
-var _ghostScore = 0;
-var _ghostDefeated = false;
-
-function initGhostOpponent(){
-  _ghostDefeated=false;
-  /* Try to get a score from leaderboard that's just above player's best */
-  var prevBest=parseInt(lsGet('bbscore','0'));
-  var lb=[]; try{lb=JSON.parse(lsGet('bblb','[]'));}catch(e){}
-  var profile=JSON.parse(lsGet('bbprofile','{}'));
-  var pName=profile.name||'Player';
-  /* Find closest score above player's best */
-  var ghostEntry=null;
-  lb.sort(function(a,b){return b.score-a.score;});
-  for(var i=0;i<lb.length;i++){
-    if(lb[i].score>prevBest){ ghostEntry=lb[i]; }
-  }
-  if(ghostEntry){
-    _ghostScore=ghostEntry.score;
-    _ghostName=getGhostName();
-  } else {
-    /* Use player's own best */
-    _ghostScore=prevBest>0?prevBest:500;
-    _ghostName=getGhostName();
-  }
-  updateGhostHUD();
-}
-
-function updateGhostHUD(){
-  var el=document.getElementById('ghostHUD');
-  if(!el||gameEnded) return;
-  if(_ghostScore<=0){ el.style.display='none'; return; }
-  el.style.display='block';
-  var diff=score-_ghostScore;
-  if(diff>=0 && !_ghostDefeated){
-    _ghostDefeated=true;
-    el.innerHTML='\u{1F47B} GHOST DEFEATED! \u{1F389}';
-    el.className='ahead';
-    showToast('\u{1F47B} Ghost defeated!');
-    tone(523,'sine',.15,.005,.2);tone(659,'sine',.12,.005,.18,.05);tone(784,'sine',.10,.005,.15,.10);
-    setTimeout(function(){el.style.display='none';},3000);
-  } else if(diff>=0){
-    el.innerHTML='Leading by '+diff+'pts \u{1F4A8}';
-    el.className='ahead';
-  } else {
-    el.innerHTML='\u{1F47B} '+_ghostName+': '+_ghostScore+' ('+Math.abs(diff)+' ahead)';
-    el.className='behind';
-  }
-}
-
-/* ═══ IMPROVEMENT 10: BOARD FLOOD MECHANIC ═══ */
-var _floodCounter = 0; /* moves since last clear */
-var _floodWarning = false;
-var _floodRows = []; /* active flood row indices */
-var T_FLOOD = 9; /* New tile type for flood blocks */
-
-function updateFloodCounter(didClear){
-  if(isAdventureMode||isDailyChallenge) return; /* only Classic + Rush */
-  if(didClear){ _floodCounter=0; _floodWarning=false; updateFloodUI(); return; }
-  _floodCounter++;
-  if(_floodCounter>=15 && !_floodWarning){
-    _floodWarning=true;
-    showToast('\u26A0\uFE0F FLOOD in 3 moves...');
-    /* Drip sound */
-    tone(200,'sine',.08,.01,.3);tone(180,'sine',.06,.01,.25,.15);
-  }
-  if(_floodCounter>=18){
-    spawnFloodRow();
-    _floodCounter=12; /* reset partially — next flood in 6 moves */
-    _floodWarning=false;
-  }
-  updateFloodUI();
-}
-
-function spawnFloodRow(){
-  if(_floodRows.length>=3) return; /* max 3 flood rows */
-  /* Pick a random non-bottom row that isn't already a flood row */
-  var candidates=[];
-  for(var r=0;r<ROWS-1;r++){
-    if(_floodRows.indexOf(r)>=0) continue;
-    /* Check row has at least 3 empty cells */
-    var empties=[];
-    for(var c=0;c<COLS;c++) if(board[r][c].type===T.EMPTY) empties.push(c);
-    if(empties.length>=3) candidates.push({r:r,empties:empties});
-  }
-  if(!candidates.length) return;
-  var pick=candidates[Math.floor(Math.random()*candidates.length)];
-  _floodRows.push(pick.r);
-  /* Fill 3 random empty cells in that row with flood blocks */
-  for(var i=pick.empties.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=pick.empties[i];pick.empties[i]=pick.empties[j];pick.empties[j]=tmp;}
-  for(var k=0;k<3&&k<pick.empties.length;k++){
-    board[pick.r][pick.empties[k]]={type:T.FILLED,color:'#546e7a',isFlood:true};
-    var el=cellEl(pick.r,pick.empties[k]);
-    if(el) el.classList.add('flood-block');
-  }
-  syncBoard();
-  showToast('\u{1F30A} FLOOD!');
-  tone(120,'sawtooth',.12,.01,.3);tone(100,'sine',.10,.01,.25,.1);
-}
-
-function checkFloodCleared(fullRows,fullCols){
-  var floodCleared=false;
-  fullRows.forEach(function(r){
-    var idx=_floodRows.indexOf(r);
-    if(idx>=0){ _floodRows.splice(idx,1); floodCleared=true; }
-  });
-  if(floodCleared){
-    score+=200;
-    showFlyScore('FLOOD CLEARED! +200',true);
-    tone(523,'sine',.15,.005,.2);tone(659,'triangle',.12,.005,.18,.05);
-  }
-}
-
-function updateFloodUI(){
-  var el=document.getElementById('floodCounter');
-  if(!el) return;
-  if(isAdventureMode||isDailyChallenge||_floodCounter<10){ el.style.display='none'; return; }
-  el.style.display='block';
-  var movesToFlood=18-_floodCounter;
-  if(movesToFlood<=3) el.innerHTML='\u{1F30A} FLOOD in '+movesToFlood+'...';
-  else el.innerHTML='\u{1F30A} '+_floodCounter+'/18';
-}
-
-/* ═══ PARTICLE POLISH: Edge sparkles + board ripple ═══ */
-function spawnEdgeSparkles(count){
-  var colors=['#ffd700','#ff6f00','#00e5ff','#e040fb','#76ff03'];
-  var w=window.innerWidth, h=window.innerHeight;
-  for(var i=0;i<count;i++){
-    (function(i){
-      setTimeout(function(){
-        var el=document.createElement('div');
-        el.className='edge-sparkle';
-        el.style.background=colors[Math.floor(Math.random()*colors.length)];
-        /* Spawn from edges */
-        var side=Math.floor(Math.random()*4);
-        if(side===0){el.style.left=Math.random()*w+'px';el.style.top='0px';}
-        else if(side===1){el.style.left=Math.random()*w+'px';el.style.bottom='0px';}
-        else if(side===2){el.style.left='0px';el.style.top=Math.random()*h+'px';}
-        else{el.style.right='0px';el.style.top=Math.random()*h+'px';}
-        el.style.width=(4+Math.random()*6)+'px';
-        el.style.height=el.style.width;
-        document.body.appendChild(el);
-        setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},800);
-      },i*30);
-    })(i);
-  }
-}
-
-function triggerBoardRipple(){
-  var bw=document.querySelector('.board-wrap');
-  if(!bw) return;
-  bw.classList.remove('ripple');
-  void bw.offsetWidth;
-  bw.classList.add('ripple');
-  setTimeout(function(){bw.classList.remove('ripple');},550);
-}
-
-/* ═══ ADVENTURE: Last gem spotlight ═══ */
-function checkLastGemSpotlight(){
-  if(!isAdventureMode) return;
-  /* Remove existing spotlights */
-  document.querySelectorAll('.cell.last-gem-glow').forEach(function(el){el.classList.remove('last-gem-glow');});
-  var remaining=starsLeft+pentasLeft;
-  if(remaining!==1) return;
-  /* Find the last gem cell and highlight it */
-  for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
-    var t=board[r][c].type;
-    if(t===T.GOLD_STAR||t===T.GOLD_PENTA){
-      var el=cellEl(r,c);
-      if(el) el.classList.add('last-gem-glow');
-      showToast('\\u{2728} Last gem! Find it!');
-      return;
-    }
-  }
-}
-
-/* ═══ GHOST OPPONENT: Fun generated names ═══ */
+/* == IMP 9: GHOST OPPONENT == */
 var GHOST_NAMES=['BlockMaster','PuzzlePro','GridNinja','TetrisKing','ClearQueen','ComboWiz','StackLord','LineHunter','GemCrusher','MegaStacker','SwiftHand','BoardBoss','ChainKing','BlitzPro','StarChaser'];
+var _ghostName='',_ghostScore=0,_ghostDefeated=false;
+function getGhostName(){var d=Math.floor(Date.now()/86400000);return GHOST_NAMES[d%GHOST_NAMES.length]+'_'+(10+d%90);}
+function initGhostOpponent(){_ghostDefeated=false;var pb=parseInt(lsGet('bbscore','0'));_ghostScore=pb>0?pb:500;_ghostName=getGhostName();updateGhostHUD();}
+function updateGhostHUD(){var el=document.getElementById('ghostHUD');if(!el||gameEnded)return;if(_ghostScore<=0){el.style.display='none';return;}el.style.display='block';var d=score-_ghostScore;if(d>=0&&!_ghostDefeated){_ghostDefeated=true;el.innerHTML='\u{1F47B} GHOST BEATEN! \u{1F389}';el.className='ahead';tone(523,'sine',.15,.005,.2);setTimeout(function(){el.style.display='none';},3000);}else if(d>=0){el.innerHTML='Leading by '+d+'pts';el.className='ahead';}else{el.innerHTML='\u{1F47B} '+_ghostName+': '+_ghostScore;el.className='behind';}}
 
-function getGhostName(){
-  /* Deterministic but varied — use day of year as seed */
-  var day=Math.floor(Date.now()/86400000);
-  var idx=day%GHOST_NAMES.length;
-  var suffix=10+day%90;
-  return GHOST_NAMES[idx]+'_'+suffix;
-}
+/* == IMP 10: FLOOD == */
+var _floodCounter=0,_floodWarning=false,_floodRows=[];
+function updateFloodCounter(dc){if(isAdventureMode||isDailyChallenge)return;if(dc){_floodCounter=0;_floodWarning=false;updateFloodUI();return;}_floodCounter++;if(_floodCounter>=15&&!_floodWarning){_floodWarning=true;showToast('\u26A0\uFE0F FLOOD in 3...');tone(200,'sine',.08,.01,.3);}if(_floodCounter>=18){spawnFloodRow();_floodCounter=12;_floodWarning=false;}updateFloodUI();}
+function spawnFloodRow(){if(_floodRows.length>=3)return;var cands=[];for(var r=0;r<ROWS-1;r++){if(_floodRows.indexOf(r)>=0)continue;var emp=[];for(var c=0;c<COLS;c++)if(board[r][c].type===T.EMPTY)emp.push(c);if(emp.length>=3)cands.push({r:r,e:emp});}if(!cands.length)return;var p=cands[Math.floor(Math.random()*cands.length)];_floodRows.push(p.r);for(var i=p.e.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=p.e[i];p.e[i]=p.e[j];p.e[j]=t;}for(var k=0;k<3&&k<p.e.length;k++){board[p.r][p.e[k]]={type:T.FILLED,color:'#546e7a',isFlood:true};}syncBoard();showToast('\u{1F30A} FLOOD!');tone(120,'sawtooth',.12,.01,.3);}
+function checkFloodCleared(fR,fC){var fc=false;fR.forEach(function(r){var i=_floodRows.indexOf(r);if(i>=0){_floodRows.splice(i,1);fc=true;}});if(fc){score+=200;showFlyScore('FLOOD CLEARED! +200',true);}}
+function updateFloodUI(){var el=document.getElementById('floodCounter');if(!el)return;if(isAdventureMode||isDailyChallenge||_floodCounter<10){el.style.display='none';return;}el.style.display='block';var m=18-_floodCounter;el.innerHTML=m<=3?'\u{1F30A} FLOOD in '+m+'...':'\u{1F30A} '+_floodCounter+'/18';}
 
-/* ═══ DANGER HEARTBEAT AUDIO ═══ */
-var _heartbeatInterval=null;
-var _heartbeatActive=false;
+/* == PARTICLE POLISH == */
+function spawnEdgeSparkles(n){var cols=['#ffd700','#ff6f00','#00e5ff','#e040fb','#76ff03'];var w=window.innerWidth,h=window.innerHeight;for(var i=0;i<n;i++){(function(i){setTimeout(function(){var el=document.createElement('div');el.className='edge-sparkle';el.style.background=cols[Math.floor(Math.random()*cols.length)];var s=Math.floor(Math.random()*4);if(s===0){el.style.left=Math.random()*w+'px';el.style.top='0';}else if(s===1){el.style.left=Math.random()*w+'px';el.style.bottom='0';}else if(s===2){el.style.left='0';el.style.top=Math.random()*h+'px';}else{el.style.right='0';el.style.top=Math.random()*h+'px';}el.style.width=(4+Math.random()*6)+'px';el.style.height=el.style.width;document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.remove();},800);},i*30);})(i);}}
+function triggerBoardRipple(){var bw=document.querySelector('.board-wrap');if(!bw)return;bw.classList.remove('ripple');void bw.offsetWidth;bw.classList.add('ripple');setTimeout(function(){bw.classList.remove('ripple');},550);}
 
-function startHeartbeat(){
-  if(_heartbeatActive) return;
-  _heartbeatActive=true;
-  var bw=document.querySelector('.board-wrap');
-  if(bw) bw.classList.add('heartbeat');
-  _heartbeatInterval=setInterval(function(){
-    if(!_heartbeatActive||gameEnded){stopHeartbeat();return;}
-    /* Double-beat like a real heart: lub-dub */
-    tone(55,'sine',.08,.01,.15);
-    setTimeout(function(){tone(45,'sine',.06,.01,.12);},180);
-  },1200);
-}
+/* == LAST GEM SPOTLIGHT == */
+function checkLastGemSpotlight(){if(!isAdventureMode)return;document.querySelectorAll('.cell.last-gem-glow').forEach(function(el){el.classList.remove('last-gem-glow');});if(starsLeft+pentasLeft!==1)return;for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var t=board[r][c].type;if(t===T.GOLD_STAR||t===T.GOLD_PENTA){var el=cellEl(r,c);if(el)el.classList.add('last-gem-glow');showToast('\u2728 Last gem!');return;}}}
 
-function stopHeartbeat(){
-  _heartbeatActive=false;
-  clearInterval(_heartbeatInterval);
-  var bw=document.querySelector('.board-wrap');
-  if(bw) bw.classList.remove('heartbeat');
-}
+/* == HEARTBEAT == */
+var _heartbeatInterval=null,_heartbeatActive=false;
+function startHeartbeat(){if(_heartbeatActive)return;_heartbeatActive=true;var bw=document.querySelector('.board-wrap');if(bw)bw.classList.add('heartbeat');_heartbeatInterval=setInterval(function(){if(!_heartbeatActive||gameEnded){stopHeartbeat();return;}tone(55,'sine',.08,.01,.15);setTimeout(function(){tone(45,'sine',.06,.01,.12);},180);},1200);}
+function stopHeartbeat(){_heartbeatActive=false;clearInterval(_heartbeatInterval);var bw=document.querySelector('.board-wrap');if(bw)bw.classList.remove('heartbeat');}
 
-/* ═══ MASTER HOOKS — Wire into existing game flow ═══ */
-
-/* Hook: After piece placement (called from onUp) */
-function _onPiecePlaced(didClear, cleared, popEls, fullRows, fullCols){
-  /* Improvement 1: Win streak is checked at game over */
-  /* Improvement 2: Near miss */
-  if(!didClear) checkNearMiss(); else clearNearMiss();
-  /* Improvement 3: Cascade effect */
-  if(cleared>=2) cascadePopEffect(popEls||[], cleared);
-  /* Improvement 6: Mystery meter */
+/* == MASTER HOOKS == */
+function _onPiecePlaced(dc,cl,pe,fR,fC){
+  if(!dc)checkNearMiss();else clearNearMiss();
+  if(cl>=2)cascadePopEffect(pe||[],cl);
   advanceMysteryMeter();
-  /* Improvement 7: Adaptive difficulty */
-  updateAdaptiveDifficulty(didClear);
-  if(_debugMode) showDebugOverlay();
-  /* Improvement 8: Mastery badges */
+  updateAdaptiveDifficulty(dc);
   _sessionPiecesPlaced++;
-  if(didClear) _sessionRowsCleared+=cleared;
-  if(didClear){ _sessionConsecutiveClearMoves++; } else { _sessionConsecutiveClearMoves=0; }
-  if(boardFillPct()<0.4) _sessionMovesUnder40++; else _sessionMovesUnder40=0;
+  if(dc)_sessionRowsCleared+=cl;
+  if(dc)_sessionConsecutiveClearMoves++;else _sessionConsecutiveClearMoves=0;
+  if(boardFillPct()<0.4)_sessionMovesUnder40++;else _sessionMovesUnder40=0;
   checkMasteryBadges();
-  if(cleared>=4) checkMasteryBadges('diamond_mind');
-  if(_sessionConsecutiveClearMoves>=3) checkMasteryBadges('speed_demon');
-  /* Improvement 9: Ghost */
+  if(cl>=4)checkMasteryBadges('diamond_mind');
+  if(_sessionConsecutiveClearMoves>=3)checkMasteryBadges('speed_demon');
   updateGhostHUD();
-  /* Improvement 10: Flood */
-  if(didClear) checkFloodCleared(fullRows||[],fullCols||[]);
-  updateFloodCounter(didClear);
-  /* Improvement 5: Blitz Rush time bonus */
-  if(didClear) rushOnClear(cleared);
-  /* Improvement 2: Clutch clear check */
-  if(didClear) checkClutchClear(cleared);
-  /* ── POLISH: Edge sparkles on mega combos, board ripple on chains ── */
-  if(cleared>=3) spawnEdgeSparkles(cleared*8);
-  if(cleared>=2) triggerBoardRipple();
-  /* ── Adventure: last gem spotlight ── */
-  if(didClear) checkLastGemSpotlight();
-  /* ── Danger heartbeat ── */
+  if(dc)checkFloodCleared(fR||[],fC||[]);
+  updateFloodCounter(dc);
+  if(dc)rushOnClear(cl);
+  if(dc)checkClutchClear(cl);
+  if(cl>=3)spawnEdgeSparkles(cl*8);
+  if(cl>=2)triggerBoardRipple();
+  if(dc)checkLastGemSpotlight();
   var fp=boardFillPct();
-  if(fp>=0.85&&!_heartbeatActive) startHeartbeat();
-  else if(fp<0.75&&_heartbeatActive) stopHeartbeat();
+  if(fp>=0.85&&!_heartbeatActive)startHeartbeat();
+  else if(fp<0.75&&_heartbeatActive)stopHeartbeat();
 }
-
-/* Hook: On game start */
 function _onGameStart(){
-  resetSessionBadges();
-  initGhostOpponent();
-  _floodCounter=0; _floodWarning=false; _floodRows=[];
-  _nearMissClutchReady=false; _lastNearMissKey='';
-  mysteryMeterPct=0;
-  _recentPlacements=[]; _distressLevel=0; _assistMovesLeft=0;
-  _goldenBlockNext=false;
+  resetSessionBadges();initGhostOpponent();
+  _floodCounter=0;_floodWarning=false;_floodRows=[];
+  _nearMissClutchReady=false;_lastNearMissKey='';
+  mysteryMeterPct=0;_recentPlacements=[];_distressLevel=0;_assistMovesLeft=0;_goldenBlockNext=false;
   applyStreakGoldBorder();
-  var mEl=document.getElementById('mysteryMeter');
-  if(mEl){ mEl.style.display='inline-block'; var f=mEl.querySelector('.meter-fill'); if(f) f.style.height='0%'; }
-  var gEl=document.getElementById('ghostHUD');
-  if(gEl) gEl.style.display='block';
+  var m=document.getElementById('mysteryMeter');if(m){m.style.display='inline-block';var f=m.querySelector('.meter-fill');if(f)f.style.height='0%';}
+  var g=document.getElementById('ghostHUD');if(g)g.style.display='block';
   updateFloodUI();
 }
-
-/* Hook: On game over */
-function _onGameOver(isNewBest){
-  updateWinStreak(isNewBest);
-  stopBlitzRush();
-  stopHeartbeat();
-  clearNearMiss();
-  var gEl=document.getElementById('ghostHUD');
-  if(gEl) gEl.style.display='none';
-  var mEl=document.getElementById('mysteryMeter');
-  if(mEl) mEl.style.display='none';
+function _onGameOver(nb){
+  updateWinStreak(nb);stopBlitzRush();stopHeartbeat();clearNearMiss();
+  var g=document.getElementById('ghostHUD');if(g)g.style.display='none';
+  var m=document.getElementById('mysteryMeter');if(m)m.style.display='none';
 }
+function _onMenuOpen(){updateMenuWinStreak();updateMenuLoginStreak();}
 
-/* Hook: On menu open */
-function _onMenuOpen(){
-  updateMenuWinStreak();
-  updateMenuLoginStreak();
-}
-
-/* Debug mode activation — type "debug" anywhere */
+/* Debug mode */
 var _debugBuffer='';
-document.addEventListener('keydown',function(e){
-  _debugBuffer+=e.key.toLowerCase();
-  if(_debugBuffer.length>10) _debugBuffer=_debugBuffer.slice(-10);
-  if(_debugBuffer.indexOf('debug')>=0){ _debugMode=!_debugMode; _debugBuffer=''; showToast(_debugMode?'Debug ON':'Debug OFF'); }
-});
+document.addEventListener('keydown',function(e){_debugBuffer+=e.key.toLowerCase();if(_debugBuffer.length>10)_debugBuffer=_debugBuffer.slice(-10);if(_debugBuffer.indexOf('debug')>=0){_debugMode=!_debugMode;_debugBuffer='';showToast(_debugMode?'Debug ON':'Debug OFF');}});
 
 
+/* ── PUBLIC ── */
 return{
   initOnly:          function(){
     /* Initialize data/state without starting a level (used on first load) */
@@ -8463,10 +7867,7 @@ return{
   openSpin:          openSpin,
   closeSpin:         closeSpin,
   doSpin:            doSpin,
-  
-
-/* ╔═══════════════════════════════════════════════════════════╗
-startBlitzRush:    startBlitzRush,
+  startBlitzRush:    typeof startBlitzRush!=="undefined"?startBlitzRush:function(){},
   shufflePieces:     shufflePieces,
 };
 
