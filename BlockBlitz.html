@@ -844,8 +844,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* ── Logo ── */
 .menu-logo{
-  display:flex;flex-direction:column;align-items:center;
-  padding:6px 0 4px;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:6px 0 4px;flex-shrink:0;width:100%;text-align:center;
 }
 .menu-logo-row{display:flex;align-items:center;gap:2px;line-height:1}
 .menu-logo-block{
@@ -1324,20 +1324,24 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       </div>
       <div class="menu-card-cta">Play ›</div>
     </div>
-  </div>
 
     <!-- Blitz Rush Mode -->
     <div class="menu-mode-card menu-card-rush" onclick="BB.startBlitzRush()">
       <div class="menu-card-shine"></div>
       <div class="menu-card-left">
         <div class="menu-card-top">
-          <div class="menu-card-title">&#9889; Blitz Rush</div>
+          <div class="menu-card-title">⚡ Blitz Rush</div>
           <div class="menu-card-badge badge-league" style="background:rgba(255,61,0,0.3);border-color:rgba(255,61,0,0.5)">TIMED</div>
         </div>
         <div class="menu-card-desc">120 seconds! Clear lines to add time. How long can you survive?</div>
+        <div class="menu-card-footer">
+          <span class="menu-card-lv">⏱</span>
+          <span class="menu-card-lv-sub">2m</span>
+        </div>
       </div>
-      <div class="menu-card-cta">Play &#8250;</div>
+      <div class="menu-card-cta">Play ›</div>
     </div>
+  </div>
 
   <!-- Bottom action buttons -->
   <div class="menu-bottom">
