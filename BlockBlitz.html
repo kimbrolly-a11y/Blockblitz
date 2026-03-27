@@ -7737,7 +7737,8 @@ function stopHeartbeat(){_heartbeatActive=false;clearInterval(_heartbeatInterval
 
 /* == MASTER HOOKS == */
 function _onPiecePlaced(dc,cl,pe,fR,fC){
-  if(!dc)checkNearMiss();else clearNearMiss();
+  /* near-miss assist disabled */
+  clearNearMiss();
   if(cl>=2)cascadePopEffect(pe||[],cl);
   advanceMysteryMeter();
   updateAdaptiveDifficulty(dc);
