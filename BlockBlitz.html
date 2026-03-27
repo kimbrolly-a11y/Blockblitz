@@ -4184,6 +4184,8 @@ function setCS(){
 
 /* ── INIT ── */
 function init(){
+  /* Check daily login streak on every app launch */
+  if(typeof checkDailyLogin==='function') checkDailyLogin();
   isPro = lsGet('bbpro','0')==='1';
   rounds = parseInt(lsGet('bbrounds','0'))||0;
   maxCombo = parseInt(lsGet('bbmaxcombo','0'))||0;
@@ -4374,8 +4376,15 @@ function applyCell(el, cell){
     el.classList.add('gold','gold-penta');
   } else if(cell.type===T.FILLED){
     el.classList.add('filled');
-    el.style.background=cell.color;
-    el.style.boxShadow='0 4px 0 '+darken(cell.color)+',0 5px 10px rgba(0,0,0,.3)';
+    if(cell.isFlood){
+      el.classList.add('flood-block');
+      el.style.background='#546e7a';
+      el.style.boxShadow='inset 0 0 8px rgba(0,0,0,0.5)';
+      el.innerHTML='<span style="font-size:'+Math.max(10,CS*0.4)+'px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:0.5">\u{1F30A}</span>';
+    } else {
+      el.style.background=cell.color;
+      el.style.boxShadow='0 4px 0 '+darken(cell.color)+',0 5px 10px rgba(0,0,0,.3)';
+    }
   } else if(cell.type===T.ICE){
     el.classList.add('ice');
   } else if(cell.type===T.BOMB_GEM){
@@ -4682,10 +4691,16 @@ function dealPieces(){
   var dangerTier = _lastDangerTier;
   var clutchActive = false;
   var clutchChance = dangerTier===2 ? 0.65 : dangerTier===1 ? 0.40 : 0;
+  /* Adaptive difficulty: boost clutch if recent placements had no clears */
+  var adaptBias = (typeof getAdaptiveBias==='function') ? getAdaptiveBias() : 'normal';
+  if(adaptBias==='small'||adaptBias==='line'){ clutchChance=Math.max(clutchChance,0.55); }
+  else if(adaptBias==='harder'){ maxSz=Math.min(maxSz+1,5); }
   if(clutchChance>0 && Math.random()<clutchChance){
     clutchActive = true;
     /* Cap large pieces: in danger only allow 0-1 large piece */
     largeCap = dangerTier===2 ? 0 : 1;
+    /* Adaptive: bias toward line shapes when board has line gaps */
+    if(adaptBias==='line') maxSz=Math.min(maxSz,3);
   }
 
   /* Shuffle groups — clutch mode: bias small groups to front */
@@ -4956,6 +4971,17 @@ function onUp(e,_move,_up){
     SND.place();
     piecesPlacedThisLevel++;
     placePiece(dragPiece,snap.r,snap.c);
+    /* Golden Block: auto-clear the row+col of the first placed cell */
+    if(typeof _goldenBlockNext!=='undefined' && _goldenBlockNext){
+      _goldenBlockNext=false;
+      var gr=snap.r, gc=snap.c;
+      for(var _gc=0;_gc<COLS;_gc++) if(board[gr][_gc].type===T.FILLED) board[gr][_gc]={type:T.EMPTY,color:null};
+      for(var _gr=0;_gr<ROWS;_gr++) if(board[_gr][gc].type===T.FILLED) board[_gr][gc]={type:T.EMPTY,color:null};
+      syncBoard();
+      score+=COLS*10+ROWS*10;
+      showFlyScore('\u{2B50} GOLDEN CLEAR!',true);
+      tone(1047,'sine',.18,.005,.3);tone(1319,'sine',.15,.005,.25,.06);tone(1568,'sine',.12,.005,.20,.12);
+    }
     /* Adventure move counter */
     if(movesLeft>0){ movesLeft--; updateXPBar(); }
     /* Precision mode: count down placements */
@@ -4974,7 +5000,7 @@ function onUp(e,_move,_up){
       /* Adventure: moves exhausted without winning → game over */
       if(movesLeft===0&&!gameEnded){ doGameOver(); return; }
       updateDangerState();
-      if(!anyMovePossible()){
+      if(!isBlitzRush && !anyMovePossible()){
         /* Rescue: levels 0-4 get one free 1×1 lifeline per level */
         if(level <= 4 && !rescueUsed){
           rescueUsed = true;
@@ -6042,6 +6068,7 @@ function puPreview(e){
 
 function applyPUAt(e){
   if(!activePU) return;
+  if(typeof _sessionPUUsed!=='undefined') _sessionPUUsed++;
   var rc=puEventRC(e);
   if(rc.r<0||rc.r>=ROWS||rc.c<0||rc.c>=COLS) return;
   clearPUHighlight();
@@ -7927,7 +7954,7 @@ function startBlitzRush(){
   closeMenu();
   isBlitzRush=true;
   isLeagueMode=false; isAdventureMode=false; isDailyChallenge=false;
-  rushTimeLeft=90; rushTimeSurvived=0;
+  rushTimeLeft=120; rushTimeSurvived=0;
   setTimeout(function(){
     level=0; startLevel(0);
     document.getElementById('rushTimerHUD').style.display='block';
@@ -8084,7 +8111,7 @@ var _sessionPUUsed = 0;
 var MASTERY_BADGES = [
   {id:'inferno',icon:'\u{1F525}',name:'Inferno',desc:'Clear 5 rows in one game',check:function(){return _sessionRowsCleared>=5;},coins:25,xp:50},
   {id:'speed_demon',icon:'\u26A1',name:'Speed Demon',desc:'Clear 3 rows in 3 consecutive moves',check:function(){return _sessionConsecutiveClearMoves>=3;},coins:30,xp:60},
-  {id:'sniper',icon:'\u{1F3AF}',name:'Sniper',desc:'Place 10 pieces without wasted cells',check:function(){return _sessionPiecesPlaced>=10 && _sessionIsolatedCells===0;},coins:40,xp:80},
+  {id:'sniper',icon:'\u{1F3AF}',name:'Sniper',desc:'Place 5 pieces and clear a line each time',check:function(){return _sessionPiecesPlaced>=5 && _sessionConsecutiveClearMoves>=5;},coins:40,xp:80},
   {id:'ice_cold',icon:'\u{1F9CA}',name:'Ice Cold',desc:'Survive 50 moves under 40% full',check:function(){return _sessionMovesUnder40>=50;},coins:35,xp:70},
   {id:'diamond_mind',icon:'\u{1F48E}',name:'Diamond Mind',desc:'Achieve a \u00D74 combo or higher',check:function(){return false;},coins:50,xp:100}, /* checked directly in checkLines */
   {id:'ghost_mode',icon:'\u{1F47B}',name:'Ghost Mode',desc:'Play 2 min without power-ups',check:function(){return _sessionPUUsed===0 && (Date.now()-_sessionStartTime)>=120000;},coins:30,xp:60}
