@@ -871,7 +871,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .menu-mode-card{
   border-radius:14px;padding:10px 14px;
   cursor:pointer;position:relative;overflow:hidden;
-  flex-shrink:0;
+  flex-shrink:0;min-height:72px;
   display:flex;align-items:center;gap:12px;
   transition:transform .15s cubic-bezier(.17,.89,.32,1.28);
 }
@@ -1120,7 +1120,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* ── Logo image on splash + menu ── */
 #splashLogoImg{max-width:min(97%,442px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:spLogoGlow 3.8s ease-in-out 1.35s infinite}
-#menuLogoImg{max-width:min(100%,1012px);height:auto;display:block;margin:12px auto 0;transform:scale(1.3);transform-origin:center top;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
+#menuLogoImg{max-width:min(85%,380px);height:auto;display:block;margin:8px auto 0;transform:scale(1);transform-origin:center top;filter:drop-shadow(0 6px 28px rgba(0,0,0,.7)) drop-shadow(0 2px 6px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
 @keyframes spLogoGlow{
   0%,100%{filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45)) drop-shadow(0 2px 8px rgba(255,200,0,.35))}
   50%    {filter:drop-shadow(0 10px 52px rgba(255,220,0,0.80)) drop-shadow(0 0 28px rgba(255,130,0,0.50))}
@@ -1200,9 +1200,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .badge-popup-inner{background:rgba(10,15,40,0.92);border:2px solid #ffd700;border-radius:16px;padding:16px 24px;box-shadow:0 0 30px rgba(255,215,0,0.4)}
 .badge-popup-icon{font-size:40px}.badge-popup-name{font-family:'Fredoka One';font-size:18px;color:#ffd700;margin:4px 0}
 .badge-popup-desc{font-size:12px;color:rgba(255,255,255,0.7)}
-/* == GHOST HUD == */
-#ghostHUD{display:none;position:absolute;top:2px;left:10px;font-size:11px;font-family:Nunito,sans-serif;color:rgba(255,255,255,0.7);z-index:50;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#ghostHUD.ahead{color:#4caf50}#ghostHUD.behind{color:#ff9800}
+/* ghost HUD removed */
 /* == FLOOD == */
 .cell.flood-block{background:#546e7a!important;border:2px solid rgba(120,144,156,0.8)!important;box-shadow:inset 0 0 8px rgba(0,0,0,0.5)!important}
 #floodCounter{display:none;position:absolute;bottom:2px;left:10px;font-size:10px;color:rgba(100,181,246,0.7);font-family:Nunito;z-index:50}
@@ -1217,9 +1215,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 /* == HEARTBEAT == */
 @keyframes dangerHeartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.02)}30%{transform:scale(1)}45%{transform:scale(1.015)}60%{transform:scale(1)}}
 .board-wrap.heartbeat{animation:dangerHeartbeat 1.2s ease-in-out infinite!important}
-/* == LOGIN STREAK == */
-#menuLoginStreak{margin:8px auto;text-align:center;font-family:'Fredoka One';font-size:16px;color:#ffd700;text-shadow:0 0 10px rgba(255,215,0,0.4)}
-#menuLoginStreak .streak-timer{font-size:11px;color:rgba(255,255,255,0.5);font-family:Nunito,sans-serif;margin-top:2px}
+/* login streak + ghost removed from menu */
 /* == WIN STREAK == */
 .win-streak-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Fredoka One';font-size:16px;color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.5)}
 .streak-gold-border .board-wrap{box-shadow:0 0 20px rgba(255,215,0,0.5)!important}
@@ -1279,8 +1275,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
   <!-- Mode cards -->
   <div class="menu-cards">
-    <div id="menuLoginStreak"></div>
-<div id="menuWinStreak" style="text-align:center;margin:4px 0"></div>
 <div class="menu-tagline">Choose Your Path</div>
     <!-- Classic Mode -->
     <div class="menu-mode-card menu-card-classic" onclick="BB.selectMode('classic')">
@@ -1470,7 +1464,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 <!-- BOARD -->
 <div class="board-outer">
   <div id="rushTimerHUD"></div>
-<div id="ghostHUD"></div>
 <div id="floodCounter"></div>
 <div class="board-wrap">
     <div class="dc-timer-bar" id="dcTimerBar"><div class="dc-timer-fill" id="dcTimerFill" style="width:100%"></div></div>
@@ -4185,6 +4178,7 @@ function init(){
   classicLevel = parseInt(lsGet('bblevel','0'))||0;
   level = classicLevel; /* Always start in Classic Mode on load */
   isAdventureMode = false;
+  if(typeof isBlitzRush!=='undefined'){isBlitzRush=false;clearInterval(rushTimerInterval);var _rh=document.getElementById('rushTimerHUD');if(_rh)_rh.style.display='none';}
   levelStreak = parseInt(lsGet('bbstreak','0'))||0;
   undoCount = parseInt(lsGet('bbundo','3'))||3;
   coins = parseInt(lsGet('bbcoins','0'))||0;
@@ -7685,7 +7679,7 @@ function updateMenuLoginStreak(){var el=document.getElementById('menuLoginStreak
 
 /* == IMP 5: BLITZ RUSH == */
 var isBlitzRush=false,rushTimeLeft=0,rushTimerInterval=null,rushTimeSurvived=0;
-function startBlitzRush(){closeMenu();isBlitzRush=true;isLeagueMode=false;isAdventureMode=false;isDailyChallenge=false;rushTimeLeft=120;rushTimeSurvived=0;setTimeout(function(){level=0;startLevel(0);document.getElementById('rushTimerHUD').style.display='block';updateRushTimer();clearInterval(rushTimerInterval);rushTimerInterval=setInterval(function(){rushTimeLeft--;rushTimeSurvived++;updateRushTimer();if(rushTimeLeft<=10)tone(800,'square',.08,.002,.06);if(rushTimeLeft<=0){clearInterval(rushTimerInterval);doGameOver();}},1000);updateModeBadge();},300);}
+function startBlitzRush(){closeMenu();isBlitzRush=true;isLeagueMode=false;isAdventureMode=false;isDailyChallenge=false;rushTimeLeft=120;rushTimeSurvived=0;setTimeout(function(){level=0;startLevel(0);var rEl=document.getElementById('rushTimerHUD');if(rEl)rEl.style.display='block';updateRushTimer();clearInterval(rushTimerInterval);rushTimerInterval=setInterval(function(){if(!isBlitzRush||gameEnded){clearInterval(rushTimerInterval);return;}rushTimeLeft--;rushTimeSurvived++;updateRushTimer();if(rushTimeLeft<=10)tone(800,'square',.08,.002,.06);if(rushTimeLeft<=0){clearInterval(rushTimerInterval);isBlitzRush=false;doGameOver();}},1000);updateModeBadge();},300);}
 function updateRushTimer(){var el=document.getElementById('rushTimerHUD');if(!el)return;var m=Math.floor(rushTimeLeft/60),s=rushTimeLeft%60;el.textContent='\u23F1 '+(m>0?m+':':'')+(s<10?'0':'')+s;el.classList.toggle('urgent',rushTimeLeft<=15);}
 function rushOnClear(cl){if(!isBlitzRush)return;var b=cl*5;if(cl>=2)b+=10;rushTimeLeft+=b;showToast('+'+b+'s');}
 function stopBlitzRush(){isBlitzRush=false;clearInterval(rushTimerInterval);var el=document.getElementById('rushTimerHUD');if(el)el.style.display='none';}
@@ -7719,8 +7713,8 @@ function showBadgePopup(b){var el=document.createElement('div');el.className='ba
 var GHOST_NAMES=['BlockMaster','PuzzlePro','GridNinja','TetrisKing','ClearQueen','ComboWiz','StackLord','LineHunter','GemCrusher','MegaStacker','SwiftHand','BoardBoss','ChainKing','BlitzPro','StarChaser'];
 var _ghostName='',_ghostScore=0,_ghostDefeated=false;
 function getGhostName(){var d=Math.floor(Date.now()/86400000);return GHOST_NAMES[d%GHOST_NAMES.length]+'_'+(10+d%90);}
-function initGhostOpponent(){_ghostDefeated=false;var pb=parseInt(lsGet('bbscore','0'));_ghostScore=pb>0?pb:500;_ghostName=getGhostName();updateGhostHUD();}
-function updateGhostHUD(){var el=document.getElementById('ghostHUD');if(!el||gameEnded)return;if(_ghostScore<=0){el.style.display='none';return;}el.style.display='block';var d=score-_ghostScore;if(d>=0&&!_ghostDefeated){_ghostDefeated=true;el.innerHTML='\u{1F47B} GHOST BEATEN! \u{1F389}';el.className='ahead';tone(523,'sine',.15,.005,.2);setTimeout(function(){el.style.display='none';},3000);}else if(d>=0){el.innerHTML='Leading by '+d+'pts';el.className='ahead';}else{el.innerHTML='\u{1F47B} '+_ghostName+': '+_ghostScore;el.className='behind';}}
+function initGhostOpponent(){_ghostDefeated=false;var pb=parseInt(lsGet('bbscore','0'));_ghostScore=pb>0?pb:500;_ghostName=getGhostName();/* ghost removed */}
+function updateGhostHUD(){var el=document.getElementById('ghostHUD');if(!el||gameEnded)return;if(_ghostScore<=0||score<10){el.style.display='none';return;}el.style.display='block';var d=score-_ghostScore;if(d>=0&&!_ghostDefeated){_ghostDefeated=true;el.innerHTML='\u{1F47B} Ghost beaten!';el.className='ahead';tone(523,'sine',.15,.005,.2);setTimeout(function(){el.style.display='none';},3000);}else if(d>=0){el.innerHTML='+'+d+' ahead';el.className='ahead';}else{el.innerHTML='\u{1F47B} '+Math.abs(d)+' to beat';el.className='behind';}}
 
 /* == IMP 10: FLOOD == */
 var _floodCounter=0,_floodWarning=false,_floodRows=[];
@@ -7754,7 +7748,7 @@ function _onPiecePlaced(dc,cl,pe,fR,fC){
   checkMasteryBadges();
   if(cl>=4)checkMasteryBadges('diamond_mind');
   if(_sessionConsecutiveClearMoves>=3)checkMasteryBadges('speed_demon');
-  updateGhostHUD();
+  /* ghost removed */
   if(dc)checkFloodCleared(fR||[],fC||[]);
   updateFloodCounter(dc);
   if(dc)rushOnClear(cl);
@@ -7767,13 +7761,14 @@ function _onPiecePlaced(dc,cl,pe,fR,fC){
   else if(fp<0.75&&_heartbeatActive)stopHeartbeat();
 }
 function _onGameStart(){
-  resetSessionBadges();initGhostOpponent();
+  resetSessionBadges();
   _floodCounter=0;_floodWarning=false;_floodRows=[];
   _nearMissClutchReady=false;_lastNearMissKey='';
   mysteryMeterPct=0;_recentPlacements=[];_distressLevel=0;_assistMovesLeft=0;_goldenBlockNext=false;
   applyStreakGoldBorder();
   var m=document.getElementById('mysteryMeter');if(m){m.style.display='inline-block';var f=m.querySelector('.meter-fill');if(f)f.style.height='0%';}
-  var g=document.getElementById('ghostHUD');if(g)g.style.display='block';
+  /* Hide rush timer in non-rush modes */
+  var rh=document.getElementById('rushTimerHUD');if(rh&&!isBlitzRush)rh.style.display='none';
   updateFloodUI();
 }
 function _onGameOver(nb){
