@@ -776,13 +776,13 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .sp-tap{
   max-width:220px;height:auto;cursor:pointer;
   margin-top:50px;position:relative;z-index:10;
-  border:none;background:none;padding:0;
+  border:none;background:transparent;padding:0;
   opacity:0;animation:spFadeUp .55s ease 1.75s both, spTapPulse 1.9s ease 2.3s infinite;
 }
 @keyframes spFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spTapPulse{
-  0%,100%{border-color:rgba(255,255,255,.22);box-shadow:none}
-  50%    {border-color:rgba(100,200,255,.7); box-shadow:0 0 32px rgba(100,180,255,.3)}
+  0%,100%{filter:drop-shadow(0 0 0 transparent)}
+  50%    {filter:drop-shadow(0 0 16px rgba(255,215,0,.6))}
 }
 
 /* Version label */
