@@ -382,6 +382,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   background:transparent;
   border-top:none;
   box-shadow:none;
+  touch-action:none;-webkit-touch-callout:none;
 }
 /* Shuffle row */
 .tray-actions{
@@ -404,16 +405,18 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   border-radius:8px;padding:2px 8px;margin-left:4px;
 }
 .slot{
-  flex:1;max-width:110px;min-height:64px;
+  flex:1;max-width:120px;min-height:68px;
   display:flex;align-items:center;justify-content:center;
-  cursor:grab;touch-action:none;border-radius:14px;
+  cursor:grab;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;
+  border-radius:14px;
   background:transparent;
   border:none;
   box-shadow:none;
-  transition:transform .15s;
+  transition:transform .12s ease;
 }
 .slot:active,.slot.active{
-  transform:scale(1.1) translateY(-5px);
+  transform:scale(0.85) translateY(-2px);
+  opacity:0.5;
 }
 .slot.empty{opacity:.22;pointer-events:none}
 
@@ -445,8 +448,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 #hamsterReact.show .hamster-react-img{animation:hamsterBounce .7s ease}
 
 /* Ghost */
-#ghost{position:fixed;pointer-events:none;z-index:9999;display:none;opacity:.75;transition:opacity .1s}
-#ghost.invalid{opacity:.20}
+#ghost{position:fixed;pointer-events:none;z-index:9999;display:none;opacity:.80;transition:opacity .08s;will-change:transform,left,top;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4))}
+#ghost.invalid{opacity:.18}
 .ghost-grid{display:grid;gap:var(--gap)}
 .ghost-cell{border-radius:8px;position:relative;overflow:hidden;}
 .ghost-cell::after{display:none}
@@ -4958,7 +4961,9 @@ function refreshGhost(mx,my){
   var pR=dragPiece.shape.length, pC=dragPiece.shape[0].length;
   var gx=ax-(pC*STEP)/2, gy=ay-(pR*STEP)/2;
   var g=document.getElementById('ghost');
-  g.style.left=gx+'px'; g.style.top=gy+'px';
+  /* Use transform for GPU-accelerated movement — much smoother on mobile */
+  g.style.left='0px'; g.style.top='0px';
+  g.style.transform='translate3d('+gx+'px,'+gy+'px,0)';
   return snap;
 }
 
