@@ -7715,90 +7715,6 @@ function applySpinPrize(idx){
 }
 
 /* ── PUBLIC ── */
-return{
-  initOnly:          function(){
-    /* Initialize data/state without starting a level (used on first load) */
-    init();
-    /* Hide game, show menu via splash */
-  },
-  retry:             function(){
-    var savedAdv = isAdventureMode;
-    document.getElementById('goModal').classList.remove('on');
-    init();
-    isAdventureMode = savedAdv; /* Preserve mode on retry */
-    startLevel(level);
-  },
-  nextStage:         function(){
-    var sr=document.getElementById('clearSpinReward');if(sr)sr.style.display='none';
-    document.getElementById('clearModal').classList.remove('on');
-    /* classicLevel/advLevel already advanced in checkStageClear; just start next level */
-    startLevel(level+1);
-  },
-  goMenu:            function(){
-    stopDCTimer();
-    isDailyChallenge=false; dcModId='';
-    var _dchud=document.getElementById('dcHud'); if(_dchud) _dchud.classList.remove('visible');
-    document.getElementById('goModal').classList.remove('on');
-    document.getElementById('clearModal').classList.remove('on');
-    document.getElementById('mapModal').classList.remove('on');
-    openMenu();
-  },
-  /* Daily challenge spin reward */
-  claimDailySpin:    function(){
-    var sr=document.getElementById('clearSpinReward');if(sr)sr.style.display='none';
-    document.getElementById('clearModal').classList.remove('on');
-    setTimeout(function(){openSpin();},250);
-  },
-  /* Spin directly from daily bonus popup */
-  spinFromBonus:     function(){
-    document.getElementById('dailyModal').classList.remove('on');
-    setTimeout(function(){openSpin();},250);
-  },
-  closeDailyBonus:   function(){document.getElementById('dailyModal').classList.remove('on');},
-  toggleMusic:       function(){MUSIC.toggle();},
-  purchasePro:       function(){isPro=true;lsSet('bbpro','1');alert('👑 Pro activated!');},
-  undo:              doUndo,
-  activatePU:        activatePU,
-  openLeaderboard:   openLeaderboard,
-  closeLeaderboard:  closeLeaderboard,
-  lbShowTab:         lbShowTab,
-  openProfile:       openProfile,
-  closeProfile:      closeProfile,
-  saveProfile:       saveProfile,
-  onPhotoSelected:   onPhotoSelected,
-  closeBadgePopup:   closeBadgePopup,
-  openLeague:        openLeague,
-  closeLeague:       closeLeague,
-  startLeague:       startLeague,
-  openRankInfo:      openRankInfo,
-  closeRankInfo:     closeRankInfo,
-  openDailyChallenge:openDailyChallenge,
-  startDailyChallenge:startDailyChallenge,
-  closeDCModal:      closeDCModal,
-  openShop:          openShop,
-  closeShop:         closeShop,
-  shopBuy:           shopBuy,
-  shopBuyPro:        shopBuyPro,
-  shopConfirmYes:    shopConfirmYes,
-  reviveWithAd:      reviveWithAd,
-  doubleCoinsWithAd: doubleCoinsWithAd,
-  applySkin:         applySkinClass,
-  shopConfirmCancel: shopConfirmCancel,
-  setCS:             setCS,
-  openMenu:          openMenu,
-  closeMenu:         closeMenu,
-  selectMode:        selectMode,
-  mapToMenu:         mapToMenu,
-  openMap:           openMap,
-  closeMap:          closeMap,
-  switchMapMode:     switchMapMode,
-  openSpinFromMenu:  function(){ openSpin(); },
-  openSpin:          openSpin,
-  closeSpin:         closeSpin,
-  doSpin:            doSpin,
-  
-
-/* ╔═══════════════════════════════════════════════════════════╗
    ║         10 GAMEPLAY IMPROVEMENTS                         ║
    ╚═══════════════════════════════════════════════════════════╝ */
 
@@ -8466,6 +8382,90 @@ document.addEventListener('keydown',function(e){
 });
 
 
+return{
+  initOnly:          function(){
+    /* Initialize data/state without starting a level (used on first load) */
+    init();
+    /* Hide game, show menu via splash */
+  },
+  retry:             function(){
+    var savedAdv = isAdventureMode;
+    document.getElementById('goModal').classList.remove('on');
+    init();
+    isAdventureMode = savedAdv; /* Preserve mode on retry */
+    startLevel(level);
+  },
+  nextStage:         function(){
+    var sr=document.getElementById('clearSpinReward');if(sr)sr.style.display='none';
+    document.getElementById('clearModal').classList.remove('on');
+    /* classicLevel/advLevel already advanced in checkStageClear; just start next level */
+    startLevel(level+1);
+  },
+  goMenu:            function(){
+    stopDCTimer();
+    isDailyChallenge=false; dcModId='';
+    var _dchud=document.getElementById('dcHud'); if(_dchud) _dchud.classList.remove('visible');
+    document.getElementById('goModal').classList.remove('on');
+    document.getElementById('clearModal').classList.remove('on');
+    document.getElementById('mapModal').classList.remove('on');
+    openMenu();
+  },
+  /* Daily challenge spin reward */
+  claimDailySpin:    function(){
+    var sr=document.getElementById('clearSpinReward');if(sr)sr.style.display='none';
+    document.getElementById('clearModal').classList.remove('on');
+    setTimeout(function(){openSpin();},250);
+  },
+  /* Spin directly from daily bonus popup */
+  spinFromBonus:     function(){
+    document.getElementById('dailyModal').classList.remove('on');
+    setTimeout(function(){openSpin();},250);
+  },
+  closeDailyBonus:   function(){document.getElementById('dailyModal').classList.remove('on');},
+  toggleMusic:       function(){MUSIC.toggle();},
+  purchasePro:       function(){isPro=true;lsSet('bbpro','1');alert('👑 Pro activated!');},
+  undo:              doUndo,
+  activatePU:        activatePU,
+  openLeaderboard:   openLeaderboard,
+  closeLeaderboard:  closeLeaderboard,
+  lbShowTab:         lbShowTab,
+  openProfile:       openProfile,
+  closeProfile:      closeProfile,
+  saveProfile:       saveProfile,
+  onPhotoSelected:   onPhotoSelected,
+  closeBadgePopup:   closeBadgePopup,
+  openLeague:        openLeague,
+  closeLeague:       closeLeague,
+  startLeague:       startLeague,
+  openRankInfo:      openRankInfo,
+  closeRankInfo:     closeRankInfo,
+  openDailyChallenge:openDailyChallenge,
+  startDailyChallenge:startDailyChallenge,
+  closeDCModal:      closeDCModal,
+  openShop:          openShop,
+  closeShop:         closeShop,
+  shopBuy:           shopBuy,
+  shopBuyPro:        shopBuyPro,
+  shopConfirmYes:    shopConfirmYes,
+  reviveWithAd:      reviveWithAd,
+  doubleCoinsWithAd: doubleCoinsWithAd,
+  applySkin:         applySkinClass,
+  shopConfirmCancel: shopConfirmCancel,
+  setCS:             setCS,
+  openMenu:          openMenu,
+  closeMenu:         closeMenu,
+  selectMode:        selectMode,
+  mapToMenu:         mapToMenu,
+  openMap:           openMap,
+  closeMap:          closeMap,
+  switchMapMode:     switchMapMode,
+  openSpinFromMenu:  function(){ openSpin(); },
+  openSpin:          openSpin,
+  closeSpin:         closeSpin,
+  doSpin:            doSpin,
+  
+
+/* ╔═══════════════════════════════════════════════════════════╗
 startBlitzRush:    startBlitzRush,
   shufflePieces:     shufflePieces,
 };
