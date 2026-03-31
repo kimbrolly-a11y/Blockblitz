@@ -4204,6 +4204,8 @@ function init(){
   classicLevel = parseInt(lsGet('bblevel','0'))||0;
   level = classicLevel; /* Always start in Classic Mode on load */
   isAdventureMode = false;
+  if(isTetrisMode) stopTetris(); /* Clean up any lingering Tetris state */
+  isTetrisMode = false;
   levelStreak = parseInt(lsGet('bbstreak','0'))||0;
   undoCount = parseInt(lsGet('bbundo','3'))||3;
   coins = parseInt(lsGet('bbcoins','0'))||0;
@@ -8056,13 +8058,13 @@ function startTetris(){
   tetGameOver=false; gameEnded=false;
   tetScore=0; tetLevel=1; tetLines=0; _tetBag=[];
   _savedROWS=ROWS; _savedCOLS=COLS;
-  ROWS=TET_VISIBLE; COLS=TET_COLS; /* Display grid is 20x10 (buffer rows hidden) */
+  ROWS=TET_VISIBLE; COLS=TET_COLS; /* Display grid is 14x10 (2 buffer rows hidden) */
   tetHold=null; tetHoldUsed=false;
   tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
-  /* Init empty board (22 rows: 2 buffer + 20 visible) */
+  /* Init empty board (16 rows: 2 buffer + 14 visible) */
   tetBoard=[];
   for(var r=0;r<TET_ROWS;r++){tetBoard.push([]);for(var c=0;c<TET_COLS;c++) tetBoard[r].push({type:T.EMPTY,color:null});}
-  /* Display board is 20x10 */
+  /* Display board is 14x10 */
   board=[];
   for(var r=0;r<TET_VISIBLE;r++){board.push([]);for(var c=0;c<TET_COLS;c++) board[r].push({type:T.EMPTY,color:null});}
   /* Hide puzzle UI, show tetris UI */
@@ -8083,7 +8085,7 @@ function startTetris(){
   tetGravityId=setInterval(tetTick,tetGravityMs());
   /* Keyboard with DAS (Delayed Auto Shift) */
   _tetKeyRepeat={};
-  clearInterval(_tetDASTimer); clearInterval(_tetARRTimer);
+  clearTimeout(_tetDASTimer); clearInterval(_tetARRTimer);
   if(!_tetKeyHandler){
     _tetKeyHandler=function(e){
       if(!isTetrisMode||tetGameOver)return;
@@ -8471,17 +8473,21 @@ function tetDoGameOver(){
 }
 
 function stopTetris(){
+  if(!isTetrisMode) return; /* guard against double-call */
   isTetrisMode=false;
   clearInterval(tetGravityId);tetGravityId=null;
   clearTimeout(tetLockTimer);tetLocking=false;
   _tetStopDAS();_tetKeyRepeat={};
   if(_tetKeyHandler)document.removeEventListener('keydown',_tetKeyHandler);
   if(_tetKeyUpHandler)document.removeEventListener('keyup',_tetKeyUpHandler);
+  _tetKeyHandler=null; _tetKeyUpHandler=null; /* allow re-creation next start */
   ROWS=_savedROWS;COLS=_savedCOLS;
+  /* Restore all hidden UI elements */
   var tc=document.getElementById('tetControls');if(tc)tc.style.display='none';
   var np=document.getElementById('tetNextPreview');if(np)np.style.display='none';
   var tray=document.getElementById('tray');if(tray)tray.style.display='';
   var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='';
+  var pu=document.querySelector('.pu-bar');if(pu)pu.style.display='';
 }
 
 
@@ -8505,8 +8511,10 @@ return{
     startLevel(level+1);
   },
   goMenu:            function(){
+    if(isTetrisMode) stopTetris(); /* Clean up Tetris state before menu */
     stopDCTimer();
     isDailyChallenge=false; dcModId='';
+    isTetrisMode=false; isLeagueMode=false;
     var _dchud=document.getElementById('dcHud'); if(_dchud) _dchud.classList.remove('visible');
     document.getElementById('goModal').classList.remove('on');
     document.getElementById('clearModal').classList.remove('on');
