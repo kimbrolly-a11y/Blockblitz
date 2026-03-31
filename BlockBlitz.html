@@ -7798,28 +7798,85 @@ document.addEventListener('keydown',function(e){_debugBuffer+=e.key.toLowerCase(
 
 
 /* ══════════════════════════════════════
-   TETRIS MODE ENGINE
+   TETRIS MODE ENGINE — follows Tetris Guideline
+   Ref: https://tetris.wiki/Tetris_Guideline
 ══════════════════════════════════════ */
 var isTetrisMode=false;
-var tetBoard=[]; /* 20x10 */
-var tetPiece=null; /* {key,shape,color,r,c,rot} */
+var tetBoard=[]; /* 22x10 (rows 0-1 hidden buffer) */
+var tetPiece=null; /* {key,rot,r,c} */
 var tetNext=null;
+var tetHold=null; /* hold piece key */
+var tetHoldUsed=false; /* can only hold once per piece */
 var tetScore=0, tetLevel=1, tetLines=0;
 var tetGravityId=null;
 var tetGameOver=false;
-var TET_ROWS=20, TET_COLS=10;
+var tetLocking=false; /* lock delay active */
+var tetLockTimer=null;
+var tetLockMoves=0; /* max 15 moves during lock delay */
+var TET_ROWS=22, TET_COLS=10; /* 22 rows: rows 0-1 are hidden buffer above visible 20 */
+var TET_VISIBLE=20;
 var _savedROWS=8, _savedCOLS=8;
 var _tetKeyHandler=null;
+var _tetKeyRepeat={}; /* DAS: track held keys */
+var _tetDASTimer=null;
+var _tetARRTimer=null;
+var _tetKeyUpHandler=null;
+var _tetDASKey=null;
 
-/* 7 standard tetrominoes with all rotations */
+function _tetStartDAS(key,fn){
+  _tetStopDAS();
+  _tetDASKey=key;
+  _tetDASTimer=setTimeout(function(){
+    _tetARRTimer=setInterval(fn,50); /* ARR: 50ms repeat */
+  },170); /* DAS: 170ms initial delay */
+}
+function _tetStopDAS(key){
+  if(key&&key!==_tetDASKey)return;
+  clearTimeout(_tetDASTimer);clearInterval(_tetARRTimer);
+  _tetDASTimer=null;_tetARRTimer=null;_tetDASKey=null;
+}
+
+/* 7 standard tetrominoes — SRS rotation states (all 4 rotations each) */
 var TETRO={
-  I:{shapes:[[[1,1,1,1]],[[1],[1],[1],[1]]],color:'#00acc1'},
-  O:{shapes:[[[1,1],[1,1]]],color:'#ff8f00'},
-  T:{shapes:[[[0,1,0],[1,1,1]],[[1,0],[1,1],[1,0]],[[1,1,1],[0,1,0]],[[0,1],[1,1],[0,1]]],color:'#ab47bc'},
-  S:{shapes:[[[0,1,1],[1,1,0]],[[1,0],[1,1],[0,1]]],color:'#43a047'},
-  Z:{shapes:[[[1,1,0],[0,1,1]],[[0,1],[1,1],[1,0]]],color:'#e53935'},
-  J:{shapes:[[[1,0,0],[1,1,1]],[[1,1],[1,0],[1,0]],[[1,1,1],[0,0,1]],[[0,1],[0,1],[1,1]]],color:'#1e88e5'},
-  L:{shapes:[[[0,0,1],[1,1,1]],[[1,0],[1,0],[1,1]],[[1,1,1],[1,0,0]],[[1,1],[0,1],[0,1]]],color:'#5c6bc0'}
+  I:{shapes:[
+    [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+    [[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,0,1,0]],
+    [[0,0,0,0],[0,0,0,0],[1,1,1,1],[0,0,0,0]],
+    [[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]]
+  ],color:'#00acc1'},
+  O:{shapes:[
+    [[1,1],[1,1]],[[1,1],[1,1]],[[1,1],[1,1]],[[1,1],[1,1]]
+  ],color:'#ff8f00'},
+  T:{shapes:[
+    [[0,1,0],[1,1,1],[0,0,0]],
+    [[0,1,0],[0,1,1],[0,1,0]],
+    [[0,0,0],[1,1,1],[0,1,0]],
+    [[0,1,0],[1,1,0],[0,1,0]]
+  ],color:'#ab47bc'},
+  S:{shapes:[
+    [[0,1,1],[1,1,0],[0,0,0]],
+    [[0,1,0],[0,1,1],[0,0,1]],
+    [[0,0,0],[0,1,1],[1,1,0]],
+    [[1,0,0],[1,1,0],[0,1,0]]
+  ],color:'#43a047'},
+  Z:{shapes:[
+    [[1,1,0],[0,1,1],[0,0,0]],
+    [[0,0,1],[0,1,1],[0,1,0]],
+    [[0,0,0],[1,1,0],[0,1,1]],
+    [[0,1,0],[1,1,0],[1,0,0]]
+  ],color:'#e53935'},
+  J:{shapes:[
+    [[1,0,0],[1,1,1],[0,0,0]],
+    [[0,1,1],[0,1,0],[0,1,0]],
+    [[0,0,0],[1,1,1],[0,0,1]],
+    [[0,1,0],[0,1,0],[1,1,0]]
+  ],color:'#1e88e5'},
+  L:{shapes:[
+    [[0,0,1],[1,1,1],[0,0,0]],
+    [[0,1,0],[0,1,0],[0,1,1]],
+    [[0,0,0],[1,1,1],[1,0,0]],
+    [[1,1,0],[0,1,0],[0,1,0]]
+  ],color:'#5c6bc0'}
 };
 var TETRO_KEYS=['I','O','T','S','Z','J','L'];
 var _tetBag=[];
@@ -7832,7 +7889,25 @@ function _tetNextFromBag(){
   return _tetBag.pop();
 }
 
-function tetGravityMs(){return Math.max(80,1000-(tetLevel-1)*80);}
+/* SRS wall kick data */
+var SRS_KICKS_JLSTZ=[
+  [[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]], /* 0→1 */
+  [[0,0],[1,0],[1,-1],[0,2],[1,2]],     /* 1→2 */
+  [[0,0],[1,0],[1,1],[0,-2],[1,-2]],    /* 2→3 */
+  [[0,0],[-1,0],[-1,-1],[0,2],[-1,2]]  /* 3→0 */
+];
+var SRS_KICKS_I=[
+  [[0,0],[-2,0],[1,0],[-2,-1],[1,2]],  /* 0→1 */
+  [[0,0],[-1,0],[2,0],[-1,2],[2,-1]],  /* 1→2 */
+  [[0,0],[2,0],[-1,0],[2,1],[-1,-2]],  /* 2→3 */
+  [[0,0],[1,0],[-2,0],[1,-2],[-2,1]]   /* 3→0 */
+];
+
+function tetGravityMs(){
+  /* NES-style speed curve */
+  var speeds=[800,720,630,550,470,380,300,220,140,100,80,80,80,70,70,70,50,50,50,30];
+  return speeds[Math.min(tetLevel-1,speeds.length-1)];
+}
 
 function startTetris(){
   closeMenu();
@@ -7840,13 +7915,15 @@ function startTetris(){
   tetGameOver=false; gameEnded=false;
   tetScore=0; tetLevel=1; tetLines=0; _tetBag=[];
   _savedROWS=ROWS; _savedCOLS=COLS;
-  ROWS=TET_ROWS; COLS=TET_COLS;
-  /* Init empty board */
+  ROWS=TET_VISIBLE; COLS=TET_COLS; /* Display grid is 20x10 (buffer rows hidden) */
+  tetHold=null; tetHoldUsed=false;
+  tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
+  /* Init empty board (22 rows: 2 buffer + 20 visible) */
   tetBoard=[];
   for(var r=0;r<TET_ROWS;r++){tetBoard.push([]);for(var c=0;c<TET_COLS;c++) tetBoard[r].push({type:T.EMPTY,color:null});}
-  /* board will be rebuilt each frame by tetRender() as a copy of tetBoard */
+  /* Display board is 20x10 */
   board=[];
-  for(var r=0;r<TET_ROWS;r++){board.push([]);for(var c=0;c<TET_COLS;c++) board[r].push({type:T.EMPTY,color:null});}
+  for(var r=0;r<TET_VISIBLE;r++){board.push([]);for(var c=0;c<TET_COLS;c++) board[r].push({type:T.EMPTY,color:null});}
   /* Hide puzzle UI, show tetris UI */
   var tray=document.getElementById('tray');if(tray)tray.style.display='none';
   var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='none';
@@ -7863,39 +7940,58 @@ function startTetris(){
   /* Start gravity */
   clearInterval(tetGravityId);
   tetGravityId=setInterval(tetTick,tetGravityMs());
-  /* Keyboard */
+  /* Keyboard with DAS (Delayed Auto Shift) */
+  _tetKeyRepeat={};
+  clearInterval(_tetDASTimer); clearInterval(_tetARRTimer);
   if(!_tetKeyHandler){
     _tetKeyHandler=function(e){
       if(!isTetrisMode||tetGameOver)return;
+      if(_tetKeyRepeat[e.key])return; /* already held */
       var handled=true;
       switch(e.key){
-        case'ArrowLeft':tetMoveLeft();break;
-        case'ArrowRight':tetMoveRight();break;
-        case'ArrowDown':tetMoveDown();break;
+        case'ArrowLeft':tetMoveLeft();_tetStartDAS('ArrowLeft',tetMoveLeft);break;
+        case'ArrowRight':tetMoveRight();_tetStartDAS('ArrowRight',tetMoveRight);break;
+        case'ArrowDown':tetMoveDown();_tetStartDAS('ArrowDown',tetMoveDown);break;
         case'ArrowUp':tetRotate();break;
         case' ':tetHardDrop();break;
+        case'c':case'C':case'Shift':tetHoldPiece();break;
         default:handled=false;
       }
-      if(handled)e.preventDefault();
+      if(handled){e.preventDefault();_tetKeyRepeat[e.key]=true;}
     };
   }
   document.addEventListener('keydown',_tetKeyHandler);
+  if(!_tetKeyUpHandler){
+    _tetKeyUpHandler=function(e){
+      delete _tetKeyRepeat[e.key];
+      _tetStopDAS(e.key);
+    };
+  }
+  document.addEventListener('keyup',_tetKeyUpHandler);
   updateModeBadge();
   MUSIC.play(0);
 }
 
+function tetGetShape(){return TETRO[tetPiece.key].shapes[tetPiece.rot];}
+
 function tetSpawnPiece(){
   var key=tetNext.key;
   var td=TETRO[key];
-  tetPiece={key:key,shape:td.shapes[0],color:td.color,r:0,c:Math.floor((TET_COLS-td.shapes[0][0].length)/2),rot:0};
+  var shape=td.shapes[0];
+  /* Spawn at row 0 (in buffer zone), centered */
+  tetPiece={key:key,rot:0,r:0,c:Math.floor((TET_COLS-shape[0].length)/2)};
+  tetHoldUsed=false;
+  tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
   /* Pick next */
   tetNext={key:_tetNextFromBag()};
   tetRenderNext();
-  /* Check if spawn is blocked */
-  if(tetCollides(tetPiece.shape,tetPiece.r,tetPiece.c)){
+  /* Check if spawn is blocked — game over */
+  if(tetCollides(tetGetShape(),tetPiece.r,tetPiece.c)){
     tetDoGameOver();
     return;
   }
+  /* Try to drop 1 row into visible area */
+  if(!tetCollides(tetGetShape(),tetPiece.r+1,tetPiece.c)) tetPiece.r++;
   tetRender();
 }
 
@@ -7904,81 +8000,138 @@ function tetCollides(shape,r,c){
     for(var dc=0;dc<shape[0].length;dc++)
       if(shape[dr][dc]){
         var nr=r+dr,nc=c+dc;
-        if(nr<0||nr>=TET_ROWS||nc<0||nc>=TET_COLS)return true;
+        if(nc<0||nc>=TET_COLS||nr>=TET_ROWS)return true;
+        if(nr<0)continue; /* allow above top */
         if(tetBoard[nr][nc].type===T.FILLED)return true;
       }
   return false;
 }
 
+function tetIsOnGround(){
+  return tetPiece && tetCollides(tetGetShape(),tetPiece.r+1,tetPiece.c);
+}
+
+function tetResetLockDelay(){
+  if(tetLocking && tetLockMoves<15){
+    tetLockMoves++;
+    clearTimeout(tetLockTimer);
+    tetLockTimer=setTimeout(tetDoLock,500);
+  }
+}
+
+function tetStartLockDelay(){
+  if(tetLocking)return;
+  tetLocking=true;
+  tetLockMoves=0;
+  tetLockTimer=setTimeout(tetDoLock,500);
+}
+
 function tetTick(){
-  if(!isTetrisMode||tetGameOver)return;
-  if(!tetCollides(tetPiece.shape,tetPiece.r+1,tetPiece.c)){
+  if(!isTetrisMode||tetGameOver||!tetPiece)return;
+  var shape=tetGetShape();
+  if(!tetCollides(shape,tetPiece.r+1,tetPiece.c)){
     tetPiece.r++;
+    tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
     tetRender();
   } else {
-    tetLock();
+    /* Piece is on ground — start lock delay */
+    tetStartLockDelay();
   }
+}
+
+function tetDoLock(){
+  if(!tetPiece||tetGameOver)return;
+  var shape=tetGetShape();
+  var color=TETRO[tetPiece.key].color;
+  /* Write piece to board */
+  for(var dr=0;dr<shape.length;dr++)
+    for(var dc=0;dc<shape[0].length;dc++)
+      if(shape[dr][dc]){
+        var nr=tetPiece.r+dr,nc=tetPiece.c+dc;
+        if(nr>=0&&nr<TET_ROWS&&nc>=0&&nc<TET_COLS)
+          tetBoard[nr][nc]={type:T.FILLED,color:color};
+      }
+  tetLocking=false; clearTimeout(tetLockTimer);
+  SND.place();
+  tetCheckLines();
+  tetSpawnPiece();
 }
 
 function tetMoveLeft(){
   if(!tetPiece||tetGameOver)return;
-  if(!tetCollides(tetPiece.shape,tetPiece.r,tetPiece.c-1)){
-    tetPiece.c--;tetRender();SND.pickup();
+  var shape=tetGetShape();
+  if(!tetCollides(shape,tetPiece.r,tetPiece.c-1)){
+    tetPiece.c--;
+    if(tetIsOnGround()) tetResetLockDelay();
+    tetRender();
   }
 }
 function tetMoveRight(){
   if(!tetPiece||tetGameOver)return;
-  if(!tetCollides(tetPiece.shape,tetPiece.r,tetPiece.c+1)){
-    tetPiece.c++;tetRender();SND.pickup();
+  var shape=tetGetShape();
+  if(!tetCollides(shape,tetPiece.r,tetPiece.c+1)){
+    tetPiece.c++;
+    if(tetIsOnGround()) tetResetLockDelay();
+    tetRender();
   }
 }
 function tetMoveDown(){
   if(!tetPiece||tetGameOver)return;
-  if(!tetCollides(tetPiece.shape,tetPiece.r+1,tetPiece.c)){
-    tetPiece.r++;tetScore++;tetRender();
+  var shape=tetGetShape();
+  if(!tetCollides(shape,tetPiece.r+1,tetPiece.c)){
+    tetPiece.r++;tetScore++;
+    tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
+    tetRender();
   } else {
-    tetLock();
+    tetStartLockDelay();
   }
 }
 function tetRotate(){
   if(!tetPiece||tetGameOver)return;
   var td=TETRO[tetPiece.key];
-  var newRot=(tetPiece.rot+1)%td.shapes.length;
+  if(tetPiece.key==='O')return; /* O doesn't rotate */
+  var oldRot=tetPiece.rot;
+  var newRot=(oldRot+1)%4;
   var newShape=td.shapes[newRot];
-  /* Try rotation at current position */
-  if(!tetCollides(newShape,tetPiece.r,tetPiece.c)){
-    tetPiece.shape=newShape;tetPiece.rot=newRot;tetRender();SND.pickup();return;
-  }
-  /* Wall kicks: try offsets */
-  var kicks=[[-1,0],[1,0],[0,-1],[-2,0],[2,0]];
+  /* SRS wall kick tests */
+  var kicks=(tetPiece.key==='I')?SRS_KICKS_I[oldRot]:SRS_KICKS_JLSTZ[oldRot];
   for(var k=0;k<kicks.length;k++){
-    if(!tetCollides(newShape,tetPiece.r+kicks[k][1],tetPiece.c+kicks[k][0])){
-      tetPiece.c+=kicks[k][0];tetPiece.r+=kicks[k][1];
-      tetPiece.shape=newShape;tetPiece.rot=newRot;tetRender();SND.pickup();return;
+    var dx=kicks[k][0],dy=-kicks[k][1]; /* SRS: positive y = up, our grid positive = down */
+    if(!tetCollides(newShape,tetPiece.r+dy,tetPiece.c+dx)){
+      tetPiece.c+=dx;tetPiece.r+=dy;
+      tetPiece.rot=newRot;
+      if(tetIsOnGround()) tetResetLockDelay();
+      tetRender();
+      return;
     }
   }
 }
+function tetHoldPiece(){
+  if(!tetPiece||tetGameOver||tetHoldUsed)return;
+  tetHoldUsed=true;
+  var prevHold=tetHold;
+  tetHold=tetPiece.key;
+  tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
+  if(prevHold){
+    /* Swap: spawn held piece */
+    var td=TETRO[prevHold];
+    tetPiece={key:prevHold,rot:0,r:0,c:Math.floor((TET_COLS-td.shapes[0][0].length)/2)};
+    if(!tetCollides(td.shapes[0],tetPiece.r+1,tetPiece.c)) tetPiece.r++;
+    tetRender();
+  } else {
+    tetSpawnPiece();
+  }
+  tetRenderHold();
+}
 function tetHardDrop(){
   if(!tetPiece||tetGameOver)return;
+  var shape=tetGetShape();
   var dropped=0;
-  while(!tetCollides(tetPiece.shape,tetPiece.r+1,tetPiece.c)){tetPiece.r++;dropped++;}
+  while(!tetCollides(shape,tetPiece.r+1,tetPiece.c)){tetPiece.r++;dropped++;}
   tetScore+=dropped*2;
-  tetLock();
-}
-
-function tetLock(){
-  if(!tetPiece)return;
-  /* Write piece to board */
-  for(var dr=0;dr<tetPiece.shape.length;dr++)
-    for(var dc=0;dc<tetPiece.shape[0].length;dc++)
-      if(tetPiece.shape[dr][dc]){
-        var nr=tetPiece.r+dr,nc=tetPiece.c+dc;
-        if(nr>=0&&nr<TET_ROWS&&nc>=0&&nc<TET_COLS)
-          tetBoard[nr][nc]={type:T.FILLED,color:tetPiece.color};
-      }
-  SND.place();
-  tetCheckLines();
-  tetSpawnPiece();
+  /* Instant lock — no delay on hard drop */
+  tetLocking=false; clearTimeout(tetLockTimer);
+  tetDoLock();
 }
 
 function tetCheckLines(){
@@ -8002,14 +8155,17 @@ function tetCheckLines(){
     showToast('Level '+tetLevel+'!');
     SND.stageWin();
   }
-  /* Animate clear */
+  /* Animate clear on visible rows */
+  var bufOff=TET_ROWS-TET_VISIBLE;
   fullRows.forEach(function(r){
+    var vr=r-bufOff;
+    if(vr<0)return;
     for(var c=0;c<TET_COLS;c++){
-      var el=cellEl(r,c);
-      if(el){el.classList.add('pop');el.style.background='';el.style.boxShadow='';el.innerHTML='';}
+      var el=cellEl(vr,c);
+      if(el){el.classList.add('pop');el.style.background='#fff';el.style.boxShadow='0 0 12px #fff';el.innerHTML='';}
     }
   });
-  /* Remove rows and shift down */
+  /* Remove rows and shift down after animation */
   setTimeout(function(){
     for(var i=fullRows.length-1;i>=0;i--){
       tetBoard.splice(fullRows[i],1);
@@ -8019,8 +8175,8 @@ function tetCheckLines(){
       for(var c=0;c<TET_COLS;c++)emptyRow.push({type:T.EMPTY,color:null});
       tetBoard.unshift(emptyRow);
     }
-    tetRender(); /* rebuild display from updated tetBoard */
-  },250);
+    tetRender();
+  },200);
   /* Visual feedback */
   SND.clear(cl,cl>=4?2:1);
   showFlyScore('+'+pts,cl>=2);
@@ -8031,58 +8187,54 @@ function tetCheckLines(){
 }
 
 function tetGhostR(){
-  if(!tetPiece)return tetPiece?tetPiece.r:0;
+  if(!tetPiece)return 0;
+  var shape=tetGetShape();
   var gr=tetPiece.r;
-  while(!tetCollides(tetPiece.shape,gr+1,tetPiece.c))gr++;
+  while(!tetCollides(shape,gr+1,tetPiece.c))gr++;
   return gr;
 }
 
 function tetRender(){
-  /* Build display board as a COPY of tetBoard (not a reference!) */
-  board=[];
-  for(var r=0;r<TET_ROWS;r++){
-    board.push([]);
+  if(!isTetrisMode)return;
+  var shape=tetPiece?tetGetShape():null;
+  var color=tetPiece?TETRO[tetPiece.key].color:null;
+  /* Only render visible rows (skip buffer rows 0-1) */
+  var bufOff=TET_ROWS-TET_VISIBLE; /* =2 */
+  for(var vr=0;vr<TET_VISIBLE;vr++){
+    var br=vr+bufOff; /* board row */
     for(var c=0;c<TET_COLS;c++){
-      var src=tetBoard[r][c];
-      board[r].push({type:src.type,color:src.color});
-    }
-  }
-  /* Overlay ghost piece */
-  var gr=tetGhostR();
-  if(tetPiece&&gr!==tetPiece.r){
-    for(var dr=0;dr<tetPiece.shape.length;dr++)
-      for(var dc=0;dc<tetPiece.shape[0].length;dc++)
-        if(tetPiece.shape[dr][dc]){
-          var nr=gr+dr,nc=tetPiece.c+dc;
-          if(nr>=0&&nr<TET_ROWS&&nc>=0&&nc<TET_COLS&&board[nr][nc].type===T.EMPTY)
-            board[nr][nc]={type:'ghost',color:tetPiece.color};
-        }
-  }
-  /* Overlay active piece */
-  if(tetPiece){
-    for(var dr=0;dr<tetPiece.shape.length;dr++)
-      for(var dc=0;dc<tetPiece.shape[0].length;dc++)
-        if(tetPiece.shape[dr][dc]){
-          var nr=tetPiece.r+dr,nc=tetPiece.c+dc;
-          if(nr>=0&&nr<TET_ROWS&&nc>=0&&nc<TET_COLS)
-            board[nr][nc]={type:T.FILLED,color:tetPiece.color};
-        }
-  }
-  /* Render to DOM */
-  for(var r=0;r<TET_ROWS;r++)for(var c=0;c<TET_COLS;c++){
-    var el=cellEl(r,c);if(!el)continue;
-    var cell=board[r][c];
-    if(cell.type==='ghost'){
-      el.className='cell tet-ghost';
-      el.style.background=cell.color;
-      el.style.boxShadow='none';
-      el.innerHTML='';
-    } else {
-      applyCell(el,cell);
-      if(cell.type===T.FILLED){
-        el.style.background=cell.color;
-        el.style.boxShadow='0 3px 0 '+darken(cell.color)+',0 4px 8px rgba(0,0,0,.3)';
+      var el=cellEl(vr,c);if(!el)continue;
+      var src=tetBoard[br][c];
+      var isGhost=false,isActive=false;
+      /* Check if this cell is part of ghost piece */
+      if(tetPiece){
+        var gr=tetGhostR();
+        for(var dr=0;dr<shape.length&&!isGhost;dr++)
+          for(var dc=0;dc<shape[0].length&&!isGhost;dc++)
+            if(shape[dr][dc]&&gr+dr===br&&tetPiece.c+dc===c&&src.type===T.EMPTY) isGhost=true;
+        /* Check if this cell is part of active piece */
+        for(var dr=0;dr<shape.length&&!isActive;dr++)
+          for(var dc=0;dc<shape[0].length&&!isActive;dc++)
+            if(shape[dr][dc]&&tetPiece.r+dr===br&&tetPiece.c+dc===c) isActive=true;
+      }
+      if(isActive){
+        el.className='cell filled';
+        el.style.background=color;
+        el.style.boxShadow='0 3px 0 '+darken(color)+',0 4px 8px rgba(0,0,0,.3)';
         el.innerHTML='<div style="position:absolute;top:2px;left:2px;right:2px;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);border-radius:4px 4px 0 0;pointer-events:none"></div>';
+      } else if(isGhost){
+        el.className='cell tet-ghost';
+        el.style.background=color;
+        el.style.boxShadow='none';
+        el.innerHTML='';
+      } else if(src.type===T.FILLED){
+        el.className='cell filled';
+        el.style.background=src.color;
+        el.style.boxShadow='0 3px 0 '+darken(src.color)+',0 4px 8px rgba(0,0,0,.3)';
+        el.innerHTML='<div style="position:absolute;top:2px;left:2px;right:2px;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);border-radius:4px 4px 0 0;pointer-events:none"></div>';
+      } else {
+        el.className='cell empty';
+        el.style.background='';el.style.boxShadow='';el.innerHTML='';
       }
     }
   }
@@ -8090,6 +8242,10 @@ function tetRender(){
   var sco=document.getElementById('xpScore');if(sco)sco.textContent=tetScore;
   var lbl=document.getElementById('xpLabel');if(lbl)lbl.textContent='LV '+tetLevel+' | '+tetLines+' Lines';
   var fill=document.getElementById('xpFill');if(fill)fill.style.width=Math.min(100,(tetLines%10)*10)+'%';
+}
+
+function tetRenderHold(){
+  /* TODO: add hold piece preview UI in future */
 }
 
 function tetRenderNext(){
@@ -8125,7 +8281,10 @@ function tetDoGameOver(){
 function stopTetris(){
   isTetrisMode=false;
   clearInterval(tetGravityId);tetGravityId=null;
+  clearTimeout(tetLockTimer);tetLocking=false;
+  _tetStopDAS();_tetKeyRepeat={};
   if(_tetKeyHandler)document.removeEventListener('keydown',_tetKeyHandler);
+  if(_tetKeyUpHandler)document.removeEventListener('keyup',_tetKeyUpHandler);
   ROWS=_savedROWS;COLS=_savedCOLS;
   var tc=document.getElementById('tetControls');if(tc)tc.style.display='none';
   var np=document.getElementById('tetNextPreview');if(np)np.style.display='none';
@@ -8216,7 +8375,7 @@ return{
   closeSpin:         closeSpin,
   doSpin:            doSpin,
   startTetris:startTetris,
-  tetLeft:tetMoveLeft,tetRight:tetMoveRight,tetDown:tetMoveDown,tetDrop:tetHardDrop,tetRotate:tetRotate,
+  tetLeft:tetMoveLeft,tetRight:tetMoveRight,tetDown:tetMoveDown,tetDrop:tetHardDrop,tetRotate:tetRotate,tetHold:tetHoldPiece,
   shufflePieces:     shufflePieces,
 };
 
