@@ -1303,7 +1303,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 
     <!-- Tetris Mode -->
-    <div class="menu-mode-card menu-card-tetris" onclick="BB.startTetris()">
+    <div class="menu-mode-card menu-card-tetris" onclick="BB.switchMapMode('tetris');BB.openMap()">
       <div class="menu-card-shine"></div>
       <div class="menu-card-left">
         <div class="menu-card-top">
@@ -1371,6 +1371,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     </div>
     <div class="map-tabs">
       <button class="map-tab active" id="mapTabClassic" onclick="BB.switchMapMode('classic')">⚡ Classic</button>
+      <button class="map-tab" id="mapTabTetris" onclick="BB.switchMapMode('tetris')" style="background:rgba(0,172,193,0.15);border-color:rgba(0,172,193,0.3)">🎮 Tetris</button>
       <button class="map-tab adv-tab" id="mapTabAdv" onclick="BB.switchMapMode('adventure')">⚔️ Adventure</button>
     </div>
     <div class="map-scroll" id="mapScroll">
@@ -7222,10 +7223,65 @@ function buildMapModal(mode){
   /* Update tab highlights */
   var tc = document.getElementById('mapTabClassic');
   var ta = document.getElementById('mapTabAdv');
+  var tt = document.getElementById('mapTabTetris');
   if(tc){ tc.classList.toggle('active', mode==='classic'); }
   if(ta){ ta.classList.toggle('active', mode==='adventure'); }
+  if(tt){ tt.classList.toggle('active', mode==='tetris'); }
 
   wrap.innerHTML='';
+
+  /* ── TETRIS MAP ── */
+  if(mode==='tetris'){
+    var tetWorlds=[
+      {name:'🎮 Zone 1 — Slow Start',color:'#00acc1',bg:'rgba(0,172,193,0.2)',levels:[0,9]},
+      {name:'🎮 Zone 2 — Warming Up',color:'#00897b',bg:'rgba(0,137,123,0.2)',levels:[10,19]},
+      {name:'🎮 Zone 3 — Getting Fast',color:'#43a047',bg:'rgba(67,160,71,0.2)',levels:[20,29]},
+      {name:'🎮 Zone 4 — Speed Zone',color:'#7cb342',bg:'rgba(124,179,66,0.2)',levels:[30,39]},
+      {name:'🎮 Zone 5 — Turbo Mode',color:'#ff8f00',bg:'rgba(255,143,0,0.2)',levels:[40,49]},
+      {name:'🎮 Zone 6 — Hyper Speed',color:'#f4511e',bg:'rgba(244,81,30,0.2)',levels:[50,59]},
+      {name:'🎮 Zone 7 — Blitz Territory',color:'#e53935',bg:'rgba(229,57,53,0.2)',levels:[60,69]},
+      {name:'🎮 Zone 8 — Insane',color:'#c62828',bg:'rgba(198,40,40,0.2)',levels:[70,79]},
+      {name:'🎮 Zone 9 — Godlike',color:'#ab47bc',bg:'rgba(171,71,188,0.2)',levels:[80,89]},
+      {name:'🎮 Zone 10 — Infinity',color:'#ffd700',bg:'rgba(255,215,0,0.2)',levels:[90,99]},
+    ];
+    var TET_MAP_COLORS=['#00acc1','#00897b','#009688','#43a047','#7cb342','#ff8f00','#f4511e','#e53935','#ab47bc','#ffd700',
+                        '#00bcd4','#26a69a','#4caf50','#8bc34a','#ffc107','#ff9800','#ff5722','#d32f2f','#9c27b0','#ffeb3b'];
+    tetWorlds.forEach(function(w){
+      var sec=document.createElement('div');sec.className='map-world';
+      var wtitle=document.createElement('div');wtitle.className='map-world-title';
+      wtitle.style.background=w.bg;wtitle.style.color=w.color;wtitle.style.border='1px solid '+w.color+'55';
+      wtitle.textContent=w.name;
+      sec.appendChild(wtitle);
+      var grid=document.createElement('div');grid.className='map-grid';
+      for(var i=w.levels[0];i<=w.levels[1];i++){
+        var unlocked=i<=tetMaxLevel;
+        var isCurrent=i===tetLevel-1&&isTetrisMode;
+        var stars=tetLevelStars[i]||0;
+        var item=document.createElement('div');item.className='map-lvl';
+        var bubble=document.createElement('div');
+        bubble.className='map-bubble'+(unlocked?' completed':'')+(isCurrent?' current':'')+(unlocked?'':' locked');
+        bubble.style.background=unlocked?'linear-gradient(145deg,'+TET_MAP_COLORS[i%TET_MAP_COLORS.length]+','+TET_MAP_COLORS[(i+5)%TET_MAP_COLORS.length]+')':'';
+        if(!unlocked){bubble.innerHTML='<span class="map-lck">🔒</span>';}
+        else{
+          bubble.textContent=(i+1);
+          (function(n){
+            bubble.addEventListener('click',function(){
+              document.getElementById('mapModal').classList.remove('on');
+              var ms=document.getElementById('menuScreen');if(ms){ms.classList.add('hidden');ms.style.display='none';}
+              setTimeout(function(){tetStartAtLevel(n);},200);
+            });
+          })(i);
+        }
+        var starRow=document.createElement('div');starRow.className='map-stars';
+        starRow.textContent=unlocked?(stars>=1?'⭐':'☆')+(stars>=2?'⭐':'☆')+(stars>=3?'⭐':'☆'):'';
+        item.appendChild(bubble);item.appendChild(starRow);
+        grid.appendChild(item);
+      }
+      sec.appendChild(grid);wrap.appendChild(sec);
+    });
+    return;
+  }
+
   var isAdv = (mode === 'adventure');
 
   var worlds=[
@@ -7805,6 +7861,8 @@ var isTetrisMode=false;
 var tetBoard=[]; /* 22x10 (rows 0-1 hidden buffer) */
 var tetPiece=null; /* {key,rot,r,c} */
 var tetNext=null;
+var tetMaxLevel=parseInt(lsGet('bbTetMaxLv','0'))||0;
+var tetLevelStars=JSON.parse(lsGet('bbTetStars','[]'))||[];
 var tetHold=null; /* hold piece key */
 var tetHoldUsed=false; /* can only hold once per piece */
 var tetScore=0, tetLevel=1, tetLines=0;
@@ -8264,15 +8322,41 @@ function tetRenderNext(){
   }
 }
 
+function tetStartAtLevel(lv){
+  /* Start Tetris at a specific level from the map */
+  startTetris();
+  /* Set level and speed */
+  tetLevel=lv+1;
+  tetLines=lv*10; /* lines already "cleared" to reach this level */
+  clearInterval(tetGravityId);
+  tetGravityId=setInterval(tetTick,tetGravityMs());
+  tetRender();
+}
+
 function tetDoGameOver(){
   tetGameOver=true;
   clearInterval(tetGravityId);tetGravityId=null;
-  document.removeEventListener('keydown',_tetKeyHandler);
+  clearTimeout(tetLockTimer);
+  _tetStopDAS();
+  if(_tetKeyHandler)document.removeEventListener('keydown',_tetKeyHandler);
+  if(_tetKeyUpHandler)document.removeEventListener('keyup',_tetKeyUpHandler);
   /* Save high scores */
   var prevLines=parseInt(lsGet('bbTetrisLines','0'))||0;
   if(tetLines>prevLines)lsSet('bbTetrisLines',tetLines);
   var prevScore=parseInt(lsGet('bbTetrisScore','0'))||0;
   if(tetScore>prevScore)lsSet('bbTetrisScore',tetScore);
+  /* Save level progress — star rating based on lines cleared at this level */
+  var linesAtLevel=tetLines%10;
+  var lvIdx=tetLevel-1;
+  if(lvIdx>tetMaxLevel){tetMaxLevel=lvIdx;lsSet('bbTetMaxLv',tetMaxLevel);}
+  /* Stars: 1=reached level, 2=cleared 5+ lines at level, 3=cleared all 10 */
+  var stars=1;
+  if(linesAtLevel>=5)stars=2;
+  if(linesAtLevel>=10||tetLevel>lvIdx+1)stars=3;
+  if(!tetLevelStars[lvIdx]||stars>tetLevelStars[lvIdx]){
+    tetLevelStars[lvIdx]=stars;
+    lsSet('bbTetStars',JSON.stringify(tetLevelStars));
+  }
   /* Pass score to game over system */
   score=tetScore;
   doGameOver();
@@ -8374,7 +8458,7 @@ return{
   openSpin:          openSpin,
   closeSpin:         closeSpin,
   doSpin:            doSpin,
-  startTetris:startTetris,
+  startTetris:startTetris,tetStartAtLevel:tetStartAtLevel,
   tetLeft:tetMoveLeft,tetRight:tetMoveRight,tetDown:tetMoveDown,tetDrop:tetHardDrop,tetRotate:tetRotate,tetHold:tetHoldPiece,
   shufflePieces:     shufflePieces,
 };
