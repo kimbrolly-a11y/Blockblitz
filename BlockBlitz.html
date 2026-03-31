@@ -7871,8 +7871,8 @@ var tetGameOver=false;
 var tetLocking=false; /* lock delay active */
 var tetLockTimer=null;
 var tetLockMoves=0; /* max 15 moves during lock delay */
-var TET_ROWS=22, TET_COLS=10; /* 22 rows: rows 0-1 are hidden buffer above visible 20 */
-var TET_VISIBLE=20;
+var TET_ROWS=18, TET_COLS=10; /* 18 total: 2 buffer + 16 visible (Tetris Plus style) */
+var TET_VISIBLE=16;
 var _savedROWS=8, _savedCOLS=8;
 var _tetKeyHandler=null;
 var _tetKeyRepeat={}; /* DAS: track held keys */
