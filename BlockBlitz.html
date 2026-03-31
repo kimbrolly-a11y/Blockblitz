@@ -4166,13 +4166,20 @@ function setCS(){
     var trayPad  = h<481? 3: h<601? 5: h<701? 7:  9;
     trayH = slotMin + trayPad + 2; /* +2 for top border */
   }
+  /* Tetris mode: tray/power-ups are hidden, measure touch controls instead */
+  if(isTetrisMode){
+    puH=0; taH=0; trayH=0;
+    var tcEl=document.getElementById('tetControls');
+    if(tcEl) trayH=tcEl.offsetHeight+8; else trayH=56;
+  }
   /* Board-wrap padding varies by breakpoint */
   var bwPad = h<481?6: h<601?8: h<701?12: 16;
   var availH = Math.max(40, h - topH - xpH - puH - trayH - taH - bwPad);
   var csFromW = Math.floor((w - GAP*(COLS-1)) / COLS);
   var csFromH = Math.floor((availH - GAP*(ROWS-1)) / ROWS);
   CS = Math.min(csFromW, csFromH);
-  CS = Math.max(18, Math.min(CS, 50));
+  var maxCS = isTetrisMode ? 36 : 50; /* Tetris: wider cap for 10-col board */
+  CS = Math.max(18, Math.min(CS, maxCS));
   GAP = Math.max(2, Math.floor(CS/13));
   STEP = CS + GAP;
   document.documentElement.style.setProperty('--cs', CS+'px');
@@ -5273,6 +5280,7 @@ function checkLines(){
 function checkStageClear(){
   if(gameEnded) return; /* prevent dual modals */
   if(isLeagueMode) return; /* league mode: play until game over, no win condition */
+  if(isTetrisMode) return; /* tetris handles its own level-up in tetCheckLines */
 
   var target = isDailyChallenge
     ? (DC_LEVEL_TARGETS[getDailyChallengeLevel()]||400)
@@ -7871,8 +7879,8 @@ var tetGameOver=false;
 var tetLocking=false; /* lock delay active */
 var tetLockTimer=null;
 var tetLockMoves=0; /* max 15 moves during lock delay */
-var TET_ROWS=18, TET_COLS=10; /* 18 total: 2 buffer + 16 visible (Tetris Plus style) */
-var TET_VISIBLE=16;
+var TET_ROWS=16, TET_COLS=10; /* 16 total: 2 buffer + 14 visible (bigger cells) */
+var TET_VISIBLE=14;
 var _savedROWS=8, _savedCOLS=8;
 var _tetKeyHandler=null;
 var _tetKeyRepeat={}; /* DAS: track held keys */
