@@ -352,6 +352,19 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .cell.pop{animation:cellPop .25s ease forwards;z-index:10}
 @keyframes cellPop{0%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.6}100%{transform:scale(0);opacity:0}}
 @keyframes leagueShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-4px) rotate(-0.5deg)}30%{transform:translateX(4px) rotate(0.5deg)}45%{transform:translateX(-3px)}60%{transform:translateX(3px)}75%{transform:translateX(-1px)}}
+
+/* Tetris Mode */
+.menu-card-tetris{background:linear-gradient(135deg,#006064 0%,#00acc1 100%)}
+.badge-tetris{background:rgba(0,172,193,0.3);border-color:rgba(0,172,193,0.5)}
+#tetControls{display:none;width:100%;justify-content:center;gap:8px;padding:8px 12px;flex-shrink:0}
+.tet-btn{flex:1;max-width:64px;height:50px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-size:22px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .1s}
+.tet-btn:active{background:rgba(255,255,255,0.25);transform:scale(0.93)}
+#tetNextPreview{display:none;position:absolute;top:8px;right:8px;text-align:center;z-index:50}
+.tet-next-label{font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px;margin-bottom:3px}
+#tetNextGrid{display:inline-grid;gap:1px}
+.tet-next-cell{width:10px;height:10px;border-radius:2px}
+.cell.tet-ghost{opacity:0.2!important;border:1px dashed rgba(255,255,255,0.3)!important}
+
 .cell.land{animation:cellLand .18s cubic-bezier(.34,1.56,.64,1)}
 @keyframes cellLand{0%{transform:scale(0) rotate(-8deg);opacity:0}70%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
 /* Streak glow on board */
@@ -1183,8 +1196,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 @keyframes nearMissPulse{0%,100%{box-shadow:inset 0 0 6px rgba(255,215,0,0.3)}50%{box-shadow:inset 0 0 14px rgba(255,215,0,0.7)}}
 .cell.near-miss{animation:nearMissPulse .8s ease-in-out infinite!important;border-color:rgba(255,215,0,0.6)!important}
 /* == BLITZ RUSH == */
-#rushTimerHUD{position:absolute;top:2px;right:10px;font-family:'Fredoka One';font-size:20px;color:#fff;text-shadow:0 2px 4px rgba(0,0,0,.5);z-index:50;display:none}
-#rushTimerHUD.urgent{color:#ff1744;animation:rushPulse .5s ease-in-out infinite}
 @keyframes rushPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 /* == MYSTERY METER == */
 #mysteryMeter{display:none;position:relative;width:28px;height:28px;margin-left:8px;cursor:default}
@@ -1217,7 +1228,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .win-streak-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Fredoka One';font-size:16px;color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.5)}
 .streak-gold-border .board-wrap{box-shadow:0 0 20px rgba(255,215,0,0.5)!important}
 /* == BLITZ RUSH CARD == */
-.menu-card-rush{background:linear-gradient(135deg,#ff6f00 0%,#ff3d00 100%)!important}
 
 </style>
 </head>
@@ -1291,6 +1301,20 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <div class="menu-card-cta">Play ›</div>
     </div>
 
+
+    <!-- Tetris Mode -->
+    <div class="menu-mode-card menu-card-tetris" onclick="BB.startTetris()">
+      <div class="menu-card-shine"></div>
+      <div class="menu-card-left">
+        <div class="menu-card-top">
+          <div class="menu-card-title">\u{1F3AE} Tetris</div>
+          <div class="menu-card-badge badge-tetris">FALLING</div>
+        </div>
+        <div class="menu-card-desc">Classic falling blocks! Clear lines & level up.</div>
+      </div>
+      <div class="menu-card-cta">Play \u203A</div>
+    </div>
+
     <!-- Adventure Mode -->
     <div class="menu-mode-card menu-card-adv" onclick="BB.selectMode('adventure')">
       <div class="menu-card-shine"></div>
@@ -1314,7 +1338,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <div class="menu-card-shine"></div>
       <div class="menu-card-left">
         <div class="menu-card-top">
-          <div class="menu-card-title">🏆 Blitz League</div>
+          <div class="menu-card-title">\u{267E}\u{FE0F} Endless</div>
           <div class="menu-card-badge badge-league">WEEKLY</div>
         </div>
         <div class="menu-card-desc">Endless marathon — no goals, no power-ups. Place blocks until you can't. Top 3 win coins!</div>
@@ -1322,18 +1346,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <div class="menu-card-cta">Play ›</div>
     </div>
 
-    <!-- Blitz Rush Mode -->
-    <div class="menu-mode-card menu-card-rush" onclick="BB.startBlitzRush()">
-      <div class="menu-card-shine"></div>
-      <div class="menu-card-left">
-        <div class="menu-card-top">
-          <div class="menu-card-title">⚡ Blitz Rush</div>
-          <div class="menu-card-badge badge-league" style="background:rgba(255,61,0,0.3);border-color:rgba(255,61,0,0.5)">TIMED</div>
-        </div>
-        <div class="menu-card-desc">120s on the clock! Clear lines to add time.</div>
-      </div>
-      <div class="menu-card-cta">Play ›</div>
-    </div>
   </div>
 
   <!-- Bottom action buttons -->
@@ -1460,9 +1472,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 <!-- BOARD -->
 <div class="board-outer">
-  <div id="rushTimerHUD"></div>
 <div id="floodCounter"></div>
-<div class="board-wrap">
+<div id="tetNextPreview"><div class="tet-next-label">NEXT</div><div id="tetNextGrid"></div></div>
+  <div class="board-wrap">
     <div class="dc-timer-bar" id="dcTimerBar"><div class="dc-timer-fill" id="dcTimerFill" style="width:100%"></div></div>
     <div id="board"></div>
   </div>
@@ -1474,6 +1486,15 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   <button class="shuffle-btn" id="shuffleBtn" onclick="BB.shufflePieces()">
     🔀 Shuffle &nbsp;<span class="shuffle-cost" id="shuffleCost">FREE</span>
   </button>
+</div>
+
+<!-- TETRIS CONTROLS -->
+<div id="tetControls">
+  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetLeft()" onclick="BB.tetLeft()">◀</button>
+  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetRotate()" onclick="BB.tetRotate()">↻</button>
+  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetDown()" onclick="BB.tetDown()">▼</button>
+  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetDrop()" onclick="BB.tetDrop()">⬇</button>
+  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetRight()" onclick="BB.tetRight()">▶</button>
 </div>
 
 <!-- HAMSTER REACTION -->
@@ -1618,7 +1639,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   </div>
 </div>
 
-<!-- BLITZ LEAGUE MODAL -->
+<!-- ENDLESS MODAL -->
 <div class="modal-bg" id="leagueModal">
   <div class="modal-card" style="max-height:90vh;overflow-y:auto">
     <span class="modal-emoji">🏆</span>
@@ -4175,7 +4196,6 @@ function init(){
   classicLevel = parseInt(lsGet('bblevel','0'))||0;
   level = classicLevel; /* Always start in Classic Mode on load */
   isAdventureMode = false;
-  if(typeof isBlitzRush!=='undefined'){isBlitzRush=false;clearInterval(rushTimerInterval);var _rh=document.getElementById('rushTimerHUD');if(_rh)_rh.style.display='none';}
   levelStreak = parseInt(lsGet('bbstreak','0'))||0;
   undoCount = parseInt(lsGet('bbundo','3'))||3;
   coins = parseInt(lsGet('bbcoins','0'))||0;
@@ -4334,8 +4354,8 @@ function checkLinesOnLoad(){
 function buildBoardDOM(){
   var b = document.getElementById('board');
   b.innerHTML='';
-  b.style.gridTemplateColumns = 'repeat(8,'+CS+'px)';
-  b.style.gridTemplateRows    = 'repeat(8,'+CS+'px)';
+  b.style.gridTemplateColumns = 'repeat('+COLS+','+CS+'px)';
+  b.style.gridTemplateRows    = 'repeat('+ROWS+','+CS+'px)';
   b.style.gap = GAP+'px';
   for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
     var el=document.createElement('div');
@@ -4510,12 +4530,12 @@ function updateStreakBadge(){
 }
 function updateModeBadge(){
   var el=document.getElementById('modeBadge'); if(!el) return;
-  if(typeof isBlitzRush!=='undefined'&&isBlitzRush){
-    el.textContent='\u26A1 BLITZ RUSH';
+  if(isTetrisMode){
+    el.textContent='\u{1F3AE} TETRIS';
     el.classList.remove('adv');
-    el.style.background='rgba(255,61,0,0.25)';el.style.borderColor='rgba(255,61,0,0.4)';el.style.color='#ff3d00';
+    el.style.background='rgba(0,172,193,0.25)'; el.style.borderColor='rgba(0,172,193,0.4)'; el.style.color='#00acc1';
   } else if(isLeagueMode){
-    el.textContent='\u{1F3C6} BLITZ LEAGUE';
+    el.textContent='\u{267E}\u{FE0F} ENDLESS';
     el.classList.remove('adv');
     el.style.background='rgba(255,215,0,0.25)'; el.style.borderColor='rgba(255,215,0,0.4)'; el.style.color='#ffd700';
   } else if(isAdventureMode){
@@ -4869,6 +4889,7 @@ function ghostTL(sr,sc){
 }
 
 function startDrag(e,idx){
+  if(isTetrisMode) return; /* Tetris uses its own input */
   if(!pieces[idx]) return;
   e.preventDefault();
   savePrev();
@@ -5535,6 +5556,8 @@ function doubleCoinsWithAd(){
 function doGameOver(){
   if(gameEnded) return; /* stage already cleared — don't show game over */
   gameEnded = true;
+  var _wasTetris=isTetrisMode, _tetLv=typeof tetLevel!=='undefined'?tetLevel:1, _tetLn=typeof tetLines!=='undefined'?tetLines:0;
+  if(isTetrisMode) stopTetris();
   _doubleUsedThisGame=false; /* reset per-game ad flags */
   rounds++; lsSet('bbrounds',rounds);
   levelStreak=0; lsSet('bbstreak',0);
@@ -7674,13 +7697,6 @@ function checkDailyLogin(){var t=new Date().toISOString().slice(0,10);if(_lastLo
 function getLoginStreakMultiplier(){return _loginStreak>=30?3:_loginStreak>=7?2:1;}
 function updateMenuLoginStreak(){var el=document.getElementById('menuLoginStreak');if(!el)return;checkDailyLogin();var b=_loginStreak>=30?' \u{1F451}':_loginStreak>=7?' \u{1F31F}':'';var now=new Date(),mn=new Date(now);mn.setHours(24,0,0,0);var df=mn-now,h=Math.floor(df/3600000),m=Math.floor((df%3600000)/60000);el.innerHTML='\u{1F525} Day '+_loginStreak+b+' <span style="font-size:11px;color:rgba(255,255,255,0.4);font-family:Nunito"> safe for '+h+'h '+m+'m</span>';}
 
-/* == IMP 5: BLITZ RUSH == */
-var isBlitzRush=false,rushTimeLeft=0,rushTimerInterval=null,rushTimeSurvived=0;
-function startBlitzRush(){closeMenu();isBlitzRush=true;isLeagueMode=false;isAdventureMode=false;isDailyChallenge=false;rushTimeLeft=120;rushTimeSurvived=0;setTimeout(function(){level=0;startLevel(0);var rEl=document.getElementById('rushTimerHUD');if(rEl)rEl.style.display='block';updateRushTimer();clearInterval(rushTimerInterval);rushTimerInterval=setInterval(function(){if(!isBlitzRush||gameEnded){clearInterval(rushTimerInterval);return;}rushTimeLeft--;rushTimeSurvived++;updateRushTimer();if(rushTimeLeft<=10)tone(800,'square',.08,.002,.06);if(rushTimeLeft<=0){clearInterval(rushTimerInterval);isBlitzRush=false;doGameOver();}},1000);updateModeBadge();},300);}
-function updateRushTimer(){var el=document.getElementById('rushTimerHUD');if(!el)return;var m=Math.floor(rushTimeLeft/60),s=rushTimeLeft%60;el.textContent='\u23F1 '+(m>0?m+':':'')+(s<10?'0':'')+s;el.classList.toggle('urgent',rushTimeLeft<=15);}
-function rushOnClear(cl){if(!isBlitzRush)return;var b=cl*5;if(cl>=2)b+=10;rushTimeLeft+=b;showToast('+'+b+'s');}
-function stopBlitzRush(){isBlitzRush=false;clearInterval(rushTimerInterval);var el=document.getElementById('rushTimerHUD');if(el)el.style.display='none';}
-
 /* == IMP 6: MYSTERY BONUS == */
 var mysteryMeterPct=0,_goldenBlockNext=false;
 function advanceMysteryMeter(){var m=document.getElementById('mysteryMeter');if(!m)return;m.style.display='inline-block';mysteryMeterPct=Math.min(100,mysteryMeterPct+(8+Math.random()*7));var f=m.querySelector('.meter-fill');if(f)f.style.height=mysteryMeterPct+'%';if(mysteryMeterPct>=100)triggerMysteryBonus();}
@@ -7749,7 +7765,6 @@ function _onPiecePlaced(dc,cl,pe,fR,fC){
   /* ghost removed */
   if(dc)checkFloodCleared(fR||[],fC||[]);
   updateFloodCounter(dc);
-  if(dc)rushOnClear(cl);
   if(dc)checkClutchClear(cl);
   if(cl>=3)spawnEdgeSparkles(cl*8);
   if(cl>=2)triggerBoardRipple();
@@ -7765,12 +7780,10 @@ function _onGameStart(){
   mysteryMeterPct=0;_recentPlacements=[];_distressLevel=0;_assistMovesLeft=0;_goldenBlockNext=false;
   applyStreakGoldBorder();
   var m=document.getElementById('mysteryMeter');if(m){m.style.display='inline-block';var f=m.querySelector('.meter-fill');if(f)f.style.height='0%';}
-  /* Hide rush timer in non-rush modes */
-  var rh=document.getElementById('rushTimerHUD');if(rh&&!isBlitzRush)rh.style.display='none';
   updateFloodUI();
 }
 function _onGameOver(nb){
-  updateWinStreak(nb);stopBlitzRush();stopHeartbeat();clearNearMiss();
+  updateWinStreak(nb);stopHeartbeat();clearNearMiss();
   var g=document.getElementById('ghostHUD');if(g)g.style.display='none';
   var m=document.getElementById('mysteryMeter');if(m)m.style.display='none';
 }
@@ -7782,6 +7795,339 @@ document.addEventListener('keydown',function(e){_debugBuffer+=e.key.toLowerCase(
 
 
 /* ── PUBLIC ── */
+
+
+/* ══════════════════════════════════════
+   TETRIS MODE ENGINE
+══════════════════════════════════════ */
+var isTetrisMode=false;
+var tetBoard=[]; /* 20x10 */
+var tetPiece=null; /* {key,shape,color,r,c,rot} */
+var tetNext=null;
+var tetScore=0, tetLevel=1, tetLines=0;
+var tetGravityId=null;
+var tetGameOver=false;
+var TET_ROWS=20, TET_COLS=10;
+var _savedROWS=8, _savedCOLS=8;
+var _tetKeyHandler=null;
+
+/* 7 standard tetrominoes with all rotations */
+var TETRO={
+  I:{shapes:[[[1,1,1,1]],[[1],[1],[1],[1]]],color:'#00acc1'},
+  O:{shapes:[[[1,1],[1,1]]],color:'#ff8f00'},
+  T:{shapes:[[[0,1,0],[1,1,1]],[[1,0],[1,1],[1,0]],[[1,1,1],[0,1,0]],[[0,1],[1,1],[0,1]]],color:'#ab47bc'},
+  S:{shapes:[[[0,1,1],[1,1,0]],[[1,0],[1,1],[0,1]]],color:'#43a047'},
+  Z:{shapes:[[[1,1,0],[0,1,1]],[[0,1],[1,1],[1,0]]],color:'#e53935'},
+  J:{shapes:[[[1,0,0],[1,1,1]],[[1,1],[1,0],[1,0]],[[1,1,1],[0,0,1]],[[0,1],[0,1],[1,1]]],color:'#1e88e5'},
+  L:{shapes:[[[0,0,1],[1,1,1]],[[1,0],[1,0],[1,1]],[[1,1,1],[1,0,0]],[[1,1],[0,1],[0,1]]],color:'#5c6bc0'}
+};
+var TETRO_KEYS=['I','O','T','S','Z','J','L'];
+var _tetBag=[];
+
+function _tetNextFromBag(){
+  if(!_tetBag.length){
+    _tetBag=TETRO_KEYS.slice();
+    for(var i=_tetBag.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=_tetBag[i];_tetBag[i]=_tetBag[j];_tetBag[j]=t;}
+  }
+  return _tetBag.pop();
+}
+
+function tetGravityMs(){return Math.max(80,1000-(tetLevel-1)*80);}
+
+function startTetris(){
+  closeMenu();
+  isTetrisMode=true; isLeagueMode=false; isAdventureMode=false; isDailyChallenge=false;
+  tetGameOver=false; gameEnded=false;
+  tetScore=0; tetLevel=1; tetLines=0; _tetBag=[];
+  _savedROWS=ROWS; _savedCOLS=COLS;
+  ROWS=TET_ROWS; COLS=TET_COLS;
+  /* Init empty board */
+  tetBoard=[];
+  for(var r=0;r<TET_ROWS;r++){tetBoard.push([]);for(var c=0;c<TET_COLS;c++) tetBoard[r].push({type:T.EMPTY,color:null});}
+  board=tetBoard;
+  /* Hide puzzle UI, show tetris UI */
+  var tray=document.getElementById('tray');if(tray)tray.style.display='none';
+  var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='none';
+  var pu=document.querySelector('.pu-bar');if(pu)pu.style.display='none';
+  var tc=document.getElementById('tetControls');if(tc)tc.style.display='flex';
+  var np=document.getElementById('tetNextPreview');if(np)np.style.display='block';
+  /* Rebuild board for 10x20 */
+  setCS();
+  buildBoardDOM();
+  syncBoard();
+  /* Spawn first pieces */
+  tetNext={key:_tetNextFromBag()};
+  tetSpawnPiece();
+  /* Start gravity */
+  clearInterval(tetGravityId);
+  tetGravityId=setInterval(tetTick,tetGravityMs());
+  /* Keyboard */
+  if(!_tetKeyHandler){
+    _tetKeyHandler=function(e){
+      if(!isTetrisMode||tetGameOver)return;
+      var handled=true;
+      switch(e.key){
+        case'ArrowLeft':tetMoveLeft();break;
+        case'ArrowRight':tetMoveRight();break;
+        case'ArrowDown':tetMoveDown();break;
+        case'ArrowUp':tetRotate();break;
+        case' ':tetHardDrop();break;
+        default:handled=false;
+      }
+      if(handled)e.preventDefault();
+    };
+  }
+  document.addEventListener('keydown',_tetKeyHandler);
+  updateModeBadge();
+  MUSIC.play(0);
+}
+
+function tetSpawnPiece(){
+  var key=tetNext.key;
+  var td=TETRO[key];
+  tetPiece={key:key,shape:td.shapes[0],color:td.color,r:0,c:Math.floor((TET_COLS-td.shapes[0][0].length)/2),rot:0};
+  /* Pick next */
+  tetNext={key:_tetNextFromBag()};
+  tetRenderNext();
+  /* Check if spawn is blocked */
+  if(tetCollides(tetPiece.shape,tetPiece.r,tetPiece.c)){
+    tetDoGameOver();
+    return;
+  }
+  tetRender();
+}
+
+function tetCollides(shape,r,c){
+  for(var dr=0;dr<shape.length;dr++)
+    for(var dc=0;dc<shape[0].length;dc++)
+      if(shape[dr][dc]){
+        var nr=r+dr,nc=c+dc;
+        if(nr<0||nr>=TET_ROWS||nc<0||nc>=TET_COLS)return true;
+        if(tetBoard[nr][nc].type===T.FILLED)return true;
+      }
+  return false;
+}
+
+function tetTick(){
+  if(!isTetrisMode||tetGameOver)return;
+  if(!tetCollides(tetPiece.shape,tetPiece.r+1,tetPiece.c)){
+    tetPiece.r++;
+    tetRender();
+  } else {
+    tetLock();
+  }
+}
+
+function tetMoveLeft(){
+  if(!tetPiece||tetGameOver)return;
+  if(!tetCollides(tetPiece.shape,tetPiece.r,tetPiece.c-1)){
+    tetPiece.c--;tetRender();SND.pickup();
+  }
+}
+function tetMoveRight(){
+  if(!tetPiece||tetGameOver)return;
+  if(!tetCollides(tetPiece.shape,tetPiece.r,tetPiece.c+1)){
+    tetPiece.c++;tetRender();SND.pickup();
+  }
+}
+function tetMoveDown(){
+  if(!tetPiece||tetGameOver)return;
+  if(!tetCollides(tetPiece.shape,tetPiece.r+1,tetPiece.c)){
+    tetPiece.r++;tetScore++;tetRender();
+  } else {
+    tetLock();
+  }
+}
+function tetRotate(){
+  if(!tetPiece||tetGameOver)return;
+  var td=TETRO[tetPiece.key];
+  var newRot=(tetPiece.rot+1)%td.shapes.length;
+  var newShape=td.shapes[newRot];
+  /* Try rotation at current position */
+  if(!tetCollides(newShape,tetPiece.r,tetPiece.c)){
+    tetPiece.shape=newShape;tetPiece.rot=newRot;tetRender();SND.pickup();return;
+  }
+  /* Wall kicks: try offsets */
+  var kicks=[[-1,0],[1,0],[0,-1],[-2,0],[2,0]];
+  for(var k=0;k<kicks.length;k++){
+    if(!tetCollides(newShape,tetPiece.r+kicks[k][1],tetPiece.c+kicks[k][0])){
+      tetPiece.c+=kicks[k][0];tetPiece.r+=kicks[k][1];
+      tetPiece.shape=newShape;tetPiece.rot=newRot;tetRender();SND.pickup();return;
+    }
+  }
+}
+function tetHardDrop(){
+  if(!tetPiece||tetGameOver)return;
+  var dropped=0;
+  while(!tetCollides(tetPiece.shape,tetPiece.r+1,tetPiece.c)){tetPiece.r++;dropped++;}
+  tetScore+=dropped*2;
+  tetLock();
+}
+
+function tetLock(){
+  if(!tetPiece)return;
+  /* Write piece to board */
+  for(var dr=0;dr<tetPiece.shape.length;dr++)
+    for(var dc=0;dc<tetPiece.shape[0].length;dc++)
+      if(tetPiece.shape[dr][dc]){
+        var nr=tetPiece.r+dr,nc=tetPiece.c+dc;
+        if(nr>=0&&nr<TET_ROWS&&nc>=0&&nc<TET_COLS)
+          tetBoard[nr][nc]={type:T.FILLED,color:tetPiece.color};
+      }
+  SND.place();
+  tetCheckLines();
+  tetSpawnPiece();
+}
+
+function tetCheckLines(){
+  var fullRows=[];
+  for(var r=0;r<TET_ROWS;r++){
+    var full=true;
+    for(var c=0;c<TET_COLS;c++){if(tetBoard[r][c].type!==T.FILLED){full=false;break;}}
+    if(full)fullRows.push(r);
+  }
+  if(!fullRows.length)return;
+  var cl=fullRows.length;
+  var pts=[0,100,300,500,800][Math.min(cl,4)]*tetLevel;
+  tetScore+=pts;
+  tetLines+=cl;
+  /* Level up every 10 lines */
+  var newLv=Math.floor(tetLines/10)+1;
+  if(newLv>tetLevel){
+    tetLevel=newLv;
+    clearInterval(tetGravityId);
+    tetGravityId=setInterval(tetTick,tetGravityMs());
+    showToast('Level '+tetLevel+'!');
+    SND.stageWin();
+  }
+  /* Animate clear */
+  fullRows.forEach(function(r){
+    for(var c=0;c<TET_COLS;c++){
+      var el=cellEl(r,c);
+      if(el){el.classList.add('pop');el.style.background='';el.style.boxShadow='';el.innerHTML='';}
+    }
+  });
+  /* Remove rows and shift down */
+  setTimeout(function(){
+    for(var i=fullRows.length-1;i>=0;i--){
+      tetBoard.splice(fullRows[i],1);
+    }
+    while(tetBoard.length<TET_ROWS){
+      var emptyRow=[];
+      for(var c=0;c<TET_COLS;c++)emptyRow.push({type:T.EMPTY,color:null});
+      tetBoard.unshift(emptyRow);
+    }
+    board=tetBoard;
+    syncBoard();
+  },250);
+  /* Visual feedback */
+  SND.clear(cl,cl>=4?2:1);
+  showFlyScore('+'+pts,cl>=2);
+  if(cl>=4){showToast('TETRIS!');spawnConfetti(document.querySelectorAll('.cell.pop'));}
+  else if(cl>=2) showToast('Combo x'+cl+'!');
+  /* Update score display */
+  var sco=document.getElementById('xpScore');if(sco)sco.textContent=tetScore;
+}
+
+function tetGhostR(){
+  if(!tetPiece)return tetPiece?tetPiece.r:0;
+  var gr=tetPiece.r;
+  while(!tetCollides(tetPiece.shape,gr+1,tetPiece.c))gr++;
+  return gr;
+}
+
+function tetRender(){
+  /* Copy locked board to shared board */
+  for(var r=0;r<TET_ROWS;r++)for(var c=0;c<TET_COLS;c++){
+    board[r][c]=tetBoard[r][c];
+  }
+  /* Overlay ghost piece */
+  var gr=tetGhostR();
+  if(tetPiece&&gr!==tetPiece.r){
+    for(var dr=0;dr<tetPiece.shape.length;dr++)
+      for(var dc=0;dc<tetPiece.shape[0].length;dc++)
+        if(tetPiece.shape[dr][dc]){
+          var nr=gr+dr,nc=tetPiece.c+dc;
+          if(nr>=0&&nr<TET_ROWS&&nc>=0&&nc<TET_COLS&&board[nr][nc].type===T.EMPTY)
+            board[nr][nc]={type:'ghost',color:tetPiece.color};
+        }
+  }
+  /* Overlay active piece */
+  if(tetPiece){
+    for(var dr=0;dr<tetPiece.shape.length;dr++)
+      for(var dc=0;dc<tetPiece.shape[0].length;dc++)
+        if(tetPiece.shape[dr][dc]){
+          var nr=tetPiece.r+dr,nc=tetPiece.c+dc;
+          if(nr>=0&&nr<TET_ROWS&&nc>=0&&nc<TET_COLS)
+            board[nr][nc]={type:T.FILLED,color:tetPiece.color};
+        }
+  }
+  /* Render to DOM */
+  for(var r=0;r<TET_ROWS;r++)for(var c=0;c<TET_COLS;c++){
+    var el=cellEl(r,c);if(!el)continue;
+    var cell=board[r][c];
+    if(cell.type==='ghost'){
+      el.className='cell tet-ghost';
+      el.style.background=cell.color;
+      el.style.boxShadow='none';
+      el.innerHTML='';
+    } else {
+      applyCell(el,cell);
+      if(cell.type===T.FILLED){
+        el.style.background=cell.color;
+        el.style.boxShadow='0 3px 0 '+darken(cell.color)+',0 4px 8px rgba(0,0,0,.3)';
+        el.innerHTML='<div style="position:absolute;top:2px;left:2px;right:2px;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);border-radius:4px 4px 0 0;pointer-events:none"></div>';
+      }
+    }
+  }
+  /* Update score in XP bar */
+  var sco=document.getElementById('xpScore');if(sco)sco.textContent=tetScore;
+  var lbl=document.getElementById('xpLabel');if(lbl)lbl.textContent='LV '+tetLevel+' | '+tetLines+' Lines';
+  var fill=document.getElementById('xpFill');if(fill)fill.style.width=Math.min(100,(tetLines%10)*10)+'%';
+}
+
+function tetRenderNext(){
+  var ng=document.getElementById('tetNextGrid');if(!ng)return;
+  ng.innerHTML='';
+  var td=TETRO[tetNext.key];
+  var shape=td.shapes[0];
+  ng.style.gridTemplateColumns='repeat('+shape[0].length+',10px)';
+  ng.style.gridTemplateRows='repeat('+shape.length+',10px)';
+  for(var r=0;r<shape.length;r++)for(var c=0;c<shape[0].length;c++){
+    var cel=document.createElement('div');
+    cel.className='tet-next-cell';
+    cel.style.background=shape[r][c]?td.color:'transparent';
+    if(shape[r][c])cel.style.borderRadius='2px';
+    ng.appendChild(cel);
+  }
+}
+
+function tetDoGameOver(){
+  tetGameOver=true;
+  clearInterval(tetGravityId);tetGravityId=null;
+  document.removeEventListener('keydown',_tetKeyHandler);
+  /* Save high scores */
+  var prevLines=parseInt(lsGet('bbTetrisLines','0'))||0;
+  if(tetLines>prevLines)lsSet('bbTetrisLines',tetLines);
+  var prevScore=parseInt(lsGet('bbTetrisScore','0'))||0;
+  if(tetScore>prevScore)lsSet('bbTetrisScore',tetScore);
+  /* Pass score to game over system */
+  score=tetScore;
+  doGameOver();
+}
+
+function stopTetris(){
+  isTetrisMode=false;
+  clearInterval(tetGravityId);tetGravityId=null;
+  if(_tetKeyHandler)document.removeEventListener('keydown',_tetKeyHandler);
+  ROWS=_savedROWS;COLS=_savedCOLS;
+  var tc=document.getElementById('tetControls');if(tc)tc.style.display='none';
+  var np=document.getElementById('tetNextPreview');if(np)np.style.display='none';
+  var tray=document.getElementById('tray');if(tray)tray.style.display='';
+  var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='';
+}
+
+
 return{
   initOnly:          function(){
     /* Initialize data/state without starting a level (used on first load) */
@@ -7863,7 +8209,8 @@ return{
   openSpin:          openSpin,
   closeSpin:         closeSpin,
   doSpin:            doSpin,
-  startBlitzRush:    typeof startBlitzRush!=="undefined"?startBlitzRush:function(){},
+  startTetris:startTetris,
+  tetLeft:tetMoveLeft,tetRight:tetMoveRight,tetDown:tetMoveDown,tetDrop:tetHardDrop,tetRotate:tetRotate,
   shufflePieces:     shufflePieces,
 };
 
