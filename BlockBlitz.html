@@ -868,9 +868,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   text-shadow:0 0 22px rgba(0,229,255,.7),0 3px 0 rgba(0,0,0,.5);
 }
 .menu-tagline{
-  font-family:'Fredoka One';font-size:24px;color:rgba(144,202,249,.75);
-  letter-spacing:5px;text-transform:uppercase;
-  text-align:center;padding:0 14px 2px;flex-shrink:0;
+  font-family:'Fredoka One';font-size:16px;color:rgba(144,202,249,.75);
+  letter-spacing:4px;text-transform:uppercase;
+  text-align:center;padding:0 14px 0;flex-shrink:0;
 }
 
 /* ── Mode cards ── */
@@ -879,9 +879,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   padding:0 14px 8px;justify-content:flex-end;min-height:0;
 }
 .menu-mode-card{
-  border-radius:14px;padding:10px 14px;
+  border-radius:12px;padding:8px 12px;
   cursor:pointer;position:relative;overflow:hidden;
-  flex-shrink:0;min-height:72px;
+  flex-shrink:0;min-height:56px;
   display:flex;align-items:center;gap:12px;
   transition:transform .15s cubic-bezier(.17,.89,.32,1.28);
 }
@@ -912,14 +912,14 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 }
 .menu-card-left{flex:1;min-width:0}
 .menu-card-top{display:flex;align-items:center;gap:8px;margin-bottom:2px}
-.menu-card-title{font-family:'Fredoka One';font-size:17px;color:#fff;letter-spacing:.3px}
+.menu-card-title{font-family:'Fredoka One';font-size:15px;color:#fff;letter-spacing:.3px}
 .menu-card-badge{
   font-family:'Fredoka One';font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
   padding:2px 7px;border-radius:6px;
 }
 .badge-classic{background:rgba(255,215,0,0.18);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
 .badge-adv{background:rgba(206,147,216,0.18);color:#ce93d8;border:1px solid rgba(206,147,216,0.3)}
-.menu-card-desc{font-size:11px;color:rgba(255,255,255,0.6);margin:4px 0 2px;line-height:1.35;letter-spacing:.1px}
+.menu-card-desc{font-size:10px;color:rgba(255,255,255,0.6);margin:2px 0 1px;line-height:1.3;letter-spacing:.1px}
 .menu-card-footer{display:flex;align-items:center;gap:8px}
 .menu-card-meta{display:flex;align-items:center;gap:8px}
 .menu-card-lv{
@@ -1130,7 +1130,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* ── Logo image on splash + menu ── */
 #splashLogoImg{max-width:min(97%,442px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:spLogoGlow 3.8s ease-in-out 1.35s infinite}
-#menuLogoImg{max-width:min(85%,380px);height:auto;display:block;margin:8px auto 0;transform:scale(1);transform-origin:center top;filter:drop-shadow(0 6px 28px rgba(0,0,0,.7)) drop-shadow(0 2px 6px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
+#menuLogoImg{max-width:min(65%,280px);height:auto;display:block;margin:4px auto 0;transform:scale(1);transform-origin:center top;filter:drop-shadow(0 4px 20px rgba(0,0,0,.7)) drop-shadow(0 2px 4px rgba(255,200,0,.3));animation:menuLogoFloat 4.2s ease-in-out infinite}
 @keyframes spLogoGlow{
   0%,100%{filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45)) drop-shadow(0 2px 8px rgba(255,200,0,.35))}
   50%    {filter:drop-shadow(0 10px 52px rgba(255,220,0,0.80)) drop-shadow(0 0 28px rgba(255,130,0,0.50))}
@@ -1307,12 +1307,12 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <div class="menu-card-shine"></div>
       <div class="menu-card-left">
         <div class="menu-card-top">
-          <div class="menu-card-title">\u{1F3AE} Tetris</div>
+          <div class="menu-card-title">🎮 Tetris</div>
           <div class="menu-card-badge badge-tetris">FALLING</div>
         </div>
         <div class="menu-card-desc">Classic falling blocks! Clear lines & level up.</div>
       </div>
-      <div class="menu-card-cta">Play \u203A</div>
+      <div class="menu-card-cta">Play ›</div>
     </div>
 
     <!-- Adventure Mode -->
@@ -1338,7 +1338,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <div class="menu-card-shine"></div>
       <div class="menu-card-left">
         <div class="menu-card-top">
-          <div class="menu-card-title">\u{267E}\u{FE0F} Endless</div>
+          <div class="menu-card-title">♾️ Endless</div>
           <div class="menu-card-badge badge-league">WEEKLY</div>
         </div>
         <div class="menu-card-desc">Endless marathon — no goals, no power-ups. Place blocks until you can't. Top 3 win coins!</div>
@@ -7844,7 +7844,9 @@ function startTetris(){
   /* Init empty board */
   tetBoard=[];
   for(var r=0;r<TET_ROWS;r++){tetBoard.push([]);for(var c=0;c<TET_COLS;c++) tetBoard[r].push({type:T.EMPTY,color:null});}
-  board=tetBoard;
+  /* board will be rebuilt each frame by tetRender() as a copy of tetBoard */
+  board=[];
+  for(var r=0;r<TET_ROWS;r++){board.push([]);for(var c=0;c<TET_COLS;c++) board[r].push({type:T.EMPTY,color:null});}
   /* Hide puzzle UI, show tetris UI */
   var tray=document.getElementById('tray');if(tray)tray.style.display='none';
   var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='none';
@@ -8017,8 +8019,7 @@ function tetCheckLines(){
       for(var c=0;c<TET_COLS;c++)emptyRow.push({type:T.EMPTY,color:null});
       tetBoard.unshift(emptyRow);
     }
-    board=tetBoard;
-    syncBoard();
+    tetRender(); /* rebuild display from updated tetBoard */
   },250);
   /* Visual feedback */
   SND.clear(cl,cl>=4?2:1);
@@ -8037,9 +8038,14 @@ function tetGhostR(){
 }
 
 function tetRender(){
-  /* Copy locked board to shared board */
-  for(var r=0;r<TET_ROWS;r++)for(var c=0;c<TET_COLS;c++){
-    board[r][c]=tetBoard[r][c];
+  /* Build display board as a COPY of tetBoard (not a reference!) */
+  board=[];
+  for(var r=0;r<TET_ROWS;r++){
+    board.push([]);
+    for(var c=0;c<TET_COLS;c++){
+      var src=tetBoard[r][c];
+      board[r].push({type:src.type,color:src.color});
+    }
   }
   /* Overlay ghost piece */
   var gr=tetGhostR();
