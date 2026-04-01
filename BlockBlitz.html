@@ -356,7 +356,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 /* Tetris Mode */
 .menu-card-tetris{background:linear-gradient(135deg,#006064 0%,#00acc1 100%)}
 .badge-tetris{background:rgba(0,172,193,0.3);border-color:rgba(0,172,193,0.5)}
-/* Tetris button controls removed — now gesture-based */
+/* Tetris gesture-based controls */
+@keyframes tetSlam{0%{transform:translateY(0)}40%{transform:translateY(3px)}100%{transform:translateY(0)}}
 #tetNextPreview{display:none;position:absolute;top:8px;right:8px;text-align:center;z-index:50}
 #tetHoldPreview{display:none;position:absolute;top:8px;left:8px;text-align:center;z-index:50}
 .tet-next-label,.tet-hold-label{font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px;margin-bottom:3px}
@@ -8025,10 +8026,10 @@ function tetTouchMove(e){
   while(_tetTouchState.colOffset<targetCols){ tetMoveRight(); _tetTouchState.colOffset++; }
   while(_tetTouchState.colOffset>targetCols){ tetMoveLeft(); _tetTouchState.colOffset--; }
 
-  /* Soft drop: if dragging mostly downward */
-  if(dy>0&&Math.abs(dy)>Math.abs(dx)*1.2){
-    var targetDrops=Math.floor(dy/35);
-    while(_tetTouchState.softDrops<targetDrops){ tetMoveDown(); _tetTouchState.softDrops++; }
+  /* Swipe down = instant hard drop (like original Tetris mobile) */
+  if(!_tetTouchState.hardDropped&&dy>60&&Math.abs(dy)>Math.abs(dx)*2){
+    _tetTouchState.hardDropped=true;
+    tetHardDrop();
   }
 
   _tetTouchState.x=t.clientX;
@@ -8149,13 +8150,23 @@ function tetGravityMs(){
 }
 
 /* Lines required to advance TO the next level (cumulative target) */
+/* Goal per level: lines needed to clear THIS level (not cumulative) */
+function tetLevelGoal(lv){
+  if(lv<=5)  return 4+lv;     /* Lv1:5, Lv2:6, Lv3:7, Lv4:8, Lv5:9 */
+  if(lv<=10) return 10;       /* Lv6-10: 10 lines each */
+  if(lv<=20) return 12;       /* Lv11-20: 12 lines each */
+  if(lv<=30) return 14;       /* Lv21-30: 14 lines each */
+  if(lv<=50) return 16;       /* Lv31-50: 16 lines each */
+  if(lv<=70) return 18;       /* Lv51-70: 18 lines each */
+  return 20;                  /* Lv71-100: 20 lines each */
+}
+var tetLevelLinesCleared=0; /* lines cleared in current level */
+
 function tetLinesForLevel(lv){
-  /* Lv1→2: 10 lines, gradually increases to 15 at high levels */
-  if(lv<=10) return lv*10;           /* 10,20,30...100 */
-  if(lv<=20) return 100+(lv-10)*11;  /* 111,122...210 */
-  if(lv<=30) return 210+(lv-20)*12;  /* 222...330 */
-  if(lv<=50) return 330+(lv-30)*13;  /* 343...590 */
-  return 590+(lv-50)*15;             /* 605...1340 at lv100 */
+  /* Cumulative lines needed to reach level lv (for backwards compat) */
+  var total=0;
+  for(var i=1;i<=lv;i++) total+=tetLevelGoal(i);
+  return total;
 }
 
 /* Garbage rows: pre-filled partial rows that appear on level-up
@@ -8207,7 +8218,7 @@ function startTetris(){
   closeMenu();
   isTetrisMode=true; isLeagueMode=false; isAdventureMode=false; isDailyChallenge=false;
   tetGameOver=false; gameEnded=false;
-  tetScore=0; tetLevel=1; tetLines=0; _tetBag=[];
+  tetScore=0; tetLevel=1; tetLines=0; tetLevelLinesCleared=0; _tetBag=[];
   _savedROWS=ROWS; _savedCOLS=COLS;
   ROWS=TET_VISIBLE; COLS=TET_COLS; /* Display grid is 14x10 (2 buffer rows hidden) */
   tetHold=null; tetHoldUsed=false;
@@ -8222,6 +8233,7 @@ function startTetris(){
   var tray=document.getElementById('tray');if(tray)tray.style.display='none';
   var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='none';
   var pu=document.querySelector('.pu-bar');if(pu)pu.style.display='none';
+  var shuf=document.getElementById('shuffleBtn');if(shuf)shuf.style.display='none';
   var np=document.getElementById('tetNextPreview');if(np)np.style.display='block';
   var hp=document.getElementById('tetHoldPreview');if(hp)hp.style.display='block';
   /* Attach touch gesture controls to board */
@@ -8455,6 +8467,12 @@ function tetHardDrop(){
   var dropped=0;
   while(!tetCollides(shape,tetPiece.r+1,tetPiece.c)){tetPiece.r++;dropped++;}
   tetScore+=dropped*2;
+  /* Slam animation — brief board shake + flash */
+  if(dropped>2){
+    var bw=document.querySelector('.board-wrap');
+    if(bw){bw.style.animation='tetSlam .15s ease';setTimeout(function(){bw.style.animation='';},160);}
+    haptic(20);
+  }
   /* Instant lock — no delay on hard drop */
   tetLocking=false; clearTimeout(tetLockTimer);
   tetDoLock();
@@ -8480,9 +8498,11 @@ function tetCheckLines(){
   var pts=Math.round(baseScore*levelMult);
   tetScore+=pts;
   tetLines+=cl;
-  /* Level up when cumulative lines reach the threshold */
-  var targetLines=tetLinesForLevel(tetLevel);
-  if(tetLines>=targetLines && tetLevel<100){
+  tetLevelLinesCleared+=cl;
+  /* Level up when lines cleared in this level reach the goal */
+  var goal=tetLevelGoal(tetLevel);
+  if(tetLevelLinesCleared>=goal && tetLevel<100){
+    tetLevelLinesCleared=0; /* reset for next level */
     var oldLv=tetLevel;
     tetLevel++;
     clearInterval(tetGravityId);
@@ -8492,7 +8512,7 @@ function tetCheckLines(){
     if(phaseNames[tetLevel]){
       showToast('\u{1F525} '+phaseNames[tetLevel]+' Level '+tetLevel);
     } else {
-      showToast('Level '+tetLevel+'!');
+      showToast('Level '+tetLevel+'! Clear '+tetLevelGoal(tetLevel)+' lines');
     }
     SND.stageWin();
     /* Spawn garbage rows at Lv31+ */
@@ -8598,12 +8618,10 @@ function tetRender(){
   var sco=document.getElementById('xpScore');if(sco)sco.textContent=tetScore;
   /* Phase label for flavor */
   var phase=tetLevel<=10?'':tetLevel<=20?' \u{1F7E1}':tetLevel<=30?' \u{1F7E0}':tetLevel<=50?' \u{1F534}':tetLevel<=70?' \u{1F7E3}':' \u{1F451}';
-  var lbl=document.getElementById('xpLabel');if(lbl)lbl.textContent='LV '+tetLevel+phase+' | '+tetLines+' Lines | '+tetGravityMs()+'ms';
-  /* XP fill: progress toward next level */
-  var prevTarget=tetLevel>1?tetLinesForLevel(tetLevel-1):0;
-  var nextTarget=tetLinesForLevel(tetLevel);
-  var range=nextTarget-prevTarget;
-  var progress=range>0?Math.min(100,Math.round(((tetLines-prevTarget)/range)*100)):100;
+  var goal=tetLevelGoal(tetLevel);
+  var lbl=document.getElementById('xpLabel');if(lbl)lbl.textContent='LV '+tetLevel+phase+' | Clear '+tetLevelLinesCleared+'/'+goal+' lines';
+  /* XP fill: progress toward level goal */
+  var progress=goal>0?Math.min(100,Math.round((tetLevelLinesCleared/goal)*100)):0;
   var fill=document.getElementById('xpFill');if(fill)fill.style.width=progress+'%';
 }
 
@@ -8705,6 +8723,7 @@ function stopTetris(){
   var tray=document.getElementById('tray');if(tray)tray.style.display='';
   var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='';
   var pu=document.querySelector('.pu-bar');if(pu)pu.style.display='';
+  var shuf=document.getElementById('shuffleBtn');if(shuf)shuf.style.display='';
 }
 
 
