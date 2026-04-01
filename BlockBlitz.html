@@ -356,16 +356,14 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 /* Tetris Mode */
 .menu-card-tetris{background:linear-gradient(135deg,#006064 0%,#00acc1 100%)}
 .badge-tetris{background:rgba(0,172,193,0.3);border-color:rgba(0,172,193,0.5)}
-#tetControls{display:none;width:100%;justify-content:center;gap:8px;padding:8px 12px;flex-shrink:0}
-.tet-btn{flex:1;max-width:64px;height:50px;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.2);border-radius:12px;color:#fff;font-size:22px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .1s}
-.tet-btn:active{background:rgba(255,255,255,0.25);transform:scale(0.93)}
+/* Tetris button controls removed — now gesture-based */
 #tetNextPreview{display:none;position:absolute;top:8px;right:8px;text-align:center;z-index:50}
 #tetHoldPreview{display:none;position:absolute;top:8px;left:8px;text-align:center;z-index:50}
 .tet-next-label,.tet-hold-label{font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px;margin-bottom:3px}
 #tetNextGrid,#tetHoldGrid{display:inline-grid;gap:1px}
 .tet-next-cell,.tet-hold-cell{width:10px;height:10px;border-radius:2px}
 #tetHoldPreview.used{opacity:0.4}
-.cell.tet-ghost{opacity:0.2!important;border:1px dashed rgba(255,255,255,0.3)!important}
+.cell.tet-ghost{opacity:0.35!important;border:1.5px solid rgba(255,255,255,0.5)!important;box-shadow:0 0 4px rgba(255,255,255,0.15)!important}
 
 .cell.land{animation:cellLand .18s cubic-bezier(.34,1.56,.64,1)}
 @keyframes cellLand{0%{transform:scale(0) rotate(-8deg);opacity:0}70%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
@@ -1492,14 +1490,14 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   </button>
 </div>
 
-<!-- TETRIS CONTROLS -->
-<div id="tetControls">
-  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetLeft()" onclick="BB.tetLeft()">◀</button>
-  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetRotate()" onclick="BB.tetRotate()">↻</button>
-  <button class="tet-btn tet-btn-hold" ontouchstart="event.preventDefault();BB.tetHold()" onclick="BB.tetHold()">⏸</button>
-  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetDown()" onclick="BB.tetDown()">▼</button>
-  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetDrop()" onclick="BB.tetDrop()">⬇</button>
-  <button class="tet-btn" ontouchstart="event.preventDefault();BB.tetRight()" onclick="BB.tetRight()">▶</button>
+<!-- TETRIS TOUCH TUTORIAL (shown once) -->
+<div id="tetTutorial" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;flex-direction:column;gap:16px;color:#fff;font-family:'Fredoka One',sans-serif;text-align:center">
+  <div style="font-size:22px;color:#ffd700;margin-bottom:8px">How to Play</div>
+  <div style="font-size:16px">🔄 <b>TAP</b> to rotate</div>
+  <div style="font-size:16px">← → <b>SWIPE</b> to move</div>
+  <div style="font-size:16px">⬇ <b>SWIPE DOWN</b> to drop</div>
+  <div style="font-size:16px">✋ <b>HOLD</b> long press</div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:12px">Tap anywhere to start</div>
 </div>
 
 <!-- HAMSTER REACTION -->
@@ -4172,9 +4170,7 @@ function setCS(){
   }
   /* Tetris mode: tray/power-ups are hidden, measure touch controls instead */
   if(isTetrisMode){
-    puH=0; taH=0; trayH=0;
-    var tcEl=document.getElementById('tetControls');
-    if(tcEl) trayH=tcEl.offsetHeight+8; else trayH=56;
+    puH=0; taH=0; trayH=8; /* gesture controls — no button bar */
   }
   /* Board-wrap padding varies by breakpoint */
   var bwPad = h<481?6: h<601?8: h<701?12: 16;
@@ -7963,8 +7959,8 @@ var tetGameOver=false;
 var tetLocking=false; /* lock delay active */
 var tetLockTimer=null;
 var tetLockMoves=0; /* max 15 moves during lock delay */
-var TET_ROWS=16, TET_COLS=10; /* 16 total: 2 buffer + 14 visible (bigger cells) */
-var TET_VISIBLE=14;
+var TET_ROWS=24, TET_COLS=10; /* 24 total: 2 buffer + 22 visible */
+var TET_VISIBLE=22;
 var _savedROWS=8, _savedCOLS=8;
 var _tetKeyHandler=null;
 var _tetKeyRepeat={}; /* DAS: track held keys */
@@ -7984,6 +7980,79 @@ function _tetStopDAS(key){
   if(key&&key!==_tetDASKey)return;
   clearTimeout(_tetDASTimer);clearInterval(_tetARRTimer);
   _tetDASTimer=null;_tetARRTimer=null;_tetDASKey=null;
+}
+
+/* ── TETRIS GESTURE CONTROLS (swipe/tap, no buttons) ── */
+var _tetTouchState=null;
+
+function tetTouchStart(e){
+  if(!isTetrisMode||tetGameOver)return;
+  e.preventDefault();
+  var t=e.touches[0];
+  _tetTouchState={
+    x0:t.clientX, y0:t.clientY,
+    x:t.clientX, y:t.clientY,
+    t0:Date.now(),
+    moved:false,
+    colOffset:0,
+    softDrops:0,
+    hardDropped:false,
+    holdFired:false,
+    longPressTimer:setTimeout(function(){
+      if(_tetTouchState&&!_tetTouchState.moved){
+        tetHoldPiece();
+        _tetTouchState.holdFired=true;
+      }
+    },350)
+  };
+}
+
+function tetTouchMove(e){
+  if(!_tetTouchState||!isTetrisMode||tetGameOver)return;
+  e.preventDefault();
+  var t=e.touches[0];
+  var dx=t.clientX-_tetTouchState.x0;
+  var dy=t.clientY-_tetTouchState.y0;
+  var dist=Math.sqrt(dx*dx+dy*dy);
+
+  if(dist>10){
+    _tetTouchState.moved=true;
+    clearTimeout(_tetTouchState.longPressTimer);
+  }
+
+  /* Horizontal movement: 1 cell per ~28px of drag */
+  var targetCols=Math.round(dx/28);
+  while(_tetTouchState.colOffset<targetCols){ tetMoveRight(); _tetTouchState.colOffset++; }
+  while(_tetTouchState.colOffset>targetCols){ tetMoveLeft(); _tetTouchState.colOffset--; }
+
+  /* Soft drop: if dragging mostly downward */
+  if(dy>0&&Math.abs(dy)>Math.abs(dx)*1.2){
+    var targetDrops=Math.floor(dy/35);
+    while(_tetTouchState.softDrops<targetDrops){ tetMoveDown(); _tetTouchState.softDrops++; }
+  }
+
+  _tetTouchState.x=t.clientX;
+  _tetTouchState.y=t.clientY;
+}
+
+function tetTouchEnd(e){
+  if(!_tetTouchState)return;
+  clearTimeout(_tetTouchState.longPressTimer);
+  var dt=Date.now()-_tetTouchState.t0;
+  var dy=_tetTouchState.y-_tetTouchState.y0;
+  var dx=_tetTouchState.x-_tetTouchState.x0;
+
+  /* Tap = rotate (short touch, minimal movement) */
+  if(!_tetTouchState.moved&&dt<250&&!_tetTouchState.holdFired){
+    tetRotate();
+  }
+
+  /* Fast swipe down = hard drop */
+  if(!_tetTouchState.hardDropped&&dy>50&&dt<400&&Math.abs(dy)>Math.abs(dx)*2){
+    tetHardDrop();
+  }
+
+  _tetTouchState=null;
 }
 
 /* 7 standard tetrominoes — SRS rotation states (all 4 rotations each) */
@@ -8146,17 +8215,34 @@ function startTetris(){
   /* Init empty board (16 rows: 2 buffer + 14 visible) */
   tetBoard=[];
   for(var r=0;r<TET_ROWS;r++){tetBoard.push([]);for(var c=0;c<TET_COLS;c++) tetBoard[r].push({type:T.EMPTY,color:null});}
-  /* Display board is 14x10 */
+  /* Display board is 22x10 */
   board=[];
   for(var r=0;r<TET_VISIBLE;r++){board.push([]);for(var c=0;c<TET_COLS;c++) board[r].push({type:T.EMPTY,color:null});}
   /* Hide puzzle UI, show tetris UI */
   var tray=document.getElementById('tray');if(tray)tray.style.display='none';
   var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='none';
   var pu=document.querySelector('.pu-bar');if(pu)pu.style.display='none';
-  var tc=document.getElementById('tetControls');if(tc)tc.style.display='flex';
   var np=document.getElementById('tetNextPreview');if(np)np.style.display='block';
   var hp=document.getElementById('tetHoldPreview');if(hp)hp.style.display='block';
-  /* Rebuild board for 10x14 */
+  /* Attach touch gesture controls to board */
+  var _bEl=document.querySelector('.board-wrap');
+  if(_bEl){
+    _bEl.addEventListener('touchstart',tetTouchStart,{passive:false});
+    _bEl.addEventListener('touchmove',tetTouchMove,{passive:false});
+    _bEl.addEventListener('touchend',tetTouchEnd);
+  }
+  /* Show tutorial on first play */
+  if(!lsGet('bb_tetTutorialSeen')){
+    var tut=document.getElementById('tetTutorial');
+    if(tut){
+      tut.style.display='flex';
+      var dismissTut=function(){tut.style.display='none';lsSet('bb_tetTutorialSeen','1');tut.removeEventListener('touchstart',dismissTut);tut.removeEventListener('click',dismissTut);};
+      tut.addEventListener('touchstart',dismissTut);
+      tut.addEventListener('click',dismissTut);
+      setTimeout(dismissTut,4000);
+    }
+  }
+  /* Rebuild board for 10x22 */
   setCS();
   buildBoardDOM();
   syncBoard();
@@ -8607,7 +8693,13 @@ function stopTetris(){
   _tetKeyHandler=null; _tetKeyUpHandler=null; /* allow re-creation next start */
   ROWS=_savedROWS;COLS=_savedCOLS;
   /* Restore all hidden UI elements */
-  var tc=document.getElementById('tetControls');if(tc)tc.style.display='none';
+  /* Remove touch gesture listeners */
+  var _bEl=document.querySelector('.board-wrap');
+  if(_bEl){
+    _bEl.removeEventListener('touchstart',tetTouchStart);
+    _bEl.removeEventListener('touchmove',tetTouchMove);
+    _bEl.removeEventListener('touchend',tetTouchEnd);
+  }
   var np=document.getElementById('tetNextPreview');if(np)np.style.display='none';
   var hpv=document.getElementById('tetHoldPreview');if(hpv)hpv.style.display='none';
   var tray=document.getElementById('tray');if(tray)tray.style.display='';
