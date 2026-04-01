@@ -4497,6 +4497,14 @@ function updateXPBar(){
     return;
   }
 
+  /* ── TETRIS MODE: XP bar managed by tetRender() ── */
+  if(isTetrisMode){
+    if(xpWrap) xpWrap.style.display='';
+    if(advDisp) advDisp.classList.remove('visible');
+    if(advProg) advProg.classList.remove('visible');
+    return; /* tetRender() handles fill, label, and score */
+  }
+
   /* ── LEAGUE MODE: use dedicated league XP bar ── */
   if(isLeagueMode){
     if(xpWrap) xpWrap.style.display='';
@@ -8619,7 +8627,10 @@ function tetRender(){
   /* Phase label for flavor */
   var phase=tetLevel<=10?'':tetLevel<=20?' \u{1F7E1}':tetLevel<=30?' \u{1F7E0}':tetLevel<=50?' \u{1F534}':tetLevel<=70?' \u{1F7E3}':' \u{1F451}';
   var goal=tetLevelGoal(tetLevel);
-  var lbl=document.getElementById('xpLabel');if(lbl)lbl.textContent='LV '+tetLevel+phase+' | Clear '+tetLevelLinesCleared+'/'+goal+' lines';
+  /* XP left label: show goal */
+  var lvlLbl=document.getElementById('xpLevelLbl');if(lvlLbl)lvlLbl.textContent=tetLevelLinesCleared+'/'+goal;
+  /* XP right label: show level + score */
+  var lbl=document.getElementById('xpLabel');if(lbl)lbl.textContent='LV '+tetLevel+phase+' | '+tetScore.toLocaleString();
   /* XP fill: progress toward level goal */
   var progress=goal>0?Math.min(100,Math.round((tetLevelLinesCleared/goal)*100)):0;
   var fill=document.getElementById('xpFill');if(fill)fill.style.width=progress+'%';
