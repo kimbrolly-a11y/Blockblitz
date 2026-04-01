@@ -4435,6 +4435,9 @@ function updateGemUI(){
   if(typeof isDailyChallenge!=='undefined' && isDailyChallenge){
     if(lblTxt) lblTxt.textContent='DAILY';
     if(lbl) lbl.textContent='\u{1F4C5}';
+  } else if(isTetrisMode){
+    if(lblTxt) lblTxt.textContent='LEVEL';
+    if(lbl) lbl.textContent=tetLevel;
   } else {
     if(lblTxt) lblTxt.textContent='LEVEL';
     if(lbl) lbl.textContent=level+1;
@@ -5686,7 +5689,9 @@ function doGameOver(){
   }
   var prevBest=parseInt(lsGet('bbscore','0'));
   var isNewBest=score>prevBest;
-  document.getElementById('goTitle').textContent = _wasLeague
+  document.getElementById('goTitle').textContent = _wasTetris
+    ? 'Level '+_tetLv+' | '+_tetLn+' Lines'
+    : _wasLeague
     ? 'Stage '+(_leagueStageReached+1)+' | '+score.toLocaleString()+' pts'
     : isNewBest?'New Best! \u{1F389}':'Game Over';
   if(isNewBest) lsSet('bbscore',score);
@@ -8523,6 +8528,7 @@ function tetCheckLines(){
       showToast('Level '+tetLevel+'! Clear '+tetLevelGoal(tetLevel)+' lines');
     }
     SND.stageWin();
+    updateGemUI(); /* refresh header level number */
     /* Spawn garbage rows at Lv31+ */
     var garbage=tetGarbageCount(tetLevel);
     if(garbage>0){
