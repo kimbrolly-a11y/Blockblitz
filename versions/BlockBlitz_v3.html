@@ -3,9 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>BlockBlitz</title>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -352,45 +349,17 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 .cell.pop{animation:cellPop .25s ease forwards;z-index:10}
 @keyframes cellPop{0%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.6}100%{transform:scale(0);opacity:0}}
 @keyframes leagueShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-4px) rotate(-0.5deg)}30%{transform:translateX(4px) rotate(0.5deg)}45%{transform:translateX(-3px)}60%{transform:translateX(3px)}75%{transform:translateX(-1px)}}
+.cell.land{animation:cellLand .14s ease}
+@keyframes cellLand{from{transform:scale(0) rotate(-8deg);opacity:0}to{transform:scale(1);opacity:1}}
 
-/* Tetris Mode */
-.menu-card-tetris{background:linear-gradient(135deg,#006064 0%,#00acc1 100%)}
-.badge-tetris{background:rgba(0,172,193,0.3);border-color:rgba(0,172,193,0.5)}
-/* Tetris gesture-based controls */
-@keyframes tetSlam{0%{transform:translateY(0)}40%{transform:translateY(3px)}100%{transform:translateY(0)}}
-#tetNextPreview{display:none;position:absolute;top:8px;right:8px;text-align:center;z-index:50}
-#tetHoldPreview{display:none;position:absolute;top:8px;left:8px;text-align:center;z-index:50}
-.tet-next-label,.tet-hold-label{font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px;margin-bottom:3px}
-#tetNextGrid,#tetHoldGrid{display:inline-grid;gap:1px}
-.tet-next-cell,.tet-hold-cell{width:10px;height:10px;border-radius:2px}
-#tetHoldPreview.used{opacity:0.4}
-.cell.tet-ghost{opacity:0.35!important;border:1.5px solid rgba(255,255,255,0.5)!important;box-shadow:0 0 4px rgba(255,255,255,0.15)!important}
-
-.cell.land{animation:cellLand .18s cubic-bezier(.34,1.56,.64,1)}
-@keyframes cellLand{0%{transform:scale(0) rotate(-8deg);opacity:0}70%{transform:scale(1.12);opacity:1}100%{transform:scale(1);opacity:1}}
-/* Streak glow on board */
-.board-wrap.streak-hot{box-shadow:0 0 15px rgba(255,152,0,0.35)!important}
-.board-wrap.streak-fire{box-shadow:0 0 25px rgba(255,60,0,0.45)!important}
-
-/* ══ BOARD WARNING & DANGER STATES ══ */
-.board-wrap.warning{
-  animation:warnPulse 1.4s ease-in-out infinite alternate;
-}
-@keyframes warnPulse{
-  from{box-shadow:0 0 0 0 rgba(255,180,0,0)}
-  to{box-shadow:0 0 12px 3px rgba(255,180,0,0.35)}
-}
+/* ══ BOARD DANGER PULSE ══ */
 .board-wrap.danger{
-  animation:dangerPulse 0.7s ease-in-out infinite alternate;
-  border-color:rgba(255,50,50,0.6)!important;
+  animation: dangerPulse 0.9s ease-in-out infinite alternate;
 }
 @keyframes dangerPulse{
-  from{box-shadow:0 0 8px 2px rgba(255,50,50,0.2)}
-  to{box-shadow:0 0 20px 8px rgba(255,50,50,0.55)}
+  from{box-shadow:0 0 0 0 rgba(255,60,60,0);}
+  to{box-shadow:0 0 10px 4px rgba(255,60,60,0.45);}
 }
-/* Heartbeat throb for critical danger (85%+) */
-.board-wrap.danger .cell.empty{animation:cellHeartbeat 0.7s ease-in-out infinite alternate}
-@keyframes cellHeartbeat{from{opacity:1}to{opacity:0.7}}
 
 /* ══ TRAY ══ */
 .tray{
@@ -462,7 +431,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 #hamsterReact.show .hamster-react-img{animation:hamsterBounce .7s ease}
 
 /* Ghost */
-#ghost{position:fixed;pointer-events:none;z-index:9999;display:none;opacity:.80;transition:opacity .08s;will-change:transform;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.4))}
+#ghost{position:fixed;pointer-events:none;z-index:9999;display:none;opacity:.75;transition:opacity .1s}
 #ghost.invalid{opacity:.20}
 .ghost-grid{display:grid;gap:var(--gap)}
 .ghost-cell{border-radius:8px;position:relative;overflow:hidden;}
@@ -788,15 +757,18 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* Tap to play button */
 .sp-tap{
-  max-width:220px;height:auto;cursor:pointer;
+  font-family:'Fredoka One';font-size:19px;color:#fff;
+  letter-spacing:3px;text-transform:uppercase;
+  background:rgba(255,255,255,.08);
+  border:2px solid rgba(255,255,255,.22);
+  border-radius:32px;padding:14px 44px;
   margin-top:50px;position:relative;z-index:10;
-  border:none;background:transparent;padding:0;
   opacity:0;animation:spFadeUp .55s ease 1.75s both, spTapPulse 1.9s ease 2.3s infinite;
 }
 @keyframes spFadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spTapPulse{
-  0%,100%{filter:drop-shadow(0 0 0 transparent)}
-  50%    {filter:drop-shadow(0 0 16px rgba(255,215,0,.6))}
+  0%,100%{border-color:rgba(255,255,255,.22);box-shadow:none}
+  50%    {border-color:rgba(100,200,255,.7); box-shadow:0 0 32px rgba(100,180,255,.3)}
 }
 
 /* Version label */
@@ -855,8 +827,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* ── Logo ── */
 .menu-logo{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:6px 0 4px;flex-shrink:0;width:100%;text-align:center;
+  display:flex;flex-direction:column;align-items:center;
+  padding:6px 0 4px;flex-shrink:0;
 }
 .menu-logo-row{display:flex;align-items:center;gap:2px;line-height:1}
 .menu-logo-block{
@@ -869,9 +841,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   text-shadow:0 0 22px rgba(0,229,255,.7),0 3px 0 rgba(0,0,0,.5);
 }
 .menu-tagline{
-  font-family:'Fredoka One';font-size:16px;color:rgba(144,202,249,.75);
-  letter-spacing:4px;text-transform:uppercase;
-  text-align:center;padding:0 14px 0;flex-shrink:0;
+  font-family:'Fredoka One';font-size:24px;color:rgba(144,202,249,.75);
+  letter-spacing:5px;text-transform:uppercase;
+  text-align:center;padding:0 14px 2px;flex-shrink:0;
 }
 
 /* ── Mode cards ── */
@@ -880,9 +852,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   padding:0 14px 8px;justify-content:flex-end;min-height:0;
 }
 .menu-mode-card{
-  border-radius:12px;padding:8px 12px;
+  border-radius:14px;padding:10px 14px;
   cursor:pointer;position:relative;overflow:hidden;
-  flex-shrink:0;min-height:56px;
+  flex-shrink:0;
   display:flex;align-items:center;gap:12px;
   transition:transform .15s cubic-bezier(.17,.89,.32,1.28);
 }
@@ -913,14 +885,14 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 }
 .menu-card-left{flex:1;min-width:0}
 .menu-card-top{display:flex;align-items:center;gap:8px;margin-bottom:2px}
-.menu-card-title{font-family:'Fredoka One';font-size:15px;color:#fff;letter-spacing:.3px}
+.menu-card-title{font-family:'Fredoka One';font-size:17px;color:#fff;letter-spacing:.3px}
 .menu-card-badge{
   font-family:'Fredoka One';font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
   padding:2px 7px;border-radius:6px;
 }
 .badge-classic{background:rgba(255,215,0,0.18);color:#ffd700;border:1px solid rgba(255,215,0,0.3)}
 .badge-adv{background:rgba(206,147,216,0.18);color:#ce93d8;border:1px solid rgba(206,147,216,0.3)}
-.menu-card-desc{font-size:10px;color:rgba(255,255,255,0.6);margin:2px 0 1px;line-height:1.3;letter-spacing:.1px}
+.menu-card-desc{font-size:11px;color:rgba(255,255,255,0.6);margin:4px 0 2px;line-height:1.35;letter-spacing:.1px}
 .menu-card-footer{display:flex;align-items:center;gap:8px}
 .menu-card-meta{display:flex;align-items:center;gap:8px}
 .menu-card-lv{
@@ -1131,7 +1103,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 /* ── Logo image on splash + menu ── */
 #splashLogoImg{max-width:min(97%,442px);height:auto;display:block;margin:0 auto;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:spLogoGlow 3.8s ease-in-out 1.35s infinite}
-#menuLogoImg{max-width:min(65%,280px);height:auto;display:block;margin:4px auto 0;transform:scale(1);transform-origin:center top;filter:drop-shadow(0 4px 20px rgba(0,0,0,.7)) drop-shadow(0 2px 4px rgba(255,200,0,.3));animation:menuLogoFloat 4.2s ease-in-out infinite}
+#menuLogoImg{max-width:min(100%,1012px);height:auto;display:block;margin:12px auto 0;transform:scale(1.3);transform-origin:center top;filter:drop-shadow(0 8px 38px rgba(0,0,0,.7)) drop-shadow(0 2px 8px rgba(255,200,0,.35));animation:menuLogoFloat 4.2s ease-in-out infinite}
 @keyframes spLogoGlow{
   0%,100%{filter:drop-shadow(0 6px 32px rgba(255,200,0,0.45)) drop-shadow(0 2px 8px rgba(255,200,0,.35))}
   50%    {filter:drop-shadow(0 10px 52px rgba(255,220,0,0.80)) drop-shadow(0 0 28px rgba(255,130,0,0.50))}
@@ -1192,44 +1164,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   .tray-actions{padding:0 4px 2px}
   .board-wrap{padding:3px;border-radius:10px}
 }
-
-/* == NEAR MISS HIGHLIGHT == */
-@keyframes nearMissPulse{0%,100%{box-shadow:inset 0 0 6px rgba(255,215,0,0.3)}50%{box-shadow:inset 0 0 14px rgba(255,215,0,0.7)}}
-.cell.near-miss{animation:nearMissPulse .8s ease-in-out infinite!important;border-color:rgba(255,215,0,0.6)!important}
-/* == BLITZ RUSH == */
-@keyframes rushPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
-/* == MYSTERY METER == */
-#mysteryMeter{display:none;position:relative;width:28px;height:28px;margin-left:8px;cursor:default}
-#mysteryMeter .meter-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,#ffd700,#ff8f00);border-radius:0 0 4px 4px;transition:height .3s ease}
-#mysteryMeter .meter-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;z-index:1}
-/* == MASTERY BADGES == */
-.badge-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-60%);z-index:1000;text-align:center;pointer-events:none;animation:badgeIn .3s ease,badgeOut .3s ease 1.7s forwards}
-@keyframes badgeIn{from{transform:translate(-50%,-60%) scale(0);opacity:0}to{transform:translate(-50%,-60%) scale(1);opacity:1}}
-@keyframes badgeOut{to{transform:translate(-50%,-80%) scale(0.8);opacity:0}}
-.badge-popup-inner{background:rgba(10,15,40,0.92);border:2px solid #ffd700;border-radius:16px;padding:16px 24px;box-shadow:0 0 30px rgba(255,215,0,0.4)}
-.badge-popup-icon{font-size:40px}.badge-popup-name{font-family:'Fredoka One';font-size:18px;color:#ffd700;margin:4px 0}
-.badge-popup-desc{font-size:12px;color:rgba(255,255,255,0.7)}
-/* ghost HUD removed */
-/* == FLOOD == */
-.cell.flood-block{background:#546e7a!important;border:2px solid rgba(120,144,156,0.8)!important;box-shadow:inset 0 0 8px rgba(0,0,0,0.5)!important}
-#floodCounter{display:none;position:absolute;bottom:2px;left:10px;font-size:10px;color:rgba(100,181,246,0.7);font-family:Nunito;z-index:50}
-/* == EDGE SPARKLES + RIPPLE == */
-@keyframes edgeSparkle{0%{opacity:0;transform:scale(0)}30%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(0.3) translateY(-30px)}}
-.edge-sparkle{position:fixed;width:6px;height:6px;border-radius:50%;pointer-events:none;z-index:800;animation:edgeSparkle .7s ease forwards}
-@keyframes boardRipple{0%{box-shadow:0 0 0 0 rgba(0,229,255,0.5)}50%{box-shadow:0 0 0 12px rgba(0,229,255,0.2)}100%{box-shadow:0 0 0 20px rgba(0,229,255,0)}}
-.board-wrap.ripple{animation:boardRipple .5s ease!important}
-/* == GEM SPOTLIGHT == */
-@keyframes gemSpotlight{0%,100%{box-shadow:0 0 8px rgba(255,215,0,0.4)}50%{box-shadow:0 0 16px rgba(255,215,0,0.8)}}
-.cell.last-gem-glow{animation:gemSpotlight 1s ease-in-out infinite!important;border:2px solid rgba(255,215,0,0.7)!important;z-index:2;position:relative}
-/* == HEARTBEAT == */
-@keyframes dangerHeartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.02)}30%{transform:scale(1)}45%{transform:scale(1.015)}60%{transform:scale(1)}}
-.board-wrap.heartbeat{animation:dangerHeartbeat 1.2s ease-in-out infinite!important}
-/* login streak + ghost removed from menu */
-/* == WIN STREAK == */
-.win-streak-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Fredoka One';font-size:16px;color:#ffd700;text-shadow:0 0 8px rgba(255,215,0,0.5)}
-.streak-gold-border .board-wrap{box-shadow:0 0 20px rgba(255,215,0,0.5)!important}
-/* == BLITZ RUSH CARD == */
-
 </style>
 </head>
 <body>
@@ -1252,7 +1186,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <div class="sp-tagline">Blast · Every · Block</div>
   </div>
   <!-- CTA -->
-  <img src="Assets/Buttons/Playnow new.png" class="sp-tap" alt="Play Now">
+  <div class="sp-tap">▶&nbsp; TAP TO PLAY</div>
   <!-- Version -->
   <div class="sp-ver">v1.0 &nbsp;·&nbsp; HTML5</div>
 </div>
@@ -1283,7 +1217,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
   <!-- Mode cards -->
   <div class="menu-cards">
-<div class="menu-tagline">Choose Your Path</div>
+    <div class="menu-tagline">Choose Your Path</div>
     <!-- Classic Mode -->
     <div class="menu-mode-card menu-card-classic" onclick="BB.selectMode('classic')">
       <div class="menu-card-shine"></div>
@@ -1298,20 +1232,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
           <span class="menu-card-lv-sub">LV</span>
           <span class="menu-card-stars-row" id="menuClassicStars">☆☆☆</span>
         </div>
-      </div>
-      <div class="menu-card-cta">Play ›</div>
-    </div>
-
-
-    <!-- Tetris Mode -->
-    <div class="menu-mode-card menu-card-tetris" onclick="BB.switchMapMode('tetris');BB.openMap()">
-      <div class="menu-card-shine"></div>
-      <div class="menu-card-left">
-        <div class="menu-card-top">
-          <div class="menu-card-title">🎮 Tetris</div>
-          <div class="menu-card-badge badge-tetris">FALLING</div>
-        </div>
-        <div class="menu-card-desc">Classic falling blocks! Clear lines & level up.</div>
       </div>
       <div class="menu-card-cta">Play ›</div>
     </div>
@@ -1339,14 +1259,13 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <div class="menu-card-shine"></div>
       <div class="menu-card-left">
         <div class="menu-card-top">
-          <div class="menu-card-title">♾️ Endless</div>
+          <div class="menu-card-title">🏆 Blitz League</div>
           <div class="menu-card-badge badge-league">WEEKLY</div>
         </div>
         <div class="menu-card-desc">Endless marathon — no goals, no power-ups. Place blocks until you can't. Top 3 win coins!</div>
       </div>
       <div class="menu-card-cta">Play ›</div>
     </div>
-
   </div>
 
   <!-- Bottom action buttons -->
@@ -1372,7 +1291,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     </div>
     <div class="map-tabs">
       <button class="map-tab active" id="mapTabClassic" onclick="BB.switchMapMode('classic')">⚡ Classic</button>
-      <button class="map-tab" id="mapTabTetris" onclick="BB.switchMapMode('tetris')" style="background:rgba(0,172,193,0.15);border-color:rgba(0,172,193,0.3)">🎮 Tetris</button>
       <button class="map-tab adv-tab" id="mapTabAdv" onclick="BB.switchMapMode('adventure')">⚔️ Adventure</button>
     </div>
     <div class="map-scroll" id="mapScroll">
@@ -1474,9 +1392,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 
 <!-- BOARD -->
 <div class="board-outer">
-<div id="floodCounter"></div>
-<div id="tetNextPreview"><div class="tet-next-label">NEXT</div><div id="tetNextGrid"></div></div>
-<div id="tetHoldPreview"><div class="tet-hold-label">HOLD</div><div id="tetHoldGrid"></div></div>
   <div class="board-wrap">
     <div class="dc-timer-bar" id="dcTimerBar"><div class="dc-timer-fill" id="dcTimerFill" style="width:100%"></div></div>
     <div id="board"></div>
@@ -1489,16 +1404,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   <button class="shuffle-btn" id="shuffleBtn" onclick="BB.shufflePieces()">
     🔀 Shuffle &nbsp;<span class="shuffle-cost" id="shuffleCost">FREE</span>
   </button>
-</div>
-
-<!-- TETRIS TOUCH TUTORIAL (shown once) -->
-<div id="tetTutorial" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;flex-direction:column;gap:16px;color:#fff;font-family:'Fredoka One',sans-serif;text-align:center">
-  <div style="font-size:22px;color:#ffd700;margin-bottom:8px">How to Play</div>
-  <div style="font-size:16px">🔄 <b>TAP</b> to rotate</div>
-  <div style="font-size:16px">← → <b>SWIPE</b> to move</div>
-  <div style="font-size:16px">⬇ <b>SWIPE DOWN</b> to drop</div>
-  <div style="font-size:16px">✋ <b>HOLD</b> long press</div>
-  <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:12px">Tap anywhere to start</div>
 </div>
 
 <!-- HAMSTER REACTION -->
@@ -1535,21 +1440,10 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
         <div class="modal-gem-lbl">Gems</div>
       </div>
     </div>
-    <div id="goCoinRow" style="display:flex;align-items:center;justify-content:center;gap:8px;margin:8px 0 2px;font-family:'Fredoka One'">
-      <span style="font-size:20px">🪙</span>
-      <span id="goCoinCount" style="font-size:22px;color:#ffd700;min-width:30px">0</span>
-      <span id="goCoinBonus" style="font-size:13px;color:#ff9800;display:none;background:rgba(255,152,0,0.2);padding:2px 8px;border-radius:10px"></span>
-    </div>
-    <div id="goMomentum" style="font-family:'Fredoka One';font-size:15px;color:#90caf9;text-align:center;margin:6px 0 4px;min-height:20px;opacity:0.9"></div>
-    <!-- Rewarded ad buttons (hidden for Pro users) -->
-    <div id="goAdBtns" style="display:flex;gap:8px;margin-bottom:8px;width:100%">
-      <button id="goReviveBtn" onclick="BB.reviveWithAd()" style="flex:1;font-family:'Fredoka One';font-size:13px;padding:10px 6px;border:none;border-radius:12px;color:#fff;cursor:pointer;background:linear-gradient(180deg,#7c4dff,#512da8);box-shadow:0 4px 0 #311b92,0 6px 16px rgba(124,77,255,0.4)">🎬 Revive<br><span style="font-size:10px;opacity:0.7">Watch Ad</span></button>
-      <button id="goDoubleBtn" onclick="BB.doubleCoinsWithAd()" style="flex:1;font-family:'Fredoka One';font-size:13px;padding:10px 6px;border:none;border-radius:12px;color:#fff;cursor:pointer;background:linear-gradient(180deg,#ff8f00,#e65100);box-shadow:0 4px 0 #bf360c,0 6px 16px rgba(255,143,0,0.4)">🪙 x2 Coins<br><span style="font-size:10px;opacity:0.7">Watch Ad</span></button>
-    </div>
-    <button class="btn-retry" onclick="BB.retry()" style="font-size:22px;padding:16px 0;width:100%;margin-bottom:10px;background:linear-gradient(180deg,#00c853,#009624);box-shadow:0 6px 0 #007934,0 8px 24px rgba(0,200,100,0.4)">▶ PLAY AGAIN</button>
+    <button class="btn-retry" onclick="BB.retry()">🔄 RETRY</button>
     <div class="btn-row">
       <button class="btn-half btn-menu" onclick="BB.goMenu()">🏠 Menu</button>
-      <button class="btn-half btn-pro"  onclick="BB.openShop()">🛒 Shop</button>
+      <button class="btn-half btn-pro"  onclick="BB.openShop()">👑 Pro</button>
     </div>
   </div>
 </div>
@@ -1643,7 +1537,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   </div>
 </div>
 
-<!-- ENDLESS MODAL -->
+<!-- BLITZ LEAGUE MODAL -->
 <div class="modal-bg" id="leagueModal">
   <div class="modal-card" style="max-height:90vh;overflow-y:auto">
     <span class="modal-emoji">🏆</span>
@@ -1725,9 +1619,6 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
         <button class="shop-buy-btn" id="shopBuyPro" onclick="BB.shopBuyPro()">Buy</button>
       </div>
     </div>
-    <!-- COSMETIC SKINS -->
-    <div style="font-family:'Fredoka One';font-size:14px;color:#ffd700;margin:14px 0 8px;letter-spacing:1px">🎨 BOARD SKINS</div>
-    <div id="shopSkinsGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;margin-bottom:12px"></div>
     <button class="btn-retry" style="background:rgba(255,255,255,.15);box-shadow:none" onclick="BB.closeShop()">Close</button>
   </div>
 </div>
@@ -4106,7 +3997,6 @@ var pieces, dragging, dragIdx, dragPiece;
 var prevBoard, prevScore;
 var combo, maxCombo, level, isPro;
 var rounds, levelStreak, undoCount, undoUsed, gameEnded;
-var piecesPlacedThisLevel=0, firstClearDone=false;
 var _gameOverCount = 0; /* tracks game overs for interstitial ad frequency */
 var coins, playerXP;
 var powerups, activePU;
@@ -4169,18 +4059,13 @@ function setCS(){
     var trayPad  = h<481? 3: h<601? 5: h<701? 7:  9;
     trayH = slotMin + trayPad + 2; /* +2 for top border */
   }
-  /* Tetris mode: tray/power-ups are hidden, measure touch controls instead */
-  if(isTetrisMode){
-    puH=0; taH=0; trayH=8; /* gesture controls — no button bar */
-  }
   /* Board-wrap padding varies by breakpoint */
   var bwPad = h<481?6: h<601?8: h<701?12: 16;
   var availH = Math.max(40, h - topH - xpH - puH - trayH - taH - bwPad);
   var csFromW = Math.floor((w - GAP*(COLS-1)) / COLS);
   var csFromH = Math.floor((availH - GAP*(ROWS-1)) / ROWS);
   CS = Math.min(csFromW, csFromH);
-  var maxCS = isTetrisMode ? 36 : 50; /* Tetris: wider cap for 10-col board */
-  CS = Math.max(18, Math.min(CS, maxCS));
+  CS = Math.max(18, Math.min(CS, 50));
   GAP = Math.max(2, Math.floor(CS/13));
   STEP = CS + GAP;
   document.documentElement.style.setProperty('--cs', CS+'px');
@@ -4205,8 +4090,6 @@ function init(){
   classicLevel = parseInt(lsGet('bblevel','0'))||0;
   level = classicLevel; /* Always start in Classic Mode on load */
   isAdventureMode = false;
-  if(isTetrisMode) stopTetris(); /* Clean up any lingering Tetris state */
-  isTetrisMode = false;
   levelStreak = parseInt(lsGet('bbstreak','0'))||0;
   undoCount = parseInt(lsGet('bbundo','3'))||3;
   coins = parseInt(lsGet('bbcoins','0'))||0;
@@ -4297,8 +4180,6 @@ function startLevel(lv){
   }
   score = 0; combo = 0; undoUsed = false; gameEnded = false; puUsed = false;
   shufflesLeft = 1; rescueUsed = false;
-  piecesPlacedThisLevel = 0; firstClearDone = false; _reviveUsedThisGame = false; clearStreak = 0;
-  if(typeof _onGameStart==='function') _onGameStart();
   starsLeft = 0; pentasLeft = 0;
   var bombGems = 0, lockedGems = 0, frozenCells = 0;
   board = [];
@@ -4365,8 +4246,8 @@ function checkLinesOnLoad(){
 function buildBoardDOM(){
   var b = document.getElementById('board');
   b.innerHTML='';
-  b.style.gridTemplateColumns = 'repeat('+COLS+','+CS+'px)';
-  b.style.gridTemplateRows    = 'repeat('+ROWS+','+CS+'px)';
+  b.style.gridTemplateColumns = 'repeat(8,'+CS+'px)';
+  b.style.gridTemplateRows    = 'repeat(8,'+CS+'px)';
   b.style.gap = GAP+'px';
   for(var r=0;r<ROWS;r++) for(var c=0;c<COLS;c++){
     var el=document.createElement('div');
@@ -4435,9 +4316,6 @@ function updateGemUI(){
   if(typeof isDailyChallenge!=='undefined' && isDailyChallenge){
     if(lblTxt) lblTxt.textContent='DAILY';
     if(lbl) lbl.textContent='\u{1F4C5}';
-  } else if(isTetrisMode){
-    if(lblTxt) lblTxt.textContent='LEVEL';
-    if(lbl) lbl.textContent=tetLevel;
   } else {
     if(lblTxt) lblTxt.textContent='LEVEL';
     if(lbl) lbl.textContent=level+1;
@@ -4500,14 +4378,6 @@ function updateXPBar(){
     return;
   }
 
-  /* ── TETRIS MODE: XP bar managed by tetRender() ── */
-  if(isTetrisMode){
-    if(xpWrap) xpWrap.style.display='';
-    if(advDisp) advDisp.classList.remove('visible');
-    if(advProg) advProg.classList.remove('visible');
-    return; /* tetRender() handles fill, label, and score */
-  }
-
   /* ── LEAGUE MODE: use dedicated league XP bar ── */
   if(isLeagueMode){
     if(xpWrap) xpWrap.style.display='';
@@ -4552,12 +4422,8 @@ function updateStreakBadge(){
 }
 function updateModeBadge(){
   var el=document.getElementById('modeBadge'); if(!el) return;
-  if(isTetrisMode){
-    el.textContent='\u{1F3AE} TETRIS';
-    el.classList.remove('adv');
-    el.style.background='rgba(0,172,193,0.25)'; el.style.borderColor='rgba(0,172,193,0.4)'; el.style.color='#00acc1';
-  } else if(isLeagueMode){
-    el.textContent='\u{267E}\u{FE0F} ENDLESS';
+  if(isLeagueMode){
+    el.textContent='\u{1F3C6} BLITZ LEAGUE';
     el.classList.remove('adv');
     el.style.background='rgba(255,215,0,0.25)'; el.style.borderColor='rgba(255,215,0,0.4)'; el.style.color='#ffd700';
   } else if(isAdventureMode){
@@ -4660,30 +4526,8 @@ function embedGemInPiece(piece){
    4. COLOR:       3 different colors so pieces are visually distinct
    5. FALLBACK:    if < 3 groups available, pad from any eligible group        */
 function dealPieces(){
-  /* ── FIRST TRAY HOOK: give helpful pieces for early success ──
-     First deal of a level: guaranteed straight-3 (h or v) + 2 small pieces
-     Second deal: bias toward size 2-3 pieces for easy combo setup
-     This ensures a line clear is achievable within first 2-3 moves */
-  if(piecesPlacedThisLevel===0){
-    /* First tray: straight-3 + domino + single/domino */
-    var ftPieces=[];
-    var ftColors=[];
-    function ftColor(){ var c=COLORS[Math.floor(Math.random()*COLORS.length)]; for(var t=0;t<5;t++){if(ftColors.indexOf(c)<0)break;c=COLORS[Math.floor(Math.random()*COLORS.length)];}ftColors.push(c);return c; }
-    /* Piece 1: straight-3 (horizontal or vertical) */
-    ftPieces.push({shape:SHAPES[Math.random()<0.5?3:4], color:ftColor(), gemCell:null});
-    /* Piece 2: straight-3 or domino */
-    ftPieces.push({shape:SHAPES[Math.random()<0.5?3:Math.random()<0.5?1:2], color:ftColor(), gemCell:null});
-    /* Piece 3: domino or single */
-    ftPieces.push({shape:SHAPES[Math.random()<0.5?1:Math.random()<0.5?2:0], color:ftColor(), gemCell:null});
-    pieces=ftPieces; renderTray(); updateShuffleBtn(); updateDangerState(); return;
-  }
-  if(piecesPlacedThisLevel<=6){
-    /* Second/third trays: cap at size 3 for easy gameplay */
-    var maxSz=3; var largeCap=0;
-  } else {
-    var maxSz    = level < 4 ? 3 : 99;
-    var largeCap = (level >= 4 && level < 10) ? 1 : 99;
-  }
+  var maxSz    = level < 4 ? 3 : 99;
+  var largeCap = (level >= 4 && level < 10) ? 1 : 99;
 
   /* Build eligible groups: only shapes that fit size AND fit on the board NOW */
   var eligGroups = SHAPE_GROUPS.map(function(g, gi){
@@ -4703,29 +4547,8 @@ function dealPieces(){
     return c;
   }
 
-  /* ── CLUTCH ASSIST: in danger state, bias toward smaller helpful pieces ──
-     Warning (70%): 40% chance to prefer small pieces (size 1-2)
-     Danger  (85%): 65% chance to prefer small pieces
-     Not guaranteed — keeps tension while giving hope */
-  var dangerTier = _lastDangerTier;
-  var clutchActive = false;
-  var clutchChance = dangerTier===2 ? 0.65 : dangerTier===1 ? 0.40 : 0;
-  if(clutchChance>0 && Math.random()<clutchChance){
-    clutchActive = true;
-    /* Cap large pieces: in danger only allow 0-1 large piece */
-    largeCap = dangerTier===2 ? 0 : 1;
-  }
-
-  /* Shuffle groups — clutch mode: bias small groups to front */
-  var shuffled;
-  if(clutchActive){
-    /* Small groups first (gi 0-3), then shuffle within tiers */
-    var small=eligGroups.filter(function(g){return g.gi<4;}).sort(function(){return Math.random()-0.5;});
-    var large=eligGroups.filter(function(g){return g.gi>=4;}).sort(function(){return Math.random()-0.5;});
-    shuffled=small.concat(large);
-  } else {
-    shuffled=eligGroups.slice().sort(function(){return Math.random()-0.5;});
-  }
+  /* Shuffle groups and pick one piece from each of 3 different groups */
+  var shuffled   = eligGroups.slice().sort(function(){ return Math.random()-0.5; });
   var picked     = [], largeUsed = 0, usedColors = [];
 
   for(var i=0; i < shuffled.length && picked.length < 3; i++){
@@ -4774,19 +4597,10 @@ function dealPieces(){
   updateDangerState();
 }
 
-var _lastDangerTier=0; /* 0=safe, 1=warning, 2=danger */
 function updateDangerState(){
   var pct = boardFillPct();
   var bw = document.querySelector('.board-wrap');
-  if(!bw) return;
-  var tier = pct>=0.85?2 : pct>=0.70?1 : 0;
-  bw.classList.toggle('warning', tier===1);
-  bw.classList.toggle('danger',  tier===2);
-  /* Hamster reacts when entering a new danger tier */
-  if(tier>_lastDangerTier && tier>=1 && !gameEnded){
-    hamsterReact('danger');
-  }
-  _lastDangerTier=tier;
+  if(bw) bw.classList.toggle('danger', pct >= 0.70);
 }
 
 /* ── SHUFFLE PIECES ── */
@@ -4911,7 +4725,6 @@ function ghostTL(sr,sc){
 }
 
 function startDrag(e,idx){
-  if(isTetrisMode) return; /* Tetris uses its own input */
   if(!pieces[idx]) return;
   e.preventDefault();
   savePrev();
@@ -4956,7 +4769,7 @@ function refreshGhost(mx,my){
   var pR=dragPiece.shape.length, pC=dragPiece.shape[0].length;
   var gx=ax-(pC*STEP)/2, gy=ay-(pR*STEP)/2;
   var g=document.getElementById('ghost');
-  g.style.left='0';g.style.top='0';g.style.transform='translate3d('+gx+'px,'+gy+'px,0)';
+  g.style.left=gx+'px'; g.style.top=gy+'px';
   return snap;
 }
 
@@ -4982,8 +4795,7 @@ function onUp(e,_move,_up){
   if(dragIsTouch){ ay-=TOUCH_LIFT; ax-=TOUCH_SHIFT; }
   var snap=cursorToSnap(ax,ay,dragPiece.shape);
   if(canPlace(dragPiece.shape,snap.r,snap.c)){
-    SND.place(); haptic(8);
-    piecesPlacedThisLevel++;
+    SND.place();
     placePiece(dragPiece,snap.r,snap.c);
     /* Adventure move counter */
     if(movesLeft>0){ movesLeft--; updateXPBar(); }
@@ -5087,40 +4899,6 @@ function placePiece(p,r0,c0){
   }
 }
 
-/* ── STREAK SYSTEM — consecutive clears ── */
-var clearStreak=0; /* resets when a placement doesn't clear */
-var STREAK_LABELS=['','','\u{1F525} Hot Streak!','\u{1F525}\u{1F525} On Fire!','\u{26A1} Unstoppable!','\u{1F4A5} GODLIKE!'];
-
-function updateStreakUI(){
-  var bw=document.querySelector('.board-wrap');
-  if(!bw) return;
-  bw.classList.remove('streak-hot','streak-fire');
-  if(clearStreak>=4) bw.classList.add('streak-fire');
-  else if(clearStreak>=2) bw.classList.add('streak-hot');
-}
-
-/* ── MICRO SURPRISE — random bonus moments ── */
-function checkMicroSurprise(cleared){
-  /* 12% chance on any clear, 25% on combos */
-  var chance = cleared>=2 ? 0.25 : 0.12;
-  if(Math.random()>=chance) return;
-  var surprises=[
-    {text:'\u{2728} Perfect!',pts:50},
-    {text:'\u{1F31F} Brilliant!',pts:75},
-    {text:'\u{1F48E} Flawless!',pts:100},
-    {text:'\u{2B50} Bonus!',pts:60},
-  ];
-  var s=surprises[Math.floor(Math.random()*surprises.length)];
-  score+=s.pts;
-  /* Show floating surprise text */
-  var br=document.getElementById('board').getBoundingClientRect();
-  var el=document.createElement('div');
-  el.style.cssText='position:fixed;pointer-events:none;z-index:900;font-family:Fredoka One;font-size:18px;color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,0.8),0 2px 6px rgba(0,0,0,.5);animation:flyUp 1.1s ease forwards;left:'+(br.left+br.width/2-40)+'px;top:'+(br.top+br.height*0.3)+'px;white-space:nowrap';
-  el.textContent=s.text+' +'+s.pts;
-  document.body.appendChild(el);
-  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1200);
-}
-
 /* ── LINE CLEAR ──
    A row clears when ALL cells (gold + filled) form a complete row
    i.e. no EMPTY cells remain in that row.
@@ -5147,12 +4925,12 @@ function checkLines(){
     if(!hasEmpty && hasFilled) fullCols.push(c);
   }
   var cleared=fullRows.length+fullCols.length;
-  if(!cleared){ clearStreak=0; updateStreakUI(); if(typeof _onPiecePlaced==='function') _onPiecePlaced(false,0,[],[],[]); return; }
+  if(!cleared) return;
 
   /* ── Combo = multi-line clear in a single move ──
      1 line = normal (1x), 2 lines = Combo x2 (3x), 3 lines = Combo x3 (5x), 4+ = Mega Combo (8x) */
   var comboTier=cleared>=4?4:cleared; /* 1,2,3,4 */
-  var scoreMult=[0,1,2,3.5,6][comboTier]; /* smoothed multiplier */
+  var scoreMult=[0,1,3,5,8][comboTier]; /* multiplier by tier */
   var pts=cleared*COLS*10*scoreMult;
   if(isLeagueMode) pts=Math.round(pts*leagueMultiplier());
   score+=pts;
@@ -5229,10 +5007,6 @@ function checkLines(){
   updateXPBar();
   SND.clear(cleared, comboTier);
 
-  /* ── HIT-PAUSE — brief freeze for impact ── */
-  hitPause(cleared>=4?100:cleared>=2?70:50);
-  haptic(cleared>=4?40:cleared>=2?25:12);
-
   /* ── Visual feedback based on lines cleared in this single move ── */
   var isCombo = cleared >= 2;
   var isMega  = cleared >= 4;
@@ -5241,36 +5015,11 @@ function checkLines(){
   if(isCombo) showComboBadge(cleared, isMega);
   spawnRings(isCombo, cleared);
   spawnReaction(isCombo, isMega);
-
-  /* ── FIRST CLEAR CELEBRATION — hook players in first 10 seconds ── */
-  if(!firstClearDone){
-    firstClearDone=true;
-    var fc=isCombo?'Great Start!':'Nice!';
-    showToast(fc);
-    hamsterReact(isCombo?'clear2':'clear1');
-    /* Extra sparkle burst for first clear */
-    spawnComboFX(Math.max(cleared,2), popEls);
-  } else {
-    if(isMega)        hamsterReact('clear3');
-    else if(isCombo)  hamsterReact('clear2');
-    else              hamsterReact('clear1');
-    spawnComboFX(cleared, popEls);
-  }
+  if(isMega)        hamsterReact('clear3');
+  else if(isCombo)  hamsterReact('clear2');
+  else              hamsterReact('clear1');
   spawnConfetti(popEls);
-
-  /* ── STREAK SYSTEM ── */
-  /* -- 10 IMPROVEMENTS HOOK -- */
-  if(typeof _onPiecePlaced==="function") _onPiecePlaced(true,cleared,popEls,fullRows,fullCols);
-
-  clearStreak++;
-  updateStreakUI();
-  if(clearStreak>=2 && STREAK_LABELS[Math.min(clearStreak,STREAK_LABELS.length-1)]){
-    showToast(STREAK_LABELS[Math.min(clearStreak,STREAK_LABELS.length-1)]);
-  }
-
-  /* ── MICRO SURPRISE ── */
-  checkMicroSurprise(cleared);
-
+  spawnComboFX(cleared, popEls); /* Vita Mahjong-style combo visuals */
   /* League stage progression — simple lines-based */
   if(isLeagueMode){
     leagueLinesCleared+=cleared;
@@ -5292,79 +5041,12 @@ function checkLines(){
   },300);
 }
 
-/* ── NEAR-MISS SCANNER — "You were SO close!" on game over ── */
-function scanNearMisses(){
-  var misses=[];
-  /* Check rows */
-  for(var r=0;r<ROWS;r++){
-    var empty=0, lastEmpty=-1;
-    for(var c=0;c<COLS;c++){
-      if(board[r][c].type===T.EMPTY||board[r][c].type===T.FROZEN){empty++;lastEmpty=c;}
-    }
-    if(empty===1) misses.push({type:'row',idx:r,gap:lastEmpty,cells:1});
-    else if(empty===2) misses.push({type:'row',idx:r,cells:2});
-  }
-  /* Check cols */
-  for(var c=0;c<COLS;c++){
-    var empty=0, lastEmpty=-1;
-    for(var r=0;r<ROWS;r++){
-      if(board[r][c].type===T.EMPTY||board[r][c].type===T.FROZEN){empty++;lastEmpty=r;}
-    }
-    if(empty===1) misses.push({type:'col',idx:c,gap:lastEmpty,cells:1});
-    else if(empty===2) misses.push({type:'col',idx:c,cells:2});
-  }
-  return misses;
-}
-
-function showNearMissHighlight(misses){
-  if(!misses.length) return;
-  /* Highlight the closest misses (1 cell away first) */
-  var best=misses.filter(function(m){return m.cells===1;});
-  if(!best.length) best=misses.slice(0,2);
-  best.forEach(function(m){
-    if(m.type==='row'){
-      for(var c=0;c<COLS;c++){
-        var el=cellEl(m.idx,c);
-        if(el){ el.style.boxShadow='0 0 12px rgba(255,215,0,0.8)'; el.style.border='2px solid #ffd700'; }
-      }
-    } else {
-      for(var r=0;r<ROWS;r++){
-        var el=cellEl(r,m.idx);
-        if(el){ el.style.boxShadow='0 0 12px rgba(255,215,0,0.8)'; el.style.border='2px solid #ffd700'; }
-      }
-    }
-  });
-  /* Show floating "SO CLOSE!" text */
-  var txt=best[0].cells===1?'\u{1F3AF} 1 cell away from clearing!':'\u{1F3AF} 2 cells away!';
-  if(best.length>=2) txt='\u{1F3AF} '+best.length+' lines were almost complete!';
-  var br=document.getElementById('board').getBoundingClientRect();
-  var el=document.createElement('div');
-  el.style.cssText='position:fixed;pointer-events:none;z-index:900;font-family:Fredoka One;font-size:16px;color:#ffd700;text-shadow:0 0 12px rgba(255,215,0,0.8),0 2px 6px rgba(0,0,0,.6);animation:flyUp 2.5s ease forwards;left:'+(br.left+br.width/2)+'px;top:'+(br.top+br.height*0.4)+'px;transform:translateX(-50%);white-space:nowrap';
-  el.textContent=txt;
-  document.body.appendChild(el);
-  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},2600);
-}
-
-/* ── HIT-PAUSE — freeze frame on line clears for impact ── */
-function hitPause(ms){
-  var bw=document.querySelector('.board-wrap');
-  if(!bw) return;
-  bw.style.filter='brightness(1.3)';
-  setTimeout(function(){ bw.style.filter=''; },ms);
-}
-
-/* ── HAPTIC FEEDBACK — mobile vibration ── */
-function haptic(ms){
-  try{ if(navigator.vibrate) navigator.vibrate(ms); }catch(e){}
-}
-
 /* ── STAGE CLEAR ──
    Classic: Triggers when XP bar fills (score >= target). Stars = % gems collected.
    Adventure: Triggers when ALL gems are collected (or XP bar if level has no gems). Stars = score vs XP target. */
 function checkStageClear(){
   if(gameEnded) return; /* prevent dual modals */
   if(isLeagueMode) return; /* league mode: play until game over, no win condition */
-  if(isTetrisMode) return; /* tetris handles its own level-up in tetCheckLines */
 
   var target = isDailyChallenge
     ? (DC_LEVEL_TARGETS[getDailyChallengeLevel()]||400)
@@ -5452,8 +5134,8 @@ function checkStageClear(){
   levelStreak++; lsSet('bbstreak', levelStreak);
   updateStreakBadge();
 
-  /* Award coins — tiered (multiplied by DC modifier) */
-  var coinEarned = score>=5000?30 : score>=3000?20 : score>=1000?10 : 5;
+  /* Award coins (multiplied by DC modifier) */
+  var coinEarned = Math.floor(score / 150);
   if(isDailyChallenge){ var _mod=getDCMod(); coinEarned *= (_mod.coinMult||3); }
   awardCoins(coinEarned);
 
@@ -5525,8 +5207,8 @@ function shouldShowInterstitialAd(){
   if(isPro) return false;           /* paid users never see ads */
   if(classicLevel < 5) return false; /* levels 1-5: no ads, hook first */
   _gameOverCount++;
-  /* Show interstitial every 3-5 games (random within range for unpredictability) */
-  var every = 3 + Math.floor(Math.random()*3); /* 3, 4, or 5 */
+  /* frequency scales with level */
+  var every = classicLevel >= 31 ? 2 : classicLevel >= 16 ? 3 : 5;
   if(_gameOverCount >= every){
     _gameOverCount = 0;
     return true;
@@ -5540,134 +5222,17 @@ function showInterstitialAd(){
   console.log('[AdMob] Show interstitial ad here');
 }
 
-/* ── MOMENTUM MESSAGES — encourage replay ── */
-function getMomentumMessage(isNewBest, fillPct, score, prevBest, wasLeague, leagueStage){
-  /* Priority 1: New high score */
-  if(isNewBest && score>0) return pick_mm([
-    '\u{1F31F} New high score! Can you beat '+score+'?',
-    '\u{1F3C6} Personal best! Go for '+Math.ceil(score*1.2)+'!',
-    '\u{1F525} You crushed it! One more round?',
-  ]);
-  /* Priority 2: Board was almost full (close call) */
-  if(fillPct>=0.80) return pick_mm([
-    '\u{1F62C} You were 1 move away!',
-    '\u{1F494} So close! That was a tight finish.',
-    '\u{1F4AA} Almost survived! Try a different strategy.',
-    '\u{1F3AF} One more piece would have saved you!',
-  ]);
-  /* Priority 3: Good score (within 20% of best) */
-  if(prevBest>0 && score>=prevBest*0.8) return pick_mm([
-    '\u{26A1} Almost beat your best! Just '+Math.max(1,prevBest-score)+' more.',
-    '\u{1F4A5} That was close to your record!',
-    '\u{1F60E} Great run! You can top this.',
-  ]);
-  /* Priority 4: League-specific */
-  if(wasLeague) return pick_mm([
-    '\u{1F3C6} Stage '+(leagueStage+1)+' reached! Push further!',
-    '\u{1F525} Climb the leaderboard — one more try!',
-    '\u{26A1} Every game counts for this week\'s ranking!',
-  ]);
-  /* Priority 5: Next target hook + general encouragement */
-  var nextTarget = prevBest>0 ? prevBest : 1000;
-  var milestones=[1000,2000,3000,5000,7500,10000,15000,20000];
-  for(var _m=0;_m<milestones.length;_m++){ if(score<milestones[_m]){ nextTarget=milestones[_m]; break; } }
-  return pick_mm([
-    '\u{1F3AF} Next target: '+nextTarget.toLocaleString()+' points!',
-    '\u{1F4AA} Only '+(nextTarget-score).toLocaleString()+' more to reach '+nextTarget.toLocaleString()+'!',
-    '\u{1F680} You\'re getting better! Aim for '+nextTarget.toLocaleString()+'!',
-    '\u{2728} Every game sharpens your strategy.',
-    '\u{1F3AE} The best players never stop trying!',
-    '\u{1F331} Practice makes perfect — go again!',
-    '\u{1F60A} That was fun! Ready for another?',
-  ]);
-}
-function pick_mm(arr){return arr[Math.floor(Math.random()*arr.length)];}
-
-/* ── REWARDED AD SYSTEM ── */
-var _reviveUsedThisGame=false;
-var _doubleUsedThisGame=false;
-var _lastCoinEarned=0; /* stored for doubling */
-
-/* Simulate rewarded ad (replace with real ad SDK later) */
-function showRewardedAd(callback){
-  /* TODO: Replace with real ad SDK call:
-     e.g. admob.showRewarded().then(callback)
-     For now, simulate 1.5s "ad" then reward */
-  showToast('\u{1F3AC} Watching ad...');
-  setTimeout(function(){
-    showToast('\u{2705} Reward earned!');
-    if(callback) callback();
-  },1500);
-}
-
-function reviveWithAd(){
-  if(_reviveUsedThisGame) return;
-  _reviveUsedThisGame=true;
-  showRewardedAd(function(){
-    /* Close game over modal and resume play */
-    document.getElementById('goModal').classList.remove('on');
-    gameEnded=false;
-    /* Clear 2 random rows to give breathing room */
-    var filledRows=[];
-    for(var r=0;r<ROWS;r++){
-      var cnt=0;
-      for(var c=0;c<COLS;c++) if(board[r][c].type===T.FILLED) cnt++;
-      if(cnt>=3) filledRows.push({r:r,cnt:cnt});
-    }
-    filledRows.sort(function(a,b){return b.cnt-a.cnt;}); /* most filled first */
-    var toClear=Math.min(2,filledRows.length);
-    for(var i=0;i<toClear;i++){
-      var row=filledRows[i].r;
-      for(var c=0;c<COLS;c++){
-        if(board[row][c].type===T.FILLED) board[row][c]={type:T.EMPTY,color:null};
-      }
-    }
-    syncBoard();
-    dealPieces();
-    updateDangerState();
-    MUSIC.play(level);
-    hamsterReact('clear2');
-    showToast('\u{2764}\u{FE0F} Revived! 2 rows cleared!');
-  });
-}
-
-function doubleCoinsWithAd(){
-  if(_doubleUsedThisGame||_lastCoinEarned<=0) return;
-  _doubleUsedThisGame=true;
-  showRewardedAd(function(){
-    var bonus=_lastCoinEarned;
-    awardCoins(bonus);
-    var el=document.getElementById('goCoinCount');
-    if(el) el.textContent='+'+(_lastCoinEarned+bonus);
-    var bEl=document.getElementById('goCoinBonus');
-    if(bEl){ bEl.textContent='\u{1F4B0} Doubled!'; bEl.style.display='inline-block'; }
-    document.getElementById('goDoubleBtn').disabled=true;
-    document.getElementById('goDoubleBtn').style.opacity='0.4';
-  });
-}
-
 function doGameOver(){
   if(gameEnded) return; /* stage already cleared — don't show game over */
   gameEnded = true;
-  var _wasTetris=isTetrisMode, _tetLv=typeof tetLevel!=='undefined'?tetLevel:1, _tetLn=typeof tetLines!=='undefined'?tetLines:0;
-  if(isTetrisMode) stopTetris();
-  _doubleUsedThisGame=false; /* reset per-game ad flags */
   rounds++; lsSet('bbrounds',rounds);
   levelStreak=0; lsSet('bbstreak',0);
   updateStreakBadge();
   SND.gameOver(); MUSIC.stop();
   /* XP */
   playerXP+=score; lsSet('bbxp',playerXP); updateRankBadge();
-  /* Coins — tiered reward system */
-  var coinEarned = score>=5000?30 : score>=3000?20 : score>=1000?10 : 5;
-  var bonusTriggered = false;
-  /* 15% chance of bonus reward (extra 50-100% coins) */
-  if(Math.random()<0.15){
-    bonusTriggered = true;
-    coinEarned = Math.floor(coinEarned * (1.5 + Math.random()*0.5));
-  }
-  awardCoins(coinEarned);
-  _lastCoinEarned=coinEarned;
+  /* Coins */
+  var coinEarned=Math.floor(score/150); awardCoins(coinEarned);
   /* Leaderboard */
   submitToLeaderboard(score,level);
   /* Blitz League */
@@ -5687,63 +5252,13 @@ function doGameOver(){
     document.querySelector('.board-wrap').classList.remove('daily-mode');
     var _dchud=document.getElementById('dcHud'); if(_dchud) _dchud.classList.remove('visible');
   }
-  var prevBest=parseInt(lsGet('bbscore','0'));
-  var isNewBest=score>prevBest;
-  document.getElementById('goTitle').textContent = _wasTetris
-    ? 'Level '+_tetLv+' | '+_tetLn+' Lines'
-    : _wasLeague
+  document.getElementById('goTitle').textContent = _wasLeague
     ? 'Stage '+(_leagueStageReached+1)+' | '+score.toLocaleString()+' pts'
-    : isNewBest?'New Best! \u{1F389}':'Game Over';
-  if(isNewBest) lsSet('bbscore',score);
-  if(typeof _onGameOver==='function') _onGameOver(isNewBest);
+    : score>parseInt(lsGet('bbscore','0'))?'New Best! 🎉':'Game Over';
+  if(score>parseInt(lsGet('bbscore','0'))) lsSet('bbscore',score);
   document.getElementById('goScore').textContent  = score;
   document.getElementById('goStars').textContent  = totalStars-starsLeft;
   document.getElementById('goPentas').textContent = totalPentas-pentasLeft;
-
-  /* ── Coin count-up animation ── */
-  var goCoinEl = document.getElementById('goCoinCount');
-  var goBonusEl = document.getElementById('goCoinBonus');
-  if(goCoinEl){
-    goCoinEl.textContent='0';
-    var _coinTarget=coinEarned, _coinCur=0;
-    var _coinStep=Math.max(1,Math.floor(_coinTarget/15));
-    var _coinInt=setInterval(function(){
-      _coinCur=Math.min(_coinCur+_coinStep,_coinTarget);
-      goCoinEl.textContent='+'+_coinCur;
-      if(_coinCur>=_coinTarget) clearInterval(_coinInt);
-    },50);
-  }
-  if(goBonusEl){
-    if(bonusTriggered){
-      goBonusEl.textContent='\u{1F381} Bonus!';
-      goBonusEl.style.display='inline-block';
-    } else {
-      goBonusEl.style.display='none';
-    }
-  }
-
-  /* ── NEAR-MISS HIGHLIGHT — "You were SO close!" ── */
-  if(!_wasTetris){
-    var _nearMisses=scanNearMisses();
-    if(_nearMisses.length>0) showNearMissHighlight(_nearMisses);
-  }
-
-  /* ── Momentum message — encourage replay ── */
-  var msg = getMomentumMessage(isNewBest, boardFillPct(), score, prevBest, _wasLeague, _leagueStageReached);
-  var mEl = document.getElementById('goMomentum');
-  if(mEl) mEl.textContent = msg;
-  var wsEl=document.getElementById('goWinStreak');
-  if(!wsEl){wsEl=document.createElement('div');wsEl.id='goWinStreak';wsEl.style.cssText='text-align:center;margin:6px 0';if(mEl&&mEl.parentNode)mEl.parentNode.insertBefore(wsEl,mEl.nextSibling);}
-  if(wsEl&&typeof getWinStreakGameOverHTML==='function') wsEl.innerHTML=getWinStreakGameOverHTML(isNewBest,score,prevBest);
-
-  /* ── Ad button visibility ── */
-  var adBtns=document.getElementById('goAdBtns');
-  var revBtn=document.getElementById('goReviveBtn');
-  var dblBtn=document.getElementById('goDoubleBtn');
-  if(adBtns) adBtns.style.display=isPro?'none':'flex';
-  if(revBtn){ revBtn.disabled=_reviveUsedThisGame; revBtn.style.opacity=_reviveUsedThisGame?'0.4':'1'; }
-  if(dblBtn){ dblBtn.disabled=false; dblBtn.style.opacity='1'; }
-
   document.getElementById('goModal').classList.add('on');
   /* ── Interstitial ad (frequency scales with level) ── */
   if(shouldShowInterstitialAd()) showInterstitialAd();
@@ -6707,31 +6222,7 @@ function openShop(){
     if(btn) btn.disabled=(coins<priceMap[k]);
   });
   var pBtn=document.getElementById('shopBuyPro');
-  if(pBtn){ pBtn.disabled=isPro||(coins<999); if(isPro) pBtn.textContent='\u{2705} Owned'; }
-  /* Render cosmetic skins grid */
-  var skGrid=document.getElementById('shopSkinsGrid');
-  if(skGrid){
-    skGrid.innerHTML='';
-    var allSkins=[{id:'default',name:'Default',color:'#1a1040',price:0}];
-    WORLD_BADGES.forEach(function(b){ allSkins.push({id:b.skin,name:b.skinName,color:b.color,accent:b.accent,price:b.coins}); });
-    allSkins.forEach(function(sk){
-      var owned=isSkinUnlocked(sk.id);
-      var active=currentSkin===sk.id;
-      var canBuy=!owned&&coins>=sk.price;
-      var card=document.createElement('div');
-      card.style.cssText='background:'+(sk.color||'#1a1040')+';border:2px solid '+(active?'#ffd700':owned?'rgba(255,255,255,0.2)':'rgba(255,255,255,0.08)')+';border-radius:12px;padding:10px;text-align:center;cursor:pointer;position:relative';
-      card.innerHTML='<div style="font-family:Fredoka One;font-size:12px;color:'+(sk.accent||'#fff')+'">'+sk.name+'</div>'
-        +(active?'<div style="font-size:10px;color:#ffd700;margin-top:4px">\u{2705} Active</div>'
-        :owned?'<div style="font-size:10px;color:#90caf9;margin-top:4px;cursor:pointer" onclick="BB.applySkin(\''+sk.id+'\')">Use</div>'
-        :sk.price>0?'<div style="font-size:10px;color:'+(canBuy?'#ffd700':'#666')+';margin-top:4px">\u{1FA99} '+sk.price+'</div>':'');
-      if(!owned&&sk.price>0&&canBuy){
-        card.onclick=function(){ if(confirm('Buy '+sk.name+' for '+sk.price+' coins?')){ coins-=sk.price; lsSet('bbcoins',coins); unlockedSkins[sk.id]=true; lsSet('bbskins',JSON.stringify(unlockedSkins)); applySkinClass(sk.id); openShop(); } };
-      } else if(owned&&!active){
-        card.onclick=function(){ applySkinClass(sk.id); openShop(); };
-      }
-      skGrid.appendChild(card);
-    });
-  }
+  if(pBtn){ pBtn.disabled=isPro||(coins<999); if(isPro) pBtn.textContent='✅ Owned'; }
   document.getElementById('shopModal').classList.add('on');
 }
 function closeShop(){ document.getElementById('shopModal').classList.remove('on'); }
@@ -7022,22 +6513,16 @@ var SND=(function(){
         src.connect(bp);bp.connect(g);g.connect(c.destination);src.start(t);
       }catch(e){}
     },
-    place: function(){tone(330,'sine',.18,.003,.10);tone(220,'triangle',.10,.003,.08);tone(165,'sine',.06,.005,.06);},
+    place: function(){tone(220,'sine',.22,.005,.12);tone(150,'square',.07,.005,.09);},
     gem:   function(){tone(1568,'sine',.18,.003,.12);tone(2093,'triangle',.12,.003,.09,.04);tone(2637,'sine',.08,.003,.07,.08);},
     clear: function(n,combo){
       var P=[1,1.122,1.26,1.498,1.682,2,2.245,2.52,2.996,3.364,4];
-      /* Pitch rises with streak for escalating satisfaction */
-      var streakBoost=Math.min(clearStreak,5);
-      var base=261.63*P[Math.min(n+combo+streakBoost-1,P.length-1)];
-      var vol=0.18+streakBoost*0.02; /* slightly louder on streaks */
-      function hit(f,d,v){tone(f,'sawtooth',v*.6,.004,.20,d);tone(f,'sine',v*.8,.004,.22,d);tone(f*2,'sine',v*.3,.004,.14,d+.008);}
-      hit(base,0,vol);hit(base*1.5,.08,vol*.85);hit(base*2,.16,vol*.9);
-      tone(base*.25,'sine',.25,.004,.22,0);
-      /* ring chime — more chimes on streaks */
-      var chimes=[1047,2093,2637];
-      if(streakBoost>=2) chimes.push(3136);
-      if(streakBoost>=4) chimes.push(3520);
-      chimes.forEach(function(f,i){tone(f,'sine',.10/(i+1),.005,.4+i*.06,i*.035);});
+      var base=261.63*P[Math.min(n+combo-1,P.length-1)];
+      function hit(f,d,v){tone(f,'sawtooth',v*.6,.004,.18,d);tone(f,'sine',v*.8,.004,.18,d);tone(f*2,'sine',v*.25,.004,.12,d+.008);}
+      hit(base,0,.20);hit(base*1.5,.10,.17);hit(base*2,.20,.18);
+      tone(base*.25,'sine',.28,.004,.20,0);
+      /* ring chime on top */
+      [1047,2093,2637].forEach(function(f,i){tone(f,'sine',.12/(i+1),.005,.4+i*.08,i*.04);});
     },
     stageWin:function(){[523,659,784,1047,1319,1568,2093].forEach(function(f,i){tone(f,'sine',.20,.01,.30,i*.09);tone(f,'sawtooth',.08,.01,.22,i*.09+.005);});[523,659,784,1047].forEach(function(f){tone(f,'sine',.20,.005,.50,.70);});},
     gameOver:function(){
@@ -7323,65 +6808,10 @@ function buildMapModal(mode){
   /* Update tab highlights */
   var tc = document.getElementById('mapTabClassic');
   var ta = document.getElementById('mapTabAdv');
-  var tt = document.getElementById('mapTabTetris');
   if(tc){ tc.classList.toggle('active', mode==='classic'); }
   if(ta){ ta.classList.toggle('active', mode==='adventure'); }
-  if(tt){ tt.classList.toggle('active', mode==='tetris'); }
 
   wrap.innerHTML='';
-
-  /* ── TETRIS MAP ── */
-  if(mode==='tetris'){
-    var tetWorlds=[
-      {name:'🎮 Zone 1 — Slow Start',color:'#00acc1',bg:'rgba(0,172,193,0.2)',levels:[0,9]},
-      {name:'🎮 Zone 2 — Warming Up',color:'#00897b',bg:'rgba(0,137,123,0.2)',levels:[10,19]},
-      {name:'🎮 Zone 3 — Getting Fast',color:'#43a047',bg:'rgba(67,160,71,0.2)',levels:[20,29]},
-      {name:'🎮 Zone 4 — Speed Zone',color:'#7cb342',bg:'rgba(124,179,66,0.2)',levels:[30,39]},
-      {name:'🎮 Zone 5 — Turbo Mode',color:'#ff8f00',bg:'rgba(255,143,0,0.2)',levels:[40,49]},
-      {name:'🎮 Zone 6 — Hyper Speed',color:'#f4511e',bg:'rgba(244,81,30,0.2)',levels:[50,59]},
-      {name:'🎮 Zone 7 — Blitz Territory',color:'#e53935',bg:'rgba(229,57,53,0.2)',levels:[60,69]},
-      {name:'🎮 Zone 8 — Insane',color:'#c62828',bg:'rgba(198,40,40,0.2)',levels:[70,79]},
-      {name:'🎮 Zone 9 — Godlike',color:'#ab47bc',bg:'rgba(171,71,188,0.2)',levels:[80,89]},
-      {name:'🎮 Zone 10 — Infinity',color:'#ffd700',bg:'rgba(255,215,0,0.2)',levels:[90,99]},
-    ];
-    var TET_MAP_COLORS=['#00acc1','#00897b','#009688','#43a047','#7cb342','#ff8f00','#f4511e','#e53935','#ab47bc','#ffd700',
-                        '#00bcd4','#26a69a','#4caf50','#8bc34a','#ffc107','#ff9800','#ff5722','#d32f2f','#9c27b0','#ffeb3b'];
-    tetWorlds.forEach(function(w){
-      var sec=document.createElement('div');sec.className='map-world';
-      var wtitle=document.createElement('div');wtitle.className='map-world-title';
-      wtitle.style.background=w.bg;wtitle.style.color=w.color;wtitle.style.border='1px solid '+w.color+'55';
-      wtitle.textContent=w.name;
-      sec.appendChild(wtitle);
-      var grid=document.createElement('div');grid.className='map-grid';
-      for(var i=w.levels[0];i<=w.levels[1];i++){
-        var unlocked=i<=tetMaxLevel;
-        var isCurrent=i===tetLevel-1&&isTetrisMode;
-        var stars=tetLevelStars[i]||0;
-        var item=document.createElement('div');item.className='map-lvl';
-        var bubble=document.createElement('div');
-        bubble.className='map-bubble'+(unlocked?' completed':'')+(isCurrent?' current':'')+(unlocked?'':' locked');
-        bubble.style.background=unlocked?'linear-gradient(145deg,'+TET_MAP_COLORS[i%TET_MAP_COLORS.length]+','+TET_MAP_COLORS[(i+5)%TET_MAP_COLORS.length]+')':'';
-        if(!unlocked){bubble.innerHTML='<span class="map-lck">🔒</span>';}
-        else{
-          bubble.textContent=(i+1);
-          (function(n){
-            bubble.addEventListener('click',function(){
-              document.getElementById('mapModal').classList.remove('on');
-              var ms=document.getElementById('menuScreen');if(ms){ms.classList.add('hidden');ms.style.display='none';}
-              setTimeout(function(){tetStartAtLevel(n);},200);
-            });
-          })(i);
-        }
-        var starRow=document.createElement('div');starRow.className='map-stars';
-        starRow.textContent=unlocked?(stars>=1?'⭐':'☆')+(stars>=2?'⭐':'☆')+(stars>=3?'⭐':'☆'):'';
-        item.appendChild(bubble);item.appendChild(starRow);
-        grid.appendChild(item);
-      }
-      sec.appendChild(grid);wrap.appendChild(sec);
-    });
-    return;
-  }
-
   var isAdv = (mode === 'adventure');
 
   var worlds=[
@@ -7665,7 +7095,6 @@ function spawnLeagueObstacles(count){
 
 
 function openMenu(){
-  if(typeof _onMenuOpen==="function") _onMenuOpen();
   var hr=document.getElementById('hamsterReact'); if(hr) hr.classList.remove('show');
   refreshPromo();
   refreshProfileBtn();
@@ -7826,927 +7255,7 @@ function applySpinPrize(idx){
   document.getElementById('spinBtn').disabled = spinsLeft<=0;
 }
 
-/* == 10 GAMEPLAY IMPROVEMENTS == */
-
-/* == IMP 1: WIN STREAK == */
-var _winStreak=parseInt(lsGet('bb_win_streak','0'));
-var _bestWinStreak=parseInt(lsGet('bb_best_win_streak','0'));
-var _streakGoldActive=false;
-function updateWinStreak(nb){if(nb){_winStreak++;_streakGoldActive=true;lsSet('bb_win_streak',_winStreak);if(_winStreak>_bestWinStreak){_bestWinStreak=_winStreak;lsSet('bb_best_win_streak',_bestWinStreak);}}else{if(_winStreak>0)tone(150,'sawtooth',.15,.01,.3);_winStreak=0;_streakGoldActive=false;lsSet('bb_win_streak',0);}}
-function getWinStreakGameOverHTML(nb,sc,pb){if(nb&&_winStreak>0)return'<span style="color:#ffd700;font-family:Fredoka One">\u{1F525} STREAK x'+_winStreak+'!</span>';if(!nb&&_bestWinStreak>0)return'<span style="color:#ff4444;font-size:12px">\u{1F494} Streak lost (best: \u{1F525}x'+_bestWinStreak+')</span>';return'';}
-function updateMenuWinStreak(){var el=document.getElementById('menuWinStreak');if(!el)return;el.innerHTML=_winStreak>0?'<span style="color:#ffd700;font-family:Fredoka One;font-size:14px">\u{1F525}x'+_winStreak+' Win Streak</span>':_bestWinStreak>0?'<span style="font-size:11px;color:rgba(255,255,255,0.3)">Best: \u{1F525}x'+_bestWinStreak+'</span>':'';}
-function applyStreakGoldBorder(){var bo=document.querySelector('.board-outer');if(bo){if(_streakGoldActive)bo.classList.add('streak-gold-border');else bo.classList.remove('streak-gold-border');}}
-
-/* == IMP 2: NEAR MISS == */
-var _lastNearMissKey='',_nearMissClutchReady=false;
-function checkNearMiss(){clearNearMiss();var nR=[],nC=[];for(var r=0;r<ROWS;r++){var e=0;for(var c=0;c<COLS;c++)if(board[r][c].type===T.EMPTY||board[r][c].type===T.FROZEN)e++;if(e>=1&&e<=2)nR.push(r);}for(var c=0;c<COLS;c++){var e=0;for(var r=0;r<ROWS;r++)if(board[r][c].type===T.EMPTY||board[r][c].type===T.FROZEN)e++;if(e>=1&&e<=2)nC.push(c);}if(!nR.length&&!nC.length){_nearMissClutchReady=false;_lastNearMissKey='';return;}var k=nR.join(',')+':'+nC.join(',');_nearMissClutchReady=(k===_lastNearMissKey&&_lastNearMissKey!=='');_lastNearMissKey=k;nR.forEach(function(r){for(var c=0;c<COLS;c++){var el=cellEl(r,c);if(el&&board[r][c].type===T.EMPTY)el.classList.add('near-miss');}});nC.forEach(function(c){for(var r=0;r<ROWS;r++){var el=cellEl(r,c);if(el&&board[r][c].type===T.EMPTY)el.classList.add('near-miss');}});if(nR.length||nC.length)showToast('SO CLOSE! \u{1F3AF}');}
-function clearNearMiss(){document.querySelectorAll('.cell.near-miss').forEach(function(el){el.classList.remove('near-miss');});}
-function checkClutchClear(cl){if(_nearMissClutchReady&&cl>0){score+=50;showFlyScore('CLUTCH! +50',true);_nearMissClutchReady=false;}}
-
-/* == IMP 3: CASCADE VISUAL == */
-function cascadePopEffect(popEls,cl){if(cl<=1||!popEls.length)return;var d=0,cs=Math.max(1,Math.ceil(popEls.length/cl));for(var i=0;i<popEls.length;i+=cs){(function(chunk,dl,idx){setTimeout(function(){for(var j=0;j<chunk.length;j++){chunk[j].classList.remove('pop');void chunk[j].offsetWidth;chunk[j].classList.add('pop');}tone(261.63*Math.pow(1.26,idx),'sine',.12,.003,.15);},dl);})(popEls.slice(i,i+cs),d,Math.floor(i/cs));d+=150;}if(cl>=2)setTimeout(function(){showFlyScore('CHAIN x'+cl+'!',true);},d);}
-
-/* == IMP 4: DAILY LOGIN == */
-var _loginStreak=parseInt(lsGet('bb_login_streak','0'));
-var _lastLoginDate=lsGet('bb_last_login','');
-function checkDailyLogin(){var t=new Date().toISOString().slice(0,10);if(_lastLoginDate===t)return;var y=new Date(Date.now()-86400000).toISOString().slice(0,10);_loginStreak=(_lastLoginDate===y)?_loginStreak+1:1;_lastLoginDate=t;lsSet('bb_login_streak',_loginStreak);lsSet('bb_last_login',t);}
-function getLoginStreakMultiplier(){return _loginStreak>=30?3:_loginStreak>=7?2:1;}
-function updateMenuLoginStreak(){var el=document.getElementById('menuLoginStreak');if(!el)return;checkDailyLogin();var b=_loginStreak>=30?' \u{1F451}':_loginStreak>=7?' \u{1F31F}':'';var now=new Date(),mn=new Date(now);mn.setHours(24,0,0,0);var df=mn-now,h=Math.floor(df/3600000),m=Math.floor((df%3600000)/60000);el.innerHTML='\u{1F525} Day '+_loginStreak+b+' <span style="font-size:11px;color:rgba(255,255,255,0.4);font-family:Nunito"> safe for '+h+'h '+m+'m</span>';}
-
-/* == IMP 6: MYSTERY BONUS == */
-var mysteryMeterPct=0,_goldenBlockNext=false;
-function advanceMysteryMeter(){var m=document.getElementById('mysteryMeter');if(!m)return;m.style.display='inline-block';mysteryMeterPct=Math.min(100,mysteryMeterPct+(8+Math.random()*7));var f=m.querySelector('.meter-fill');if(f)f.style.height=mysteryMeterPct+'%';if(mysteryMeterPct>=100)triggerMysteryBonus();}
-function triggerMysteryBonus(){mysteryMeterPct=0;var m=document.getElementById('mysteryMeter');if(m){var f=m.querySelector('.meter-fill');if(f)f.style.height='0%';}var r=Math.random();if(r<0.40){score+=100;showFlyScore('\u2728 Mystery +100!',true);tone(523,'sine',.15,.005,.2);}else if(r<0.65){powerups.bomb=(powerups.bomb||0)+1;updatePUBar();showToast('\u{1F4A3} Free Bomb!');tone(440,'triangle',.15,.005,.2);}else if(r<0.85){awardCoins(50);showToast('\u{1F4B0} +50 Coins!');}else{_goldenBlockNext=true;showToast('\u{2B50} Golden Block!');tone(1047,'sine',.18,.005,.25);}}
-
-/* == IMP 7: ADAPTIVE DIFFICULTY == */
-var _recentPlacements=[],_distressLevel=0,_assistMovesLeft=0,_debugMode=false;
-function updateAdaptiveDifficulty(dc){_recentPlacements.push(dc);if(_recentPlacements.length>5)_recentPlacements.shift();var nc=_recentPlacements.filter(function(x){return!x;}).length;if(nc>=3&&_assistMovesLeft<=0){_distressLevel=nc;_assistMovesLeft=3;}if(dc&&_assistMovesLeft>0)_assistMovesLeft--;}
-function getAdaptiveBias(){if(_assistMovesLeft>0)return'small';var cc=_recentPlacements.filter(function(x){return x;}).length;return cc>=3?'harder':'normal';}
-
-/* == IMP 8: MASTERY BADGES == */
-var _badgesEarned=JSON.parse(lsGet('bb_badges','[]'));
-var _sessionBadges={},_sessionRowsCleared=0,_sessionConsecutiveClearMoves=0,_sessionPiecesPlaced=0,_sessionMovesUnder40=0,_sessionStartTime=0,_sessionPUUsed=0;
-var MASTERY_BADGES=[
-  {id:'inferno',icon:'\u{1F525}',name:'Inferno',desc:'Clear 5 rows in one game',check:function(){return _sessionRowsCleared>=5;},coins:25,xp:50},
-  {id:'speed_demon',icon:'\u26A1',name:'Speed Demon',desc:'3 consecutive clear moves',check:function(){return _sessionConsecutiveClearMoves>=3;},coins:30,xp:60},
-  {id:'sniper',icon:'\u{1F3AF}',name:'Sniper',desc:'5 pieces each clearing a line',check:function(){return _sessionPiecesPlaced>=5&&_sessionConsecutiveClearMoves>=5;},coins:40,xp:80},
-  {id:'ice_cold',icon:'\u{1F9CA}',name:'Ice Cold',desc:'50 moves under 40% full',check:function(){return _sessionMovesUnder40>=50;},coins:35,xp:70},
-  {id:'diamond_mind',icon:'\u{1F48E}',name:'Diamond Mind',desc:'x4 combo or higher',check:function(){return false;},coins:50,xp:100},
-  {id:'ghost_mode',icon:'\u{1F47B}',name:'Ghost Mode',desc:'2min without power-ups',check:function(){return _sessionPUUsed===0&&(Date.now()-_sessionStartTime)>=120000;},coins:30,xp:60}
-];
-function resetSessionBadges(){_sessionBadges={};_sessionRowsCleared=0;_sessionConsecutiveClearMoves=0;_sessionPiecesPlaced=0;_sessionMovesUnder40=0;_sessionStartTime=Date.now();_sessionPUUsed=0;}
-function checkMasteryBadges(xId){MASTERY_BADGES.forEach(function(b){if(_sessionBadges[b.id])return;var e=(xId===b.id)||b.check();if(e){_sessionBadges[b.id]=true;if(_badgesEarned.indexOf(b.id)<0){_badgesEarned.push(b.id);lsSet('bb_badges',JSON.stringify(_badgesEarned));}awardCoins(b.coins);playerXP+=b.xp;lsSet('bbxp',playerXP);showBadgePopup(b);}});}
-function showBadgePopup(b){var el=document.createElement('div');el.className='badge-popup';el.innerHTML='<div class="badge-popup-inner"><div class="badge-popup-icon">'+b.icon+'</div><div class="badge-popup-name">'+b.name+'</div><div class="badge-popup-desc">'+b.desc+'</div><div style="font-size:11px;color:#ffd700;margin-top:4px">+'+b.coins+' coins</div></div>';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.remove();},2100);}
-
-/* == IMP 9: GHOST OPPONENT == */
-var GHOST_NAMES=['BlockMaster','PuzzlePro','GridNinja','TetrisKing','ClearQueen','ComboWiz','StackLord','LineHunter','GemCrusher','MegaStacker','SwiftHand','BoardBoss','ChainKing','BlitzPro','StarChaser'];
-var _ghostName='',_ghostScore=0,_ghostDefeated=false;
-function getGhostName(){var d=Math.floor(Date.now()/86400000);return GHOST_NAMES[d%GHOST_NAMES.length]+'_'+(10+d%90);}
-function initGhostOpponent(){_ghostDefeated=false;var pb=parseInt(lsGet('bbscore','0'));_ghostScore=pb>0?pb:500;_ghostName=getGhostName();/* ghost removed */}
-function updateGhostHUD(){var el=document.getElementById('ghostHUD');if(!el||gameEnded)return;if(_ghostScore<=0||score<10){el.style.display='none';return;}el.style.display='block';var d=score-_ghostScore;if(d>=0&&!_ghostDefeated){_ghostDefeated=true;el.innerHTML='\u{1F47B} Ghost beaten!';el.className='ahead';tone(523,'sine',.15,.005,.2);setTimeout(function(){el.style.display='none';},3000);}else if(d>=0){el.innerHTML='+'+d+' ahead';el.className='ahead';}else{el.innerHTML='\u{1F47B} '+Math.abs(d)+' to beat';el.className='behind';}}
-
-/* == IMP 10: FLOOD == */
-var _floodCounter=0,_floodWarning=false,_floodRows=[];
-function updateFloodCounter(dc){if(isAdventureMode||isDailyChallenge)return;if(dc){_floodCounter=0;_floodWarning=false;updateFloodUI();return;}_floodCounter++;if(_floodCounter>=15&&!_floodWarning){_floodWarning=true;showToast('\u26A0\uFE0F FLOOD in 3...');tone(200,'sine',.08,.01,.3);}if(_floodCounter>=18){spawnFloodRow();_floodCounter=12;_floodWarning=false;}updateFloodUI();}
-function spawnFloodRow(){if(_floodRows.length>=3)return;var cands=[];for(var r=0;r<ROWS-1;r++){if(_floodRows.indexOf(r)>=0)continue;var emp=[];for(var c=0;c<COLS;c++)if(board[r][c].type===T.EMPTY)emp.push(c);if(emp.length>=3)cands.push({r:r,e:emp});}if(!cands.length)return;var p=cands[Math.floor(Math.random()*cands.length)];_floodRows.push(p.r);for(var i=p.e.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=p.e[i];p.e[i]=p.e[j];p.e[j]=t;}for(var k=0;k<3&&k<p.e.length;k++){board[p.r][p.e[k]]={type:T.FILLED,color:'#546e7a',isFlood:true};}syncBoard();showToast('\u{1F30A} FLOOD!');tone(120,'sawtooth',.12,.01,.3);}
-function checkFloodCleared(fR,fC){var fc=false;fR.forEach(function(r){var i=_floodRows.indexOf(r);if(i>=0){_floodRows.splice(i,1);fc=true;}});if(fc){score+=200;showFlyScore('FLOOD CLEARED! +200',true);}}
-function updateFloodUI(){var el=document.getElementById('floodCounter');if(!el)return;if(isAdventureMode||isDailyChallenge||_floodCounter<10){el.style.display='none';return;}el.style.display='block';var m=18-_floodCounter;el.innerHTML=m<=3?'\u{1F30A} FLOOD in '+m+'...':'\u{1F30A} '+_floodCounter+'/18';}
-
-/* == PARTICLE POLISH == */
-function spawnEdgeSparkles(n){var cols=['#ffd700','#ff6f00','#00e5ff','#e040fb','#76ff03'];var w=window.innerWidth,h=window.innerHeight;for(var i=0;i<n;i++){(function(i){setTimeout(function(){var el=document.createElement('div');el.className='edge-sparkle';el.style.background=cols[Math.floor(Math.random()*cols.length)];var s=Math.floor(Math.random()*4);if(s===0){el.style.left=Math.random()*w+'px';el.style.top='0';}else if(s===1){el.style.left=Math.random()*w+'px';el.style.bottom='0';}else if(s===2){el.style.left='0';el.style.top=Math.random()*h+'px';}else{el.style.right='0';el.style.top=Math.random()*h+'px';}el.style.width=(4+Math.random()*6)+'px';el.style.height=el.style.width;document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.remove();},800);},i*30);})(i);}}
-function triggerBoardRipple(){var bw=document.querySelector('.board-wrap');if(!bw)return;bw.classList.remove('ripple');void bw.offsetWidth;bw.classList.add('ripple');setTimeout(function(){bw.classList.remove('ripple');},550);}
-
-/* == LAST GEM SPOTLIGHT == */
-function checkLastGemSpotlight(){if(!isAdventureMode)return;document.querySelectorAll('.cell.last-gem-glow').forEach(function(el){el.classList.remove('last-gem-glow');});if(starsLeft+pentasLeft!==1)return;for(var r=0;r<ROWS;r++)for(var c=0;c<COLS;c++){var t=board[r][c].type;if(t===T.GOLD_STAR||t===T.GOLD_PENTA){var el=cellEl(r,c);if(el)el.classList.add('last-gem-glow');showToast('\u2728 Last gem!');return;}}}
-
-/* == HEARTBEAT == */
-var _heartbeatInterval=null,_heartbeatActive=false;
-function startHeartbeat(){if(_heartbeatActive)return;_heartbeatActive=true;var bw=document.querySelector('.board-wrap');if(bw)bw.classList.add('heartbeat');_heartbeatInterval=setInterval(function(){if(!_heartbeatActive||gameEnded){stopHeartbeat();return;}tone(55,'sine',.08,.01,.15);setTimeout(function(){tone(45,'sine',.06,.01,.12);},180);},1200);}
-function stopHeartbeat(){_heartbeatActive=false;clearInterval(_heartbeatInterval);var bw=document.querySelector('.board-wrap');if(bw)bw.classList.remove('heartbeat');}
-
-/* == MASTER HOOKS == */
-function _onPiecePlaced(dc,cl,pe,fR,fC){
-  /* near-miss assist disabled */
-  clearNearMiss();
-  if(cl>=2)cascadePopEffect(pe||[],cl);
-  advanceMysteryMeter();
-  updateAdaptiveDifficulty(dc);
-  _sessionPiecesPlaced++;
-  if(dc)_sessionRowsCleared+=cl;
-  if(dc)_sessionConsecutiveClearMoves++;else _sessionConsecutiveClearMoves=0;
-  if(boardFillPct()<0.4)_sessionMovesUnder40++;else _sessionMovesUnder40=0;
-  checkMasteryBadges();
-  if(cl>=4)checkMasteryBadges('diamond_mind');
-  if(_sessionConsecutiveClearMoves>=3)checkMasteryBadges('speed_demon');
-  /* ghost removed */
-  if(dc)checkFloodCleared(fR||[],fC||[]);
-  updateFloodCounter(dc);
-  if(dc)checkClutchClear(cl);
-  if(cl>=3)spawnEdgeSparkles(cl*8);
-  if(cl>=2)triggerBoardRipple();
-  if(dc)checkLastGemSpotlight();
-  var fp=boardFillPct();
-  if(fp>=0.85&&!_heartbeatActive)startHeartbeat();
-  else if(fp<0.75&&_heartbeatActive)stopHeartbeat();
-}
-function _onGameStart(){
-  resetSessionBadges();
-  _floodCounter=0;_floodWarning=false;_floodRows=[];
-  _nearMissClutchReady=false;_lastNearMissKey='';
-  mysteryMeterPct=0;_recentPlacements=[];_distressLevel=0;_assistMovesLeft=0;_goldenBlockNext=false;
-  applyStreakGoldBorder();
-  var m=document.getElementById('mysteryMeter');if(m){m.style.display='inline-block';var f=m.querySelector('.meter-fill');if(f)f.style.height='0%';}
-  updateFloodUI();
-}
-function _onGameOver(nb){
-  updateWinStreak(nb);stopHeartbeat();clearNearMiss();
-  var g=document.getElementById('ghostHUD');if(g)g.style.display='none';
-  var m=document.getElementById('mysteryMeter');if(m)m.style.display='none';
-}
-function _onMenuOpen(){updateMenuWinStreak();updateMenuLoginStreak();}
-
-/* Debug mode */
-var _debugBuffer='';
-document.addEventListener('keydown',function(e){_debugBuffer+=e.key.toLowerCase();if(_debugBuffer.length>10)_debugBuffer=_debugBuffer.slice(-10);if(_debugBuffer.indexOf('debug')>=0){_debugMode=!_debugMode;_debugBuffer='';showToast(_debugMode?'Debug ON':'Debug OFF');}});
-
-
 /* ── PUBLIC ── */
-
-
-/* ══════════════════════════════════════
-   TETRIS MODE ENGINE — follows Tetris Guideline
-   Ref: https://tetris.wiki/Tetris_Guideline
-══════════════════════════════════════ */
-var isTetrisMode=false;
-var tetBoard=[]; /* 22x10 (rows 0-1 hidden buffer) */
-var tetPiece=null; /* {key,rot,r,c} */
-var tetNext=null;
-var tetMaxLevel=parseInt(lsGet('bbTetMaxLv','0'))||0;
-var tetLevelStars=JSON.parse(lsGet('bbTetStars','[]'))||[];
-var tetHold=null; /* hold piece key */
-var tetHoldUsed=false; /* can only hold once per piece */
-var _tetLastAction=''; /* 'rotate','move','drop' — for T-Spin detection */
-var _tetLastWasTSpin=false;
-var tetScore=0, tetLevel=1, tetLines=0;
-var tetGravityId=null;
-var tetGameOver=false;
-var tetLocking=false; /* lock delay active */
-var tetLockTimer=null;
-var tetLockMoves=0; /* max 15 moves during lock delay */
-var TET_ROWS=24, TET_COLS=10; /* 24 total: 2 buffer + 22 visible */
-var TET_VISIBLE=22;
-var _savedROWS=8, _savedCOLS=8;
-var _tetKeyHandler=null;
-var _tetKeyRepeat={}; /* DAS: track held keys */
-var _tetDASTimer=null;
-var _tetARRTimer=null;
-var _tetKeyUpHandler=null;
-var _tetDASKey=null;
-
-function _tetStartDAS(key,fn){
-  _tetStopDAS();
-  _tetDASKey=key;
-  _tetDASTimer=setTimeout(function(){
-    _tetARRTimer=setInterval(fn,50); /* ARR: 50ms repeat */
-  },170); /* DAS: 170ms initial delay */
-}
-function _tetStopDAS(key){
-  if(key&&key!==_tetDASKey)return;
-  clearTimeout(_tetDASTimer);clearInterval(_tetARRTimer);
-  _tetDASTimer=null;_tetARRTimer=null;_tetDASKey=null;
-}
-
-/* ── TETRIS GESTURE CONTROLS (swipe/tap, no buttons) ── */
-var _tetTouchState=null;
-
-function tetTouchStart(e){
-  if(!isTetrisMode||tetGameOver)return;
-  e.preventDefault();
-  var t=e.touches[0];
-  _tetTouchState={
-    x0:t.clientX, y0:t.clientY,
-    x:t.clientX, y:t.clientY,
-    t0:Date.now(),
-    moved:false,
-    colOffset:0,
-    softDrops:0,
-    hardDropped:false,
-    holdFired:false,
-    longPressTimer:setTimeout(function(){
-      if(_tetTouchState&&!_tetTouchState.moved){
-        tetHoldPiece();
-        _tetTouchState.holdFired=true;
-      }
-    },350)
-  };
-}
-
-function tetTouchMove(e){
-  if(!_tetTouchState||!isTetrisMode||tetGameOver)return;
-  e.preventDefault();
-  var t=e.touches[0];
-  var dx=t.clientX-_tetTouchState.x0;
-  var dy=t.clientY-_tetTouchState.y0;
-  var dist=Math.sqrt(dx*dx+dy*dy);
-
-  if(dist>10){
-    _tetTouchState.moved=true;
-    clearTimeout(_tetTouchState.longPressTimer);
-  }
-
-  /* Swipe down = instant hard drop — check FIRST before horizontal */
-  if(!_tetTouchState.hardDropped&&dy>30&&Math.abs(dy)>Math.abs(dx)*1.3){
-    _tetTouchState.hardDropped=true;
-    tetHardDrop();
-    return; /* don't process horizontal on a downward swipe */
-  }
-
-  /* Horizontal movement: 1 cell per ~28px of drag (only if not swiping down) */
-  if(!_tetTouchState.hardDropped){
-    var targetCols=Math.round(dx/28);
-    while(_tetTouchState.colOffset<targetCols){ tetMoveRight(); _tetTouchState.colOffset++; }
-    while(_tetTouchState.colOffset>targetCols){ tetMoveLeft(); _tetTouchState.colOffset--; }
-  }
-
-  _tetTouchState.x=t.clientX;
-  _tetTouchState.y=t.clientY;
-}
-
-function tetTouchEnd(e){
-  if(!_tetTouchState)return;
-  clearTimeout(_tetTouchState.longPressTimer);
-  var dt=Date.now()-_tetTouchState.t0;
-  var dy=_tetTouchState.y-_tetTouchState.y0;
-  var dx=_tetTouchState.x-_tetTouchState.x0;
-
-  /* Tap = rotate (short touch, minimal movement) */
-  if(!_tetTouchState.moved&&dt<250&&!_tetTouchState.holdFired){
-    tetRotate();
-  }
-
-  /* Fast swipe down = hard drop */
-  if(!_tetTouchState.hardDropped&&dy>50&&dt<400&&Math.abs(dy)>Math.abs(dx)*2){
-    tetHardDrop();
-  }
-
-  _tetTouchState=null;
-}
-
-/* 7 standard tetrominoes — SRS rotation states (all 4 rotations each) */
-var TETRO={
-  I:{shapes:[
-    [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
-    [[0,0,1,0],[0,0,1,0],[0,0,1,0],[0,0,1,0]],
-    [[0,0,0,0],[0,0,0,0],[1,1,1,1],[0,0,0,0]],
-    [[0,1,0,0],[0,1,0,0],[0,1,0,0],[0,1,0,0]]
-  ],color:'#00acc1'},
-  O:{shapes:[
-    [[1,1],[1,1]],[[1,1],[1,1]],[[1,1],[1,1]],[[1,1],[1,1]]
-  ],color:'#ff8f00'},
-  T:{shapes:[
-    [[0,1,0],[1,1,1],[0,0,0]],
-    [[0,1,0],[0,1,1],[0,1,0]],
-    [[0,0,0],[1,1,1],[0,1,0]],
-    [[0,1,0],[1,1,0],[0,1,0]]
-  ],color:'#ab47bc'},
-  S:{shapes:[
-    [[0,1,1],[1,1,0],[0,0,0]],
-    [[0,1,0],[0,1,1],[0,0,1]],
-    [[0,0,0],[0,1,1],[1,1,0]],
-    [[1,0,0],[1,1,0],[0,1,0]]
-  ],color:'#43a047'},
-  Z:{shapes:[
-    [[1,1,0],[0,1,1],[0,0,0]],
-    [[0,0,1],[0,1,1],[0,1,0]],
-    [[0,0,0],[1,1,0],[0,1,1]],
-    [[0,1,0],[1,1,0],[1,0,0]]
-  ],color:'#e53935'},
-  J:{shapes:[
-    [[1,0,0],[1,1,1],[0,0,0]],
-    [[0,1,1],[0,1,0],[0,1,0]],
-    [[0,0,0],[1,1,1],[0,0,1]],
-    [[0,1,0],[0,1,0],[1,1,0]]
-  ],color:'#1e88e5'},
-  L:{shapes:[
-    [[0,0,1],[1,1,1],[0,0,0]],
-    [[0,1,0],[0,1,0],[0,1,1]],
-    [[0,0,0],[1,1,1],[1,0,0]],
-    [[1,1,0],[0,1,0],[0,1,0]]
-  ],color:'#5c6bc0'}
-};
-var TETRO_KEYS=['I','O','T','S','Z','J','L'];
-var _tetBag=[];
-
-function _tetNextFromBag(){
-  if(!_tetBag.length){
-    _tetBag=TETRO_KEYS.slice();
-    for(var i=_tetBag.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=_tetBag[i];_tetBag[i]=_tetBag[j];_tetBag[j]=t;}
-  }
-  return _tetBag.pop();
-}
-
-/* SRS wall kick data */
-var SRS_KICKS_JLSTZ=[
-  [[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]], /* 0→1 */
-  [[0,0],[1,0],[1,-1],[0,2],[1,2]],     /* 1→2 */
-  [[0,0],[1,0],[1,1],[0,-2],[1,-2]],    /* 2→3 */
-  [[0,0],[-1,0],[-1,-1],[0,2],[-1,2]]  /* 3→0 */
-];
-var SRS_KICKS_I=[
-  [[0,0],[-2,0],[1,0],[-2,-1],[1,2]],  /* 0→1 */
-  [[0,0],[-1,0],[2,0],[-1,2],[2,-1]],  /* 1→2 */
-  [[0,0],[2,0],[-1,0],[2,1],[-1,-2]],  /* 2→3 */
-  [[0,0],[1,0],[-2,0],[1,-2],[-2,1]]   /* 3→0 */
-];
-
-/* ══════════════════════════════════════════════════════
-   TETRIS DIFFICULTY ENGINE — 100 levels of progression
-   ══════════════════════════════════════════════════════
-   Phase 1 (Lv 1-10):  Tutorial zone — slow, forgiving
-   Phase 2 (Lv 11-20): Intermediate — moderate speed
-   Phase 3 (Lv 21-30): Advanced — fast, demanding
-   Phase 4 (Lv 31-50): Expert — very fast, garbage rows
-   Phase 5 (Lv 51-70): Master — near max speed, heavy garbage
-   Phase 6 (Lv 71-100): Legend — max speed, relentless
-   ────────────────────────────────────────────────────── */
-
-function tetGravityMs(){
-  var lv=tetLevel;
-  /* Smooth gravity curve: starts at 1000ms, floors at 35ms
-     Formula modeled after NES Tetris + modern guidelines */
-  if(lv<=1)  return 1000;
-  if(lv<=5)  return 1000 - (lv-1)*120;     /* 1000→520 (Lv1-5) */
-  if(lv<=10) return 520  - (lv-5)*50;      /* 520→270  (Lv6-10) */
-  if(lv<=15) return 270  - (lv-10)*26;     /* 270→140  (Lv11-15) */
-  if(lv<=20) return 140  - (lv-15)*12;     /* 140→80   (Lv16-20) */
-  if(lv<=30) return 80   - (lv-20)*3;      /* 80→50    (Lv21-30) */
-  if(lv<=50) return 50   - (lv-30)*0.5;    /* 50→40    (Lv31-50) */
-  if(lv<=70) return Math.max(38, 40-(lv-50)*0.1); /* 40→38 (Lv51-70) */
-  return 35; /* Lv71+: max speed floor */
-}
-
-/* Lines required to advance TO the next level (cumulative target) */
-/* Goal per level: lines needed to clear THIS level (not cumulative) */
-function tetLevelGoal(lv){
-  if(lv<=5)  return 4+lv;     /* Lv1:5, Lv2:6, Lv3:7, Lv4:8, Lv5:9 */
-  if(lv<=10) return 10;       /* Lv6-10: 10 lines each */
-  if(lv<=20) return 12;       /* Lv11-20: 12 lines each */
-  if(lv<=30) return 14;       /* Lv21-30: 14 lines each */
-  if(lv<=50) return 16;       /* Lv31-50: 16 lines each */
-  if(lv<=70) return 18;       /* Lv51-70: 18 lines each */
-  return 20;                  /* Lv71-100: 20 lines each */
-}
-var tetLevelLinesCleared=0; /* lines cleared in current level */
-
-function tetLinesForLevel(lv){
-  /* Cumulative lines needed to reach level lv (for backwards compat) */
-  var total=0;
-  for(var i=1;i<=lv;i++) total+=tetLevelGoal(i);
-  return total;
-}
-
-/* Garbage rows: pre-filled partial rows that appear on level-up
-   Starts at lv31, increases gradually */
-function tetGarbageCount(lv){
-  if(lv<31) return 0;
-  if(lv<=40) return 1;
-  if(lv<=50) return 2;
-  if(lv<=60) return 2;
-  if(lv<=70) return 3;
-  if(lv<=80) return 3;
-  if(lv<=90) return 4;
-  return 4; /* Lv91-100 */
-}
-
-function tetSpawnGarbage(count){
-  if(!count || count<=0) return;
-  for(var g=0;g<count;g++){
-    /* Remove top row */
-    tetBoard.shift();
-    /* Add garbage row at bottom: all filled except 1-2 random gaps */
-    var row=[];
-    var gaps = tetLevel>=60 ? 1 : 2; /* fewer gaps at higher levels */
-    var gapCols=[];
-    while(gapCols.length<gaps){
-      var rc=Math.floor(Math.random()*TET_COLS);
-      if(gapCols.indexOf(rc)<0) gapCols.push(rc);
-    }
-    for(var c=0;c<TET_COLS;c++){
-      if(gapCols.indexOf(c)>=0) row.push({type:T.EMPTY,color:null});
-      else row.push({type:T.FILLED,color:'#546e7a'}); /* gray garbage */
-    }
-    tetBoard.push(row);
-  }
-  tetRender();
-}
-
-/* Lock delay decreases at higher levels (less time to slide piece) */
-function tetLockDelayMs(){
-  var lv=tetLevel;
-  if(lv<=10) return 500;
-  if(lv<=20) return 400;
-  if(lv<=30) return 350;
-  if(lv<=50) return 300;
-  return 250; /* Lv51+: quick lock */
-}
-
-function startTetris(){
-  closeMenu();
-  isTetrisMode=true; isLeagueMode=false; isAdventureMode=false; isDailyChallenge=false;
-  tetGameOver=false; gameEnded=false;
-  tetScore=0; tetLevel=1; tetLines=0; tetLevelLinesCleared=0; _tetBag=[];
-  _savedROWS=ROWS; _savedCOLS=COLS;
-  ROWS=TET_VISIBLE; COLS=TET_COLS; /* Display grid is 14x10 (2 buffer rows hidden) */
-  tetHold=null; tetHoldUsed=false;
-  tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
-  /* Init empty board (16 rows: 2 buffer + 14 visible) */
-  tetBoard=[];
-  for(var r=0;r<TET_ROWS;r++){tetBoard.push([]);for(var c=0;c<TET_COLS;c++) tetBoard[r].push({type:T.EMPTY,color:null});}
-  /* Display board is 22x10 */
-  board=[];
-  for(var r=0;r<TET_VISIBLE;r++){board.push([]);for(var c=0;c<TET_COLS;c++) board[r].push({type:T.EMPTY,color:null});}
-  /* Hide puzzle UI, show tetris UI */
-  var tray=document.getElementById('tray');if(tray)tray.style.display='none';
-  var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='none';
-  var pu=document.querySelector('.pu-bar');if(pu)pu.style.display='none';
-  var shuf=document.getElementById('shuffleBtn');if(shuf)shuf.style.display='none';
-  var np=document.getElementById('tetNextPreview');if(np)np.style.display='block';
-  var hp=document.getElementById('tetHoldPreview');if(hp)hp.style.display='block';
-  /* Attach touch gesture controls to board */
-  var _bEl=document.querySelector('.board-wrap');
-  if(_bEl){
-    _bEl.addEventListener('touchstart',tetTouchStart,{passive:false});
-    _bEl.addEventListener('touchmove',tetTouchMove,{passive:false});
-    _bEl.addEventListener('touchend',tetTouchEnd);
-  }
-  /* Show tutorial on first play */
-  if(!lsGet('bb_tetTutorialSeen')){
-    var tut=document.getElementById('tetTutorial');
-    if(tut){
-      tut.style.display='flex';
-      var dismissTut=function(){tut.style.display='none';lsSet('bb_tetTutorialSeen','1');tut.removeEventListener('touchstart',dismissTut);tut.removeEventListener('click',dismissTut);};
-      tut.addEventListener('touchstart',dismissTut);
-      tut.addEventListener('click',dismissTut);
-      setTimeout(dismissTut,4000);
-    }
-  }
-  /* Rebuild board for 10x22 */
-  setCS();
-  buildBoardDOM();
-  syncBoard();
-  /* Spawn first pieces */
-  tetNext={key:_tetNextFromBag()};
-  tetSpawnPiece();
-  /* Start gravity */
-  clearInterval(tetGravityId);
-  tetGravityId=setInterval(tetTick,tetGravityMs());
-  /* Keyboard with DAS (Delayed Auto Shift) */
-  _tetKeyRepeat={};
-  clearTimeout(_tetDASTimer); clearInterval(_tetARRTimer);
-  if(!_tetKeyHandler){
-    _tetKeyHandler=function(e){
-      if(!isTetrisMode||tetGameOver)return;
-      if(_tetKeyRepeat[e.key])return; /* already held */
-      var handled=true;
-      switch(e.key){
-        case'ArrowLeft':tetMoveLeft();_tetStartDAS('ArrowLeft',tetMoveLeft);break;
-        case'ArrowRight':tetMoveRight();_tetStartDAS('ArrowRight',tetMoveRight);break;
-        case'ArrowDown':tetMoveDown();_tetStartDAS('ArrowDown',tetMoveDown);break;
-        case'ArrowUp':tetRotate();break;
-        case' ':tetHardDrop();break;
-        case'c':case'C':case'Shift':tetHoldPiece();break;
-        default:handled=false;
-      }
-      if(handled){e.preventDefault();_tetKeyRepeat[e.key]=true;}
-    };
-  }
-  document.addEventListener('keydown',_tetKeyHandler);
-  if(!_tetKeyUpHandler){
-    _tetKeyUpHandler=function(e){
-      delete _tetKeyRepeat[e.key];
-      _tetStopDAS(e.key);
-    };
-  }
-  document.addEventListener('keyup',_tetKeyUpHandler);
-  updateModeBadge();
-  MUSIC.play(0);
-}
-
-function tetGetShape(){return TETRO[tetPiece.key].shapes[tetPiece.rot];}
-
-function tetSpawnPiece(){
-  var key=tetNext.key;
-  var td=TETRO[key];
-  var shape=td.shapes[0];
-  /* Spawn at row 0 (in buffer zone), centered */
-  tetPiece={key:key,rot:0,r:0,c:Math.floor((TET_COLS-shape[0].length)/2)};
-  tetHoldUsed=false;
-  tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
-  /* Pick next */
-  tetNext={key:_tetNextFromBag()};
-  tetRenderNext();
-  /* Check if spawn is blocked — game over */
-  if(tetCollides(tetGetShape(),tetPiece.r,tetPiece.c)){
-    tetDoGameOver();
-    return;
-  }
-  /* Try to drop 1 row into visible area */
-  if(!tetCollides(tetGetShape(),tetPiece.r+1,tetPiece.c)) tetPiece.r++;
-  tetRender();
-}
-
-function tetCollides(shape,r,c){
-  for(var dr=0;dr<shape.length;dr++)
-    for(var dc=0;dc<shape[0].length;dc++)
-      if(shape[dr][dc]){
-        var nr=r+dr,nc=c+dc;
-        if(nc<0||nc>=TET_COLS||nr>=TET_ROWS)return true;
-        if(nr<0)continue; /* allow above top */
-        if(tetBoard[nr][nc].type===T.FILLED)return true;
-      }
-  return false;
-}
-
-function tetIsOnGround(){
-  return tetPiece && tetCollides(tetGetShape(),tetPiece.r+1,tetPiece.c);
-}
-
-function tetResetLockDelay(){
-  if(tetLocking && tetLockMoves<15){
-    tetLockMoves++;
-    clearTimeout(tetLockTimer);
-    tetLockTimer=setTimeout(tetDoLock,tetLockDelayMs());
-  }
-}
-
-function tetStartLockDelay(){
-  if(tetLocking)return;
-  tetLocking=true;
-  tetLockMoves=0;
-  tetLockTimer=setTimeout(tetDoLock,tetLockDelayMs());
-}
-
-function tetTick(){
-  if(!isTetrisMode||tetGameOver||!tetPiece)return;
-  var shape=tetGetShape();
-  if(!tetCollides(shape,tetPiece.r+1,tetPiece.c)){
-    tetPiece.r++;
-    tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
-    tetRender();
-  } else {
-    /* Piece is on ground — start lock delay */
-    tetStartLockDelay();
-  }
-}
-
-function tetDoLock(){
-  if(!tetPiece||tetGameOver)return;
-  var shape=tetGetShape();
-  var color=TETRO[tetPiece.key].color;
-  /* Write piece to board */
-  for(var dr=0;dr<shape.length;dr++)
-    for(var dc=0;dc<shape[0].length;dc++)
-      if(shape[dr][dc]){
-        var nr=tetPiece.r+dr,nc=tetPiece.c+dc;
-        if(nr>=0&&nr<TET_ROWS&&nc>=0&&nc<TET_COLS)
-          tetBoard[nr][nc]={type:T.FILLED,color:color};
-      }
-  tetLocking=false; clearTimeout(tetLockTimer);
-  SND.place(); haptic(10);
-  /* T-Spin detection: T-piece + last action was rotation + 3 of 4 corners filled */
-  _tetLastWasTSpin=false;
-  if(tetPiece.key==='T' && _tetLastAction==='rotate'){
-    var cr=tetPiece.r, cc=tetPiece.c;
-    var corners=[[cr,cc],[cr,cc+2],[cr+2,cc],[cr+2,cc+2]];
-    var filled=0;
-    corners.forEach(function(p){
-      var r=p[0],c=p[1];
-      if(r<0||r>=TET_ROWS||c<0||c>=TET_COLS) filled++;
-      else if(tetBoard[r][c].type===T.FILLED) filled++;
-    });
-    if(filled>=3) _tetLastWasTSpin=true;
-  }
-  tetCheckLines();
-  tetSpawnPiece();
-}
-
-function tetMoveLeft(){
-  if(!tetPiece||tetGameOver)return;
-  var shape=tetGetShape();
-  if(!tetCollides(shape,tetPiece.r,tetPiece.c-1)){
-    tetPiece.c--; _tetLastAction='move';
-    if(tetIsOnGround()) tetResetLockDelay();
-    tetRender();
-  }
-}
-function tetMoveRight(){
-  if(!tetPiece||tetGameOver)return;
-  var shape=tetGetShape();
-  if(!tetCollides(shape,tetPiece.r,tetPiece.c+1)){
-    tetPiece.c++; _tetLastAction='move';
-    if(tetIsOnGround()) tetResetLockDelay();
-    tetRender();
-  }
-}
-function tetMoveDown(){
-  if(!tetPiece||tetGameOver)return;
-  var shape=tetGetShape();
-  if(!tetCollides(shape,tetPiece.r+1,tetPiece.c)){
-    tetPiece.r++;tetScore++;
-    tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
-    tetRender();
-  } else {
-    tetStartLockDelay();
-  }
-}
-function tetRotate(){
-  if(!tetPiece||tetGameOver)return;
-  var td=TETRO[tetPiece.key];
-  if(tetPiece.key==='O')return; /* O doesn't rotate */
-  var oldRot=tetPiece.rot;
-  var newRot=(oldRot+1)%4;
-  var newShape=td.shapes[newRot];
-  /* SRS wall kick tests */
-  var kicks=(tetPiece.key==='I')?SRS_KICKS_I[oldRot]:SRS_KICKS_JLSTZ[oldRot];
-  for(var k=0;k<kicks.length;k++){
-    var dx=kicks[k][0],dy=-kicks[k][1]; /* SRS: positive y = up, our grid positive = down */
-    if(!tetCollides(newShape,tetPiece.r+dy,tetPiece.c+dx)){
-      tetPiece.c+=dx;tetPiece.r+=dy;
-      tetPiece.rot=newRot;
-      _tetLastAction='rotate';
-      if(tetIsOnGround()) tetResetLockDelay();
-      tetRender();
-      return;
-    }
-  }
-}
-function tetHoldPiece(){
-  if(!tetPiece||tetGameOver||tetHoldUsed)return;
-  tetHoldUsed=true;
-  var prevHold=tetHold;
-  tetHold=tetPiece.key;
-  tetLocking=false; clearTimeout(tetLockTimer); tetLockMoves=0;
-  if(prevHold){
-    /* Swap: spawn held piece */
-    var td=TETRO[prevHold];
-    tetPiece={key:prevHold,rot:0,r:0,c:Math.floor((TET_COLS-td.shapes[0][0].length)/2)};
-    if(!tetCollides(td.shapes[0],tetPiece.r+1,tetPiece.c)) tetPiece.r++;
-    tetRender();
-  } else {
-    tetSpawnPiece();
-  }
-  tetRenderHold();
-}
-function tetHardDrop(){
-  if(!tetPiece||tetGameOver)return;
-  var shape=tetGetShape();
-  var dropped=0;
-  while(!tetCollides(shape,tetPiece.r+1,tetPiece.c)){tetPiece.r++;dropped++;}
-  tetScore+=dropped*2;
-  /* Slam animation — brief board shake + flash */
-  if(dropped>2){
-    var bw=document.querySelector('.board-wrap');
-    if(bw){bw.style.animation='tetSlam .15s ease';setTimeout(function(){bw.style.animation='';},160);}
-    haptic(20);
-  }
-  /* Instant lock — no delay on hard drop */
-  tetLocking=false; clearTimeout(tetLockTimer);
-  tetDoLock();
-}
-
-function tetCheckLines(){
-  var fullRows=[];
-  for(var r=0;r<TET_ROWS;r++){
-    var full=true;
-    for(var c=0;c<TET_COLS;c++){if(tetBoard[r][c].type!==T.FILLED){full=false;break;}}
-    if(full)fullRows.push(r);
-  }
-  if(!fullRows.length){
-    /* T-Spin Mini (no lines cleared but was T-Spin) */
-    if(_tetLastWasTSpin){ tetScore+=100; showToast('\u{1F300} T-Spin!'); showFlyScore('+100',true); }
-    return;
-  }
-  var cl=fullRows.length;
-  /* Scoring: base × level multiplier. T-Spin = 2x bonus */
-  var baseScore=[0,100,300,500,800][Math.min(cl,4)];
-  if(_tetLastWasTSpin) baseScore=Math.round(baseScore*2.5); /* T-Spin bonus */
-  var levelMult = 1 + (tetLevel-1)*0.15;
-  var pts=Math.round(baseScore*levelMult);
-  tetScore+=pts;
-  tetLines+=cl;
-  tetLevelLinesCleared+=cl;
-  /* Level up when lines cleared in this level reach the goal */
-  var goal=tetLevelGoal(tetLevel);
-  if(tetLevelLinesCleared>=goal && tetLevel<100){
-    tetLevelLinesCleared=0; /* reset for next level */
-    var oldLv=tetLevel;
-    tetLevel++;
-    clearInterval(tetGravityId);
-    tetGravityId=setInterval(tetTick,tetGravityMs());
-    /* Phase milestone toasts */
-    var phaseNames={11:'Intermediate!',21:'Advanced!',31:'Expert!',51:'Master!',71:'LEGEND!'};
-    if(phaseNames[tetLevel]){
-      showToast('\u{1F525} '+phaseNames[tetLevel]+' Level '+tetLevel);
-    } else {
-      showToast('Level '+tetLevel+'! Clear '+tetLevelGoal(tetLevel)+' lines');
-    }
-    SND.stageWin();
-    updateGemUI(); /* refresh header level number */
-    /* Spawn garbage rows at Lv31+ */
-    var garbage=tetGarbageCount(tetLevel);
-    if(garbage>0){
-      setTimeout(function(){
-        tetSpawnGarbage(garbage);
-        showToast('\u{26A0}\u{FE0F} Garbage rows!');
-      },400);
-    }
-  }
-  /* Hit-pause + haptics for Tetris clears */
-  hitPause(cl>=4?100:cl>=2?70:50);
-  haptic(cl>=4?40:cl>=2?25:12);
-  /* Animate clear on visible rows */
-  var bufOff=TET_ROWS-TET_VISIBLE;
-  fullRows.forEach(function(r){
-    var vr=r-bufOff;
-    if(vr<0)return;
-    for(var c=0;c<TET_COLS;c++){
-      var el=cellEl(vr,c);
-      if(el){el.classList.add('pop');el.style.background='#fff';el.style.boxShadow='0 0 12px #fff';el.innerHTML='';}
-    }
-  });
-  /* Remove rows and shift down after animation */
-  setTimeout(function(){
-    for(var i=fullRows.length-1;i>=0;i--){
-      tetBoard.splice(fullRows[i],1);
-    }
-    while(tetBoard.length<TET_ROWS){
-      var emptyRow=[];
-      for(var c=0;c<TET_COLS;c++)emptyRow.push({type:T.EMPTY,color:null});
-      tetBoard.unshift(emptyRow);
-    }
-    tetRender();
-  },200);
-  /* Visual feedback */
-  SND.clear(cl,cl>=4?2:1);
-  var label=_tetLastWasTSpin?'\u{1F300} T-Spin ':'';
-  showFlyScore(label+'+'+pts,cl>=2||_tetLastWasTSpin);
-  if(cl>=4&&_tetLastWasTSpin){showToast('\u{1F300} T-SPIN TETRIS!!');spawnConfetti(document.querySelectorAll('.cell.pop'));}
-  else if(cl>=4){showToast('TETRIS!');spawnConfetti(document.querySelectorAll('.cell.pop'));}
-  else if(_tetLastWasTSpin&&cl>=2){showToast('\u{1F300} T-Spin Double!');spawnConfetti(document.querySelectorAll('.cell.pop'));}
-  else if(_tetLastWasTSpin){showToast('\u{1F300} T-Spin Single!');}
-  else if(cl>=2) showToast('Combo x'+cl+'!');
-  /* Update score display */
-  var sco=document.getElementById('xpScore');if(sco)sco.textContent=tetScore;
-}
-
-function tetGhostR(){
-  if(!tetPiece)return 0;
-  var shape=tetGetShape();
-  var gr=tetPiece.r;
-  while(!tetCollides(shape,gr+1,tetPiece.c))gr++;
-  return gr;
-}
-
-function tetRender(){
-  if(!isTetrisMode)return;
-  var shape=tetPiece?tetGetShape():null;
-  var color=tetPiece?TETRO[tetPiece.key].color:null;
-  /* Only render visible rows (skip buffer rows 0-1) */
-  var bufOff=TET_ROWS-TET_VISIBLE; /* =2 */
-  for(var vr=0;vr<TET_VISIBLE;vr++){
-    var br=vr+bufOff; /* board row */
-    for(var c=0;c<TET_COLS;c++){
-      var el=cellEl(vr,c);if(!el)continue;
-      var src=tetBoard[br][c];
-      var isGhost=false,isActive=false;
-      /* Check if this cell is part of ghost piece */
-      if(tetPiece){
-        var gr=tetGhostR();
-        for(var dr=0;dr<shape.length&&!isGhost;dr++)
-          for(var dc=0;dc<shape[0].length&&!isGhost;dc++)
-            if(shape[dr][dc]&&gr+dr===br&&tetPiece.c+dc===c&&src.type===T.EMPTY) isGhost=true;
-        /* Check if this cell is part of active piece */
-        for(var dr=0;dr<shape.length&&!isActive;dr++)
-          for(var dc=0;dc<shape[0].length&&!isActive;dc++)
-            if(shape[dr][dc]&&tetPiece.r+dr===br&&tetPiece.c+dc===c) isActive=true;
-      }
-      if(isActive){
-        el.className='cell filled';
-        el.style.background=color;
-        el.style.boxShadow='0 3px 0 '+darken(color)+',0 4px 8px rgba(0,0,0,.3)';
-        el.innerHTML='<div style="position:absolute;top:2px;left:2px;right:2px;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);border-radius:4px 4px 0 0;pointer-events:none"></div>';
-      } else if(isGhost){
-        el.className='cell tet-ghost';
-        el.style.background=color;
-        el.style.boxShadow='none';
-        el.innerHTML='';
-      } else if(src.type===T.FILLED){
-        el.className='cell filled';
-        el.style.background=src.color;
-        el.style.boxShadow='0 3px 0 '+darken(src.color)+',0 4px 8px rgba(0,0,0,.3)';
-        el.innerHTML='<div style="position:absolute;top:2px;left:2px;right:2px;height:40%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);border-radius:4px 4px 0 0;pointer-events:none"></div>';
-      } else {
-        el.className='cell empty';
-        el.style.background='';el.style.boxShadow='';el.innerHTML='';
-      }
-    }
-  }
-  /* Update score in XP bar */
-  var sco=document.getElementById('xpScore');if(sco)sco.textContent=tetScore;
-  /* Phase label for flavor */
-  var phase=tetLevel<=10?'':tetLevel<=20?' \u{1F7E1}':tetLevel<=30?' \u{1F7E0}':tetLevel<=50?' \u{1F534}':tetLevel<=70?' \u{1F7E3}':' \u{1F451}';
-  var goal=tetLevelGoal(tetLevel);
-  /* XP left label: show goal */
-  var lvlLbl=document.getElementById('xpLevelLbl');if(lvlLbl)lvlLbl.textContent=tetLevelLinesCleared+'/'+goal;
-  /* XP right label: show level + score */
-  var lbl=document.getElementById('xpLabel');if(lbl)lbl.textContent='LV '+tetLevel+phase+' | '+tetScore.toLocaleString();
-  /* XP fill: progress toward level goal */
-  var progress=goal>0?Math.min(100,Math.round((tetLevelLinesCleared/goal)*100)):0;
-  var fill=document.getElementById('xpFill');if(fill)fill.style.width=progress+'%';
-}
-
-function tetRenderHold(){
-  var hg=document.getElementById('tetHoldGrid');if(!hg)return;
-  var hp=document.getElementById('tetHoldPreview');
-  if(!tetHold){hg.innerHTML='';return;}
-  hg.innerHTML='';
-  var td=TETRO[tetHold];
-  var shape=td.shapes[0];
-  hg.style.gridTemplateColumns='repeat('+shape[0].length+',10px)';
-  for(var r=0;r<shape.length;r++) for(var c=0;c<shape[0].length;c++){
-    var ce=document.createElement('div');
-    ce.className='tet-hold-cell';
-    ce.style.background=shape[r][c]?td.color:'transparent';
-    if(shape[r][c]) ce.style.boxShadow='0 1px 0 '+darken(td.color);
-    hg.appendChild(ce);
-  }
-  /* Dim when already used this piece */
-  if(hp) hp.classList.toggle('used',tetHoldUsed);
-}
-
-function tetRenderNext(){
-  var ng=document.getElementById('tetNextGrid');if(!ng)return;
-  ng.innerHTML='';
-  var td=TETRO[tetNext.key];
-  var shape=td.shapes[0];
-  ng.style.gridTemplateColumns='repeat('+shape[0].length+',10px)';
-  ng.style.gridTemplateRows='repeat('+shape.length+',10px)';
-  for(var r=0;r<shape.length;r++)for(var c=0;c<shape[0].length;c++){
-    var cel=document.createElement('div');
-    cel.className='tet-next-cell';
-    cel.style.background=shape[r][c]?td.color:'transparent';
-    if(shape[r][c])cel.style.borderRadius='2px';
-    ng.appendChild(cel);
-  }
-}
-
-function tetStartAtLevel(lv){
-  /* Start Tetris at a specific level from the map */
-  startTetris();
-  /* Set level and speed */
-  tetLevel=lv+1;
-  tetLines=lv*10; /* lines already "cleared" to reach this level */
-  clearInterval(tetGravityId);
-  tetGravityId=setInterval(tetTick,tetGravityMs());
-  tetRender();
-}
-
-function tetDoGameOver(){
-  tetGameOver=true;
-  clearInterval(tetGravityId);tetGravityId=null;
-  clearTimeout(tetLockTimer);
-  _tetStopDAS();
-  if(_tetKeyHandler)document.removeEventListener('keydown',_tetKeyHandler);
-  if(_tetKeyUpHandler)document.removeEventListener('keyup',_tetKeyUpHandler);
-  /* Save high scores */
-  var prevLines=parseInt(lsGet('bbTetrisLines','0'))||0;
-  if(tetLines>prevLines)lsSet('bbTetrisLines',tetLines);
-  var prevScore=parseInt(lsGet('bbTetrisScore','0'))||0;
-  if(tetScore>prevScore)lsSet('bbTetrisScore',tetScore);
-  /* Save level progress — star rating based on lines cleared at this level */
-  var linesAtLevel=tetLines%10;
-  var lvIdx=tetLevel-1;
-  if(lvIdx>tetMaxLevel){tetMaxLevel=lvIdx;lsSet('bbTetMaxLv',tetMaxLevel);}
-  /* Stars: 1=reached level, 2=cleared 5+ lines at level, 3=cleared all 10 */
-  var stars=1;
-  if(linesAtLevel>=5)stars=2;
-  if(linesAtLevel>=10||tetLevel>lvIdx+1)stars=3;
-  if(!tetLevelStars[lvIdx]||stars>tetLevelStars[lvIdx]){
-    tetLevelStars[lvIdx]=stars;
-    lsSet('bbTetStars',JSON.stringify(tetLevelStars));
-  }
-  /* Pass score to game over system */
-  score=tetScore;
-  doGameOver();
-}
-
-function stopTetris(){
-  if(!isTetrisMode) return; /* guard against double-call */
-  isTetrisMode=false;
-  clearInterval(tetGravityId);tetGravityId=null;
-  clearTimeout(tetLockTimer);tetLocking=false;
-  _tetStopDAS();_tetKeyRepeat={};
-  if(_tetKeyHandler)document.removeEventListener('keydown',_tetKeyHandler);
-  if(_tetKeyUpHandler)document.removeEventListener('keyup',_tetKeyUpHandler);
-  _tetKeyHandler=null; _tetKeyUpHandler=null; /* allow re-creation next start */
-  ROWS=_savedROWS;COLS=_savedCOLS;
-  /* Restore all hidden UI elements */
-  /* Remove touch gesture listeners */
-  var _bEl=document.querySelector('.board-wrap');
-  if(_bEl){
-    _bEl.removeEventListener('touchstart',tetTouchStart);
-    _bEl.removeEventListener('touchmove',tetTouchMove);
-    _bEl.removeEventListener('touchend',tetTouchEnd);
-  }
-  var np=document.getElementById('tetNextPreview');if(np)np.style.display='none';
-  var hpv=document.getElementById('tetHoldPreview');if(hpv)hpv.style.display='none';
-  var tray=document.getElementById('tray');if(tray)tray.style.display='';
-  var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='';
-  var pu=document.querySelector('.pu-bar');if(pu)pu.style.display='';
-  var shuf=document.getElementById('shuffleBtn');if(shuf)shuf.style.display='';
-}
-
-
 return{
   initOnly:          function(){
     /* Initialize data/state without starting a level (used on first load) */
@@ -8767,10 +7276,8 @@ return{
     startLevel(level+1);
   },
   goMenu:            function(){
-    if(isTetrisMode) stopTetris(); /* Clean up Tetris state before menu */
     stopDCTimer();
     isDailyChallenge=false; dcModId='';
-    isTetrisMode=false; isLeagueMode=false;
     var _dchud=document.getElementById('dcHud'); if(_dchud) _dchud.classList.remove('visible');
     document.getElementById('goModal').classList.remove('on');
     document.getElementById('clearModal').classList.remove('on');
@@ -8814,9 +7321,6 @@ return{
   shopBuy:           shopBuy,
   shopBuyPro:        shopBuyPro,
   shopConfirmYes:    shopConfirmYes,
-  reviveWithAd:      reviveWithAd,
-  doubleCoinsWithAd: doubleCoinsWithAd,
-  applySkin:         applySkinClass,
   shopConfirmCancel: shopConfirmCancel,
   setCS:             setCS,
   openMenu:          openMenu,
@@ -8830,8 +7334,6 @@ return{
   openSpin:          openSpin,
   closeSpin:         closeSpin,
   doSpin:            doSpin,
-  startTetris:startTetris,tetStartAtLevel:tetStartAtLevel,
-  tetLeft:tetMoveLeft,tetRight:tetMoveRight,tetDown:tetMoveDown,tetDrop:tetHardDrop,tetRotate:tetRotate,tetHold:tetHoldPiece,
   shufflePieces:     shufflePieces,
 };
 

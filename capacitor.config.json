@@ -1,0 +1,18 @@
+{
+  "appId": "com.blockblitz.game",
+  "appName": "BlockBlitz",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#1a6dd4"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#1a6dd4"
+    }
+  }
+}
