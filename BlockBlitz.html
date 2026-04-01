@@ -68,7 +68,8 @@ body>*{position:relative;z-index:1}
   transition:background .15s,transform .1s;
 }
 .settings-btn:active{background:rgba(255,255,255,0.2);transform:scale(0.92)}
-.music-toggle{position:relative}
+.music-toggle{position:relative;display:inline-block}
+.music-toggle.muted{opacity:0.4;filter:grayscale(80%)}
 .music-toggle.muted::after{
   content:'✕';position:absolute;top:-2px;right:-2px;
   font-size:10px;font-weight:900;color:#ff4444;
@@ -1272,7 +1273,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <div class="menu-action-row">
       <button class="menu-action-btn" id="menuProfileBtn" onclick="BB.openProfile()" title="Profile">👤</button>
       <img src="Assets/Buttons/shop_btn.png" onclick="BB.openShop()" title="Shop" style="width:36px;height:36px;cursor:pointer;-webkit-tap-highlight-color:transparent" alt="Shop">
-      <button class="menu-action-btn music-toggle muted" onclick="BB.toggleMusic()">🎵</button>
+      <img src="Assets/Buttons/music_on.png" class="music-toggle muted" onclick="BB.toggleMusic()" title="Music" style="width:36px;height:36px;cursor:pointer;-webkit-tap-highlight-color:transparent" alt="Music">
     </div>
   </div>
 
@@ -1409,7 +1410,7 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     </div>
     <div class="top-bar-right">
       <img src="Assets/Buttons/shop_btn.png" onclick="BB.openShop()" title="Shop" style="width:30px;height:30px;cursor:pointer;-webkit-tap-highlight-color:transparent" alt="Shop">
-      <button class="settings-btn music-toggle muted" onclick="BB.toggleMusic()">🎵</button>
+      <img src="Assets/Buttons/music_on.png" class="music-toggle muted" onclick="BB.toggleMusic()" title="Music" style="width:30px;height:30px;cursor:pointer;-webkit-tap-highlight-color:transparent" alt="Music">
     </div>
   </div>
   <!-- Row 2: Gems · Coins · Streak · Rank · Mode · Extra -->
