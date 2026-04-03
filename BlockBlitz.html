@@ -307,7 +307,7 @@ body.skin-sunset  .board-wrap{background:linear-gradient(160deg,#1a0800,#2a1000)
 body.skin-sunset  .cell.empty{background:linear-gradient(145deg,#150600,#1e0c00);border-color:rgba(255,120,50,0.10)}
 body.skin-crystal .board-wrap{background:url('Assets/BoardSkins/Crystal/bg_stage01_crystal_cavern.png') center center / cover no-repeat;border-color:rgba(150,200,255,0.4);box-shadow:0 0 0 2px rgba(150,200,255,0.3),0 8px 40px rgba(0,0,0,0.5),inset 0 0 30px rgba(0,0,20,0.4)}
 body.skin-crystal .cell.empty{background:rgba(10,20,60,0.55);border-color:rgba(150,200,255,0.12);backdrop-filter:blur(1px)}
-body.tet-backdrop .cell.empty{background:rgba(8,15,40,0.5)!important;border-color:rgba(150,200,255,0.10)!important}
+body.tet-backdrop .cell.empty{background:rgba(5,10,30,0.25)!important;border-color:rgba(150,200,255,0.06)!important}
 body.skin-gold    .board-wrap{background:linear-gradient(160deg,#1a1000,#251800);border-color:rgba(255,215,0,0.4);box-shadow:0 0 0 2px rgba(255,200,0,0.3),0 8px 40px rgba(0,0,0,0.5),inset 0 0 30px rgba(0,0,0,0.2)}
 body.skin-gold    .cell.empty{background:linear-gradient(145deg,#120d00,#1a1200);border-color:rgba(255,200,0,0.10)}
 body.skin-midnight .board-wrap{background:linear-gradient(160deg,#03030f,#05051a);border-color:rgba(80,80,180,0.3);box-shadow:0 0 0 2px rgba(60,60,160,0.2),0 8px 40px rgba(0,0,0,0.6),inset 0 0 30px rgba(0,0,0,0.3)}
@@ -1510,10 +1510,10 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
     <!-- Pause button -->
     <button id="tetPauseBtn" onclick="BB.tetPause()" style="width:38px;height:38px;background:rgba(30,40,80,0.85);border:2px solid rgba(100,140,255,0.4);border-radius:10px;color:#fff;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0">⏸</button>
-    <!-- Moves counter -->
+    <!-- Level indicator -->
     <div style="text-align:center;min-width:60px">
-      <div style="font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px">SCORE</div>
-      <div id="tetHudScore" style="font-family:'Fredoka One';font-size:18px;color:#ffd700">0</div>
+      <div style="font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px">LEVEL</div>
+      <div id="tetHudLevel" style="font-family:'Fredoka One';font-size:20px;color:#fff">1</div>
     </div>
     <!-- Target -->
     <div style="flex:1;text-align:center;background:rgba(20,30,80,0.7);border:1.5px solid rgba(100,140,255,0.3);border-radius:10px;padding:4px 8px">
@@ -5856,9 +5856,14 @@ function doGameOver(){
   var adBtns=document.getElementById('goAdBtns');
   var revBtn=document.getElementById('goReviveBtn');
   var dblBtn=document.getElementById('goDoubleBtn');
-  if(adBtns) adBtns.style.display=isPro?'none':'flex';
-  if(revBtn){ revBtn.disabled=_reviveUsedThisGame; revBtn.style.opacity=_reviveUsedThisGame?'0.4':'1'; }
-  if(dblBtn){ dblBtn.disabled=false; dblBtn.style.opacity='1'; }
+  if(_wasTetris){
+    /* No revive for Tetris — board is full, revive makes no sense */
+    if(adBtns) adBtns.style.display='none';
+  } else {
+    if(adBtns) adBtns.style.display=isPro?'none':'flex';
+    if(revBtn){ revBtn.disabled=_reviveUsedThisGame; revBtn.style.opacity=_reviveUsedThisGame?'0.4':'1'; }
+    if(dblBtn){ dblBtn.disabled=false; dblBtn.style.opacity='1'; }
+  }
 
   document.getElementById('goModal').classList.add('on');
   /* ── Interstitial ad (frequency scales with level) ── */
@@ -8305,14 +8310,14 @@ function tetLinesForLevel(lv){
 /* Garbage rows: pre-filled partial rows that appear on level-up
    Starts at lv31, increases gradually */
 function tetGarbageCount(lv){
-  if(lv<31) return 0;
-  if(lv<=40) return 1;
-  if(lv<=50) return 2;
-  if(lv<=60) return 2;
-  if(lv<=70) return 3;
-  if(lv<=80) return 3;
-  if(lv<=90) return 4;
-  return 4; /* Lv91-100 */
+  if(lv<=2) return 0;    /* Lv1-2: clean board */
+  if(lv<=5) return 1;    /* Lv3-5: 1 garbage row */
+  if(lv<=10) return 2;   /* Lv6-10: 2 rows */
+  if(lv<=20) return 3;   /* Lv11-20: 3 rows */
+  if(lv<=30) return 4;   /* Lv21-30: 4 rows */
+  if(lv<=50) return 5;   /* Lv31-50: 5 rows */
+  if(lv<=70) return 6;   /* Lv51-70: 6 rows */
+  return 7;              /* Lv71+: 7 rows max */
 }
 
 function tetSpawnGarbage(count){
@@ -8997,6 +9002,7 @@ function tetDoGameOver(){
   }
   /* Grey curtain animation, then show game over modal */
   score=tetScore;
+  gameEnded=false; /* reset so doGameOver() doesn't skip */
   tetGameOverCurtain(function(){
     doGameOver();
   });
@@ -9110,7 +9116,7 @@ function tetUpdateBackdrop(level){
 
 /* ── TETRIS HUD UPDATE ── */
 function tetUpdateHud(){
-  var sc=document.getElementById('tetHudScore');if(sc)sc.textContent=tetScore.toLocaleString();
+  var lv=document.getElementById('tetHudLevel');if(lv)lv.textContent=tetLevel;
   var goal=tetLevelGoal(tetLevel);
   var remaining=Math.max(0, goal - tetLevelLinesCleared);
   var tn=document.getElementById('tetTargetNum');if(tn)tn.textContent=remaining;
