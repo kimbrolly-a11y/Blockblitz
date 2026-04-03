@@ -5762,7 +5762,10 @@ function doGameOver(){
   if(gameEnded) return; /* stage already cleared — don't show game over */
   gameEnded = true;
   var _wasTetris=isTetrisMode, _tetLv=typeof tetLevel!=='undefined'?tetLevel:1, _tetLn=typeof tetLines!=='undefined'?tetLines:0;
-  if(isTetrisMode) stopTetris();
+  /* Save for retry — so retry() knows to restart Tetris */
+  _wasTetrisOnGameOver=_wasTetris;
+  _tetLevelOnGameOver=_tetLv-1; /* level index (0-based) for tetStartAtLevel */
+  if(isTetrisMode) stopTetris(true); /* true = from game over, skip UI restore */
   _doubleUsedThisGame=false; /* reset per-game ad flags */
   rounds++; lsSet('bbrounds',rounds);
   levelStreak=0; lsSet('bbstreak',0);
@@ -8070,6 +8073,7 @@ document.addEventListener('keydown',function(e){_debugBuffer+=e.key.toLowerCase(
    Ref: https://tetris.wiki/Tetris_Guideline
 ══════════════════════════════════════ */
 var isTetrisMode=false;
+var _wasTetrisOnGameOver=false, _tetLevelOnGameOver=0;
 var tetBoard=[]; /* 22x10 (rows 0-1 hidden buffer) */
 var tetPiece=null; /* {key,rot,r,c} */
 var tetNext=null;
@@ -9056,10 +9060,11 @@ function tetClaimClear(){
 /* ── TETRIS HUD UPDATE ── */
 function tetUpdateHud(){
   var mc=document.getElementById('tetMoveCount');if(mc)mc.textContent=tetMoveCount;
-  var tn=document.getElementById('tetTargetNum');if(tn)tn.textContent=tetLevelGoal(tetLevel);
+  var goal=tetLevelGoal(tetLevel);
+  var remaining=Math.max(0, goal - tetLevelLinesCleared);
+  var tn=document.getElementById('tetTargetNum');if(tn)tn.textContent=remaining;
   var pf=document.getElementById('tetProgressFill');
   if(pf){
-    var goal=tetLevelGoal(tetLevel);
     var pct=goal>0?Math.min(100,Math.round((tetLevelLinesCleared/goal)*100)):0;
     pf.style.width=pct+'%';
   }
@@ -9131,7 +9136,7 @@ function tetUpdateSettings(){
   if(vBtn) vBtn.style.cssText+=';width:72px;height:72px;border-radius:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff;'+(_tetVibEnabled?onStyle:offStyle);
 }
 
-function stopTetris(){
+function stopTetris(fromGameOver){
   if(!isTetrisMode) return; /* guard against double-call */
   isTetrisMode=false;
   clearInterval(tetGravityId);tetGravityId=null;
@@ -9139,9 +9144,8 @@ function stopTetris(){
   _tetStopDAS();_tetKeyRepeat={};
   if(_tetKeyHandler)document.removeEventListener('keydown',_tetKeyHandler);
   if(_tetKeyUpHandler)document.removeEventListener('keyup',_tetKeyUpHandler);
-  _tetKeyHandler=null; _tetKeyUpHandler=null; /* allow re-creation next start */
+  _tetKeyHandler=null; _tetKeyUpHandler=null;
   ROWS=_savedROWS;COLS=_savedCOLS;
-  /* Restore all hidden UI elements */
   /* Remove touch gesture listeners */
   var _bEl=document.querySelector('.board-wrap');
   if(_bEl){
@@ -9149,11 +9153,19 @@ function stopTetris(){
     _bEl.removeEventListener('touchmove',tetTouchMove);
     _bEl.removeEventListener('touchend',tetTouchEnd);
   }
-  var np=document.getElementById('tetNextPreview');if(np)np.style.display='none';
   var hpv=document.getElementById('tetHoldPreview');if(hpv)hpv.style.display='none';
   var po=document.getElementById('tetPauseOverlay');if(po)po.style.display='none';
   tetPaused=false;
-  /* Restore standard UI */
+  /* If called from game over, DON'T restore puzzle UI — game over modal shows on top */
+  /* But DO hide the Tetris HUD so it doesn't show behind the modal */
+  if(fromGameOver){
+    var tetHud=document.getElementById('tetHud');if(tetHud)tetHud.style.display='none';
+    return;
+  }
+  /* Full UI restore (for menu/leave game) */
+  tetRestoreUI();
+}
+function tetRestoreUI(){
   var topBar=document.querySelector('.top-bar');if(topBar)topBar.style.display='';
   var xpWrap=document.getElementById('xpBarWrap');if(xpWrap)xpWrap.style.display='';
   var tetHud=document.getElementById('tetHud');if(tetHud)tetHud.style.display='none';
@@ -9171,10 +9183,16 @@ return{
     /* Hide game, show menu via splash */
   },
   retry:             function(){
-    var savedAdv = isAdventureMode;
     document.getElementById('goModal').classList.remove('on');
+    /* Check if last game was Tetris */
+    if(_wasTetrisOnGameOver){
+      var lv=_tetLevelOnGameOver||0;
+      setTimeout(function(){tetStartAtLevel(lv);},100);
+      return;
+    }
+    var savedAdv = isAdventureMode;
     init();
-    isAdventureMode = savedAdv; /* Preserve mode on retry */
+    isAdventureMode = savedAdv;
     startLevel(level);
   },
   nextStage:         function(){
@@ -9184,7 +9202,9 @@ return{
     startLevel(level+1);
   },
   goMenu:            function(){
-    if(isTetrisMode) stopTetris(); /* Clean up Tetris state before menu */
+    if(isTetrisMode) stopTetris();
+    if(_wasTetrisOnGameOver) tetRestoreUI(); /* restore UI if coming from Tetris game over */
+    _wasTetrisOnGameOver=false;
     stopDCTimer();
     isDailyChallenge=false; dcModId='';
     isTetrisMode=false; isLeagueMode=false;
