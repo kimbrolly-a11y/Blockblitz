@@ -357,8 +357,20 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 /* Tetris Mode */
 .menu-card-tetris{background:linear-gradient(135deg,#006064 0%,#00acc1 100%)}
 .badge-tetris{background:rgba(0,172,193,0.3);border-color:rgba(0,172,193,0.5)}
-/* Tetris gesture-based controls */
-@keyframes tetSlam{0%{transform:translateY(0)}40%{transform:translateY(3px)}100%{transform:translateY(0)}}
+/* ── Tetris Animations ── */
+@keyframes tetSlam{0%{transform:translateY(0)}40%{transform:translateY(4px)}100%{transform:translateY(0)}}
+@keyframes tetShake{0%,100%{transform:translateX(0)}15%{transform:translateX(-3px)}30%{transform:translateX(3px)}45%{transform:translateX(-2px)}60%{transform:translateX(2px)}}
+@keyframes tetFlashRow{0%{background:#fff!important;box-shadow:0 0 16px #fff!important}100%{background:transparent!important;box-shadow:none!important}}
+@keyframes tetShrinkCell{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes tetScorePop{0%{opacity:1;transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.2)}100%{opacity:0;transform:translateY(-60px) scale(0.8)}}
+@keyframes tetLockSquish{0%{transform:scaleY(1)}30%{transform:scaleY(0.92)}100%{transform:scaleY(1)}}
+@keyframes tetTrailFade{0%{opacity:0.7}100%{opacity:0}}
+@keyframes tetGreyWash{0%{opacity:0}100%{opacity:1}}
+@keyframes tetLevelUp{0%{transform:scale(0.3);opacity:0}40%{transform:scale(1.15);opacity:1}70%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}
+.tet-lock-squish{animation:tetLockSquish .12s ease}
+.tet-trail{position:absolute;pointer-events:none;z-index:80;border-radius:4px;animation:tetTrailFade .25s ease-out forwards}
+.tet-score-pop{position:fixed;pointer-events:none;z-index:900;font-family:'Fredoka One';animation:tetScorePop .8s ease-out forwards;text-shadow:0 2px 8px rgba(0,0,0,0.5)}
+.tet-levelup{position:fixed;pointer-events:none;z-index:950;font-family:'Fredoka One';animation:tetLevelUp .6s ease-out forwards;text-shadow:0 0 20px rgba(255,215,0,0.8),0 3px 10px rgba(0,0,0,0.5)}
 #tetNextPreview{display:none;position:absolute;top:8px;right:8px;text-align:center;z-index:50}
 #tetHoldPreview{display:none;position:absolute;top:8px;left:8px;text-align:center;z-index:50}
 .tet-next-label,.tet-hold-label{font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px;margin-bottom:3px}
@@ -8235,7 +8247,7 @@ function startTetris(){
   closeMenu();
   isTetrisMode=true; isLeagueMode=false; isAdventureMode=false; isDailyChallenge=false;
   tetGameOver=false; gameEnded=false;
-  tetScore=0; tetLevel=1; tetLines=0; tetLevelLinesCleared=0; _tetBag=[];
+  tetScore=0; tetLevel=1; tetLines=0; tetLevelLinesCleared=0; _tetCombo=-1; _tetB2B=false; _tetBag=[];
   _savedROWS=ROWS; _savedCOLS=COLS;
   ROWS=TET_VISIBLE; COLS=TET_COLS; /* Display grid is 14x10 (2 buffer rows hidden) */
   tetHold=null; tetHoldUsed=false;
@@ -8394,6 +8406,15 @@ function tetDoLock(){
       }
   tetLocking=false; clearTimeout(tetLockTimer);
   SND.place(); haptic(10);
+  /* Lock squish animation on placed cells */
+  var bufOff=TET_ROWS-TET_VISIBLE;
+  for(var _dr=0;_dr<shape.length;_dr++)
+    for(var _dc=0;_dc<shape[0].length;_dc++)
+      if(shape[_dr][_dc]){
+        var _vr=tetPiece.r+_dr-bufOff, _vc=tetPiece.c+_dc;
+        var _cel=cellEl(_vr,_vc);
+        if(_cel){_cel.classList.remove('tet-lock-squish');void _cel.offsetWidth;_cel.classList.add('tet-lock-squish');}
+      }
   /* T-Spin detection: T-piece + last action was rotation + 3 of 4 corners filled */
   _tetLastWasTSpin=false;
   if(tetPiece.key==='T' && _tetLastAction==='rotate'){
@@ -8481,10 +8502,19 @@ function tetHoldPiece(){
 function tetHardDrop(){
   if(!tetPiece||tetGameOver)return;
   var shape=tetGetShape();
+  var startR=tetPiece.r;
   var dropped=0;
+  var color=TETRO[tetPiece.key].color;
   while(!tetCollides(shape,tetPiece.r+1,tetPiece.c)){tetPiece.r++;dropped++;}
   tetScore+=dropped*2;
-  /* Slam animation — brief board shake + flash */
+  /* Trail effect — vertical streak from start to landing */
+  if(dropped>1){
+    var bufOff=TET_ROWS-TET_VISIBLE;
+    for(var dr=0;dr<shape.length;dr++)
+      for(var dc=0;dc<shape[0].length;dc++)
+        if(shape[dr][dc]) tetSpawnTrail(startR+dr-bufOff, tetPiece.r+dr-bufOff, tetPiece.c+dc, color);
+  }
+  /* Slam animation — board shake + haptic */
   if(dropped>2){
     var bw=document.querySelector('.board-wrap');
     if(bw){bw.style.animation='tetSlam .15s ease';setTimeout(function(){bw.style.animation='';},160);}
@@ -8503,81 +8533,186 @@ function tetCheckLines(){
     if(full)fullRows.push(r);
   }
   if(!fullRows.length){
-    /* T-Spin Mini (no lines cleared but was T-Spin) */
-    if(_tetLastWasTSpin){ tetScore+=100; showToast('\u{1F300} T-Spin!'); showFlyScore('+100',true); }
+    _tetCombo=-1; /* reset combo on non-clear */
+    if(_tetLastWasTSpin){ tetScore+=400*tetLevel; showToast('\u{1F300} T-Spin!'); tetSpawnScorePop(400*tetLevel,window.innerWidth/2-30,window.innerHeight*0.35,true); }
     return;
   }
   var cl=fullRows.length;
-  /* Scoring: base × level multiplier. T-Spin = 2x bonus */
-  var baseScore=[0,100,300,500,800][Math.min(cl,4)];
-  if(_tetLastWasTSpin) baseScore=Math.round(baseScore*2.5); /* T-Spin bonus */
-  var levelMult = 1 + (tetLevel-1)*0.15;
-  var pts=Math.round(baseScore*levelMult);
+  _tetCombo++;
+
+  /* ── SCORING (Guideline-based) ── */
+  var baseScore;
+  if(_tetLastWasTSpin){
+    baseScore=[0,800,1200,1600][Math.min(cl,3)]; /* T-Spin Single/Double/Triple */
+  } else {
+    baseScore=[0,100,300,500,800][Math.min(cl,4)];
+  }
+  /* Back-to-back bonus: +50% for consecutive Tetris or T-Spin clears */
+  var isDifficult=(cl>=4)||_tetLastWasTSpin;
+  var b2bBonus=1;
+  if(isDifficult&&_tetB2B) b2bBonus=1.5;
+  if(isDifficult) _tetB2B=true;
+  else _tetB2B=false;
+
+  var pts=Math.round(baseScore*tetLevel*b2bBonus);
+  /* Combo bonus: 50 × combo × level */
+  var comboBonus=_tetCombo>0?50*_tetCombo*tetLevel:0;
+  pts+=comboBonus;
+
   tetScore+=pts;
   tetLines+=cl;
   tetLevelLinesCleared+=cl;
-  /* Level up when lines cleared in this level reach the goal */
+
+  /* ── LEVEL UP ── */
   var goal=tetLevelGoal(tetLevel);
   if(tetLevelLinesCleared>=goal && tetLevel<100){
-    tetLevelLinesCleared=0; /* reset for next level */
-    var oldLv=tetLevel;
+    tetLevelLinesCleared=0;
     tetLevel++;
     clearInterval(tetGravityId);
     tetGravityId=setInterval(tetTick,tetGravityMs());
-    /* Phase milestone toasts */
-    var phaseNames={11:'Intermediate!',21:'Advanced!',31:'Expert!',51:'Master!',71:'LEGEND!'};
-    if(phaseNames[tetLevel]){
-      showToast('\u{1F525} '+phaseNames[tetLevel]+' Level '+tetLevel);
-    } else {
-      showToast('Level '+tetLevel+'! Clear '+tetLevelGoal(tetLevel)+' lines');
-    }
+    tetShowLevelUp(tetLevel);
     SND.stageWin();
-    updateGemUI(); /* refresh header level number */
-    /* Spawn garbage rows at Lv31+ */
+    updateGemUI();
     var garbage=tetGarbageCount(tetLevel);
     if(garbage>0){
       setTimeout(function(){
         tetSpawnGarbage(garbage);
         showToast('\u{26A0}\u{FE0F} Garbage rows!');
-      },400);
+      },600);
     }
   }
-  /* Hit-pause + haptics for Tetris clears */
+
+  /* ── HIT-PAUSE + HAPTICS ── */
   hitPause(cl>=4?100:cl>=2?70:50);
   haptic(cl>=4?40:cl>=2?25:12);
-  /* Animate clear on visible rows */
+
+  /* ── CASCADING LINE CLEAR ANIMATION ── */
   var bufOff=TET_ROWS-TET_VISIBLE;
-  fullRows.forEach(function(r){
-    var vr=r-bufOff;
-    if(vr<0)return;
-    for(var c=0;c<TET_COLS;c++){
-      var el=cellEl(vr,c);
-      if(el){el.classList.add('pop');el.style.background='#fff';el.style.boxShadow='0 0 12px #fff';el.innerHTML='';}
-    }
+
+  /* Phase 1: Flash rows white (50ms per row, staggered) */
+  fullRows.forEach(function(r,i){
+    var vr=r-bufOff; if(vr<0)return;
+    setTimeout(function(){
+      for(var c=0;c<TET_COLS;c++){
+        var el=cellEl(vr,c);
+        if(el){el.style.animation='tetFlashRow .15s ease';el.style.background='#fff';el.style.boxShadow='0 0 16px #fff';}
+      }
+    },i*60);
   });
-  /* Remove rows and shift down after animation */
+
+  /* Phase 2: Shrink cells (after flash completes) */
+  var shrinkDelay=fullRows.length*60+80;
+  fullRows.forEach(function(r){
+    var vr=r-bufOff; if(vr<0)return;
+    setTimeout(function(){
+      for(var c=0;c<TET_COLS;c++){
+        var el=cellEl(vr,c);
+        if(el){el.style.animation='tetShrinkCell .15s ease forwards';el.innerHTML='';}
+      }
+    },shrinkDelay);
+  });
+
+  /* Phase 3: Collapse board (after shrink) */
   setTimeout(function(){
-    for(var i=fullRows.length-1;i>=0;i--){
-      tetBoard.splice(fullRows[i],1);
-    }
+    for(var i=fullRows.length-1;i>=0;i--) tetBoard.splice(fullRows[i],1);
     while(tetBoard.length<TET_ROWS){
       var emptyRow=[];
       for(var c=0;c<TET_COLS;c++)emptyRow.push({type:T.EMPTY,color:null});
       tetBoard.unshift(emptyRow);
     }
     tetRender();
-  },200);
-  /* Visual feedback */
-  SND.clear(cl,cl>=4?2:1);
-  var label=_tetLastWasTSpin?'\u{1F300} T-Spin ':'';
-  showFlyScore(label+'+'+pts,cl>=2||_tetLastWasTSpin);
-  if(cl>=4&&_tetLastWasTSpin){showToast('\u{1F300} T-SPIN TETRIS!!');spawnConfetti(document.querySelectorAll('.cell.pop'));}
-  else if(cl>=4){showToast('TETRIS!');spawnConfetti(document.querySelectorAll('.cell.pop'));}
-  else if(_tetLastWasTSpin&&cl>=2){showToast('\u{1F300} T-Spin Double!');spawnConfetti(document.querySelectorAll('.cell.pop'));}
+  },shrinkDelay+160);
+
+  /* ── SCREEN SHAKE ── */
+  if(cl>=4) tetScreenShake(250);
+  else if(cl>=2||_tetCombo>=2) tetScreenShake(150);
+
+  /* ── SCORE POPUP ── */
+  var bRect=document.getElementById('board').getBoundingClientRect();
+  var popY=bRect.top+bRect.height*0.3;
+  var popX=bRect.left+bRect.width/2-30;
+  tetSpawnScorePop(pts,popX,popY,cl>=4||_tetLastWasTSpin);
+
+  /* ── SOUND ── */
+  SND.clear(cl,Math.min(cl+_tetCombo,6));
+
+  /* ── TOAST LABELS ── */
+  if(cl>=4&&_tetLastWasTSpin){showToast('\u{1F300} T-SPIN TETRIS!!');spawnConfetti(document.querySelectorAll('.cell'));}
+  else if(cl>=4){showToast('TETRIS!');spawnConfetti(document.querySelectorAll('.cell'));}
+  else if(_tetLastWasTSpin&&cl>=2){showToast('\u{1F300} T-Spin Double!');}
   else if(_tetLastWasTSpin){showToast('\u{1F300} T-Spin Single!');}
-  else if(cl>=2) showToast('Combo x'+cl+'!');
-  /* Update score display */
+  else if(cl>=3){showToast('Triple!');}
+  else if(cl>=2){showToast('Double!');}
+  if(b2bBonus>1) showToast('\u{1F525} Back-to-Back!');
+  if(_tetCombo>=2) showToast('\u{26A1} Combo x'+(_tetCombo+1)+'!');
+
+  /* ── UPDATE DISPLAY ── */
   var sco=document.getElementById('xpScore');if(sco)sco.textContent=tetScore;
+}
+
+/* ── TETRIS ANIMATION HELPERS ── */
+var _tetCombo=-1; /* consecutive line-clearing placements, starts at -1 per guideline */
+var _tetB2B=false; /* back-to-back: last clear was Tetris or T-Spin */
+
+function tetSpawnTrail(startRow,endRow,col,color){
+  var bEl=document.getElementById('board');if(!bEl)return;
+  var bRect=bEl.getBoundingClientRect();
+  var cs=CS, gap=GAP;
+  var x=bRect.left+col*(cs+gap);
+  var yStart=bRect.top+startRow*(cs+gap);
+  var yEnd=bRect.top+endRow*(cs+gap);
+  var h=yEnd-yStart;
+  if(h<cs)return;
+  var trail=document.createElement('div');
+  trail.className='tet-trail';
+  trail.style.cssText='left:'+x+'px;top:'+yStart+'px;width:'+cs+'px;height:'+h+'px;background:linear-gradient(180deg,transparent,'+color+')';
+  document.body.appendChild(trail);
+  setTimeout(function(){if(trail.parentNode)trail.parentNode.removeChild(trail);},260);
+}
+
+function tetSpawnScorePop(pts,x,y,isSpecial){
+  var el=document.createElement('div');
+  el.className='tet-score-pop';
+  el.style.left=x+'px';el.style.top=y+'px';
+  el.style.fontSize=isSpecial?'24px':'18px';
+  el.style.color=isSpecial?'#ffd700':'#fff';
+  el.textContent='+'+pts;
+  document.body.appendChild(el);
+  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},850);
+}
+
+function tetScreenShake(duration){
+  var bw=document.querySelector('.board-wrap');
+  if(!bw)return;
+  bw.style.animation='tetShake '+duration+'ms ease';
+  setTimeout(function(){bw.style.animation='';},duration+10);
+}
+
+function tetShowLevelUp(lv){
+  var el=document.createElement('div');
+  el.className='tet-levelup';
+  el.style.cssText='left:50%;top:40%;transform:translate(-50%,-50%);font-size:32px;color:#ffd700';
+  el.textContent='LEVEL '+lv+'!';
+  document.body.appendChild(el);
+  setTimeout(function(){el.style.transition='opacity .4s';el.style.opacity='0';},800);
+  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1300);
+}
+
+function tetGameOverCurtain(callback){
+  var bufOff=TET_ROWS-TET_VISIBLE;
+  var delay=0;
+  for(var vr=TET_VISIBLE-1;vr>=0;vr--){
+    (function(r,d){
+      setTimeout(function(){
+        for(var c=0;c<TET_COLS;c++){
+          var el=cellEl(r,c);
+          if(el){el.style.background='#333';el.style.boxShadow='none';el.innerHTML='';el.style.animation='tetGreyWash .15s ease';}
+        }
+      },d);
+    })(vr,delay);
+    delay+=40;
+  }
+  setTimeout(callback,delay+200);
 }
 
 function tetGhostR(){
@@ -8716,9 +8851,11 @@ function tetDoGameOver(){
     tetLevelStars[lvIdx]=stars;
     lsSet('bbTetStars',JSON.stringify(tetLevelStars));
   }
-  /* Pass score to game over system */
+  /* Grey curtain animation, then show game over modal */
   score=tetScore;
-  doGameOver();
+  tetGameOverCurtain(function(){
+    doGameOver();
+  });
 }
 
 function stopTetris(){
