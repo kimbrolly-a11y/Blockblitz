@@ -8939,7 +8939,24 @@ function tetLeaveGame(){
   tetPaused=false;
   document.getElementById('tetPauseOverlay').style.display='none';
   document.getElementById('tetPauseBtn').style.display='none';
-  tetDoGameOver();
+  /* Save progress without triggering full game over — go back to map */
+  var lvIdx=tetLevel-1;
+  if(lvIdx>tetMaxLevel){tetMaxLevel=lvIdx;lsSet('bbTetMaxLv',tetMaxLevel);}
+  /* Save star rating for current level */
+  var goal=tetLevelGoal(tetLevel);
+  var pct=goal>0?tetLevelLinesCleared/goal:0;
+  var stars=pct>=1?3:pct>=0.5?2:pct>0?1:0;
+  if(!tetLevelStars[lvIdx]||stars>tetLevelStars[lvIdx]){
+    tetLevelStars[lvIdx]=stars;
+    lsSet('bbTetStars',JSON.stringify(tetLevelStars));
+  }
+  /* Clean up tetris mode */
+  stopTetris();
+  /* Return to map instead of game over screen */
+  setTimeout(function(){
+    switchMapMode('tetris');
+    openMap();
+  },100);
 }
 
 function tetToggleSound(){
