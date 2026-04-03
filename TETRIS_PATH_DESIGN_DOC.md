@@ -71,7 +71,13 @@ Menu → Select Tetris Path → Level Map
 4. **Lock delay reduction** — Less time to adjust piece once it lands (500ms → 300ms).
 5. **Starting board state** — Higher levels start with some cells pre-filled.
 
-### Recommended Gravity Table
+### Official Guideline Gravity Formula
+```
+seconds_per_row = (0.8 - (level - 1) * 0.007) ^ (level - 1)
+```
+At Level 13: ~1 cell/frame. Level 19+: 20G (instant drop).
+
+### Our Simplified Gravity Table (for mobile-friendly pacing)
 
 | Level | Drop Interval (ms) | Feel |
 |-------|-------------------|------|
@@ -486,16 +492,18 @@ Per-level system (not cumulative):
 ### A. Gravity Progression
 Already implemented — see Section 3 gravity table.
 
-### B. Input Timings
-| Parameter | Value | Notes |
-|-----------|-------|-------|
-| DAS (initial delay) | 170ms | Time before auto-repeat starts |
-| ARR (repeat rate) | 50ms | Time between repeats |
-| Tap threshold | 250ms / 15px | Max time and distance for "tap" |
-| Swipe-down threshold | 30px | Min vertical distance for hard drop |
-| Swipe direction ratio | 1.3× | Vertical must be 1.3× horizontal |
-| Horizontal cell size | 28px | Pixels per column move |
-| Long press | 350ms | Time to trigger hold |
+### B. Input Timings (Official Guideline Values + Mobile Tuning)
+| Parameter | Guideline Value | Our Value | Notes |
+|-----------|----------------|-----------|-------|
+| DAS (initial delay) | 167ms (10 frames) | 170ms | Time before auto-repeat starts |
+| ARR (repeat rate) | 33ms (2 frames) | 50ms | Time between repeats (ours is more forgiving) |
+| ARE (entry delay) | 100ms (6 frames) | 0ms | Delay between lock and next spawn |
+| Line clear delay | 500ms (30 frames) | 300ms | Time for clear animation |
+| Tap threshold | — | 250ms / 15px | Max time and distance for "tap" |
+| Swipe-down threshold | — | 30px | Min vertical distance for hard drop |
+| Swipe direction ratio | — | 1.3x | Vertical must be 1.3x horizontal |
+| Horizontal cell size | — | 28px | Pixels per column move |
+| Long press | — | 350ms | Time to trigger hold |
 
 ### C. Lock Delay
 | Level Range | Lock Delay | Max Resets |
@@ -537,19 +545,45 @@ Already implemented — see Section 3 gravity table.
 | ×4 | "Combo ×4!" | Orange | Base + 5 semitones | Board pulse |
 | ×5+ | "COMBO ×5!!" | Red | Base + 7 semitones | Screen shake + glow |
 
-### G. Scoring Values
-| Action | Points | Notes |
-|--------|--------|-------|
-| Single | 100 × level_mult | 1 line cleared |
-| Double | 300 × level_mult | 2 lines at once |
-| Triple | 500 × level_mult | 3 lines at once |
-| Tetris | 800 × level_mult | 4 lines at once |
-| T-Spin | base × 2.5 | When T-piece rotates into pocket |
-| Soft drop | 1 per cell | Each cell of downward movement |
-| Hard drop | 2 per cell | Each cell piece falls |
-| Combo | +50 × combo_count | Per consecutive clear move |
-| Back-to-back | 1.5× | Consecutive Tetris or T-Spin |
-| level_mult | 1 + (lv-1) × 0.15 | Lv1=1.0, Lv10=2.35, Lv50=8.35 |
+### G. Scoring Values (Based on Official Guideline)
+
+**Line Clears** (× level):
+| Action | Points |
+|--------|--------|
+| Single | 100 |
+| Double | 300 |
+| Triple | 500 |
+| Tetris (4 lines) | 800 |
+
+**T-Spin Clears** (× level):
+| Action | Points |
+|--------|--------|
+| T-Spin (no lines) | 400 |
+| T-Spin Mini (no lines) | 100 |
+| T-Spin Mini Single | 200 |
+| T-Spin Single | 800 |
+| T-Spin Double | 1200 |
+| T-Spin Triple | 1600 |
+
+**Drop Points** (NOT × level):
+| Action | Points |
+|--------|--------|
+| Soft drop | 1 per cell |
+| Hard drop | 2 per cell |
+
+**Back-to-Back Bonus**: +50% to Tetris and T-Spin line clears when consecutive. Broken by Single/Double/Triple (non-T-Spin).
+
+**Combo**: 50 × combo_count × level. Combo starts at -1, increments each consecutive piece that clears lines. Resets to -1 on non-clear.
+
+**Perfect Clear Bonus** (× level):
+| Clear Type | Bonus |
+|-----------|-------|
+| Single | 800 |
+| Double | 1200 |
+| Triple | 1800 |
+| Tetris | 2000 |
+
+**Level multiplier**: level number itself (Lv1=×1, Lv5=×5, etc.)
 
 ---
 
@@ -757,3 +791,67 @@ This document provides the complete blueprint for implementing Tetris Path as a 
 5. **Sound escalation** — Pitch rising with combos creates auditory momentum
 
 The foundation (board, pieces, controls, scoring, progression) is already solid. The next step is **polish, polish, polish**.
+
+---
+
+## Appendix A: Official Guideline Reference Data
+
+### SRS Wall Kick Tables (JLSTZ pieces)
+(+x = right, +y = up)
+```
+0→R: (0,0) (-1,0) (-1,+1) (0,-2) (-1,-2)
+R→0: (0,0) (+1,0) (+1,-1) (0,+2) (+1,+2)
+R→2: (0,0) (+1,0) (+1,-1) (0,+2) (+1,+2)
+2→R: (0,0) (-1,0) (-1,+1) (0,-2) (-1,-2)
+2→L: (0,0) (+1,0) (+1,+1) (0,-2) (+1,-2)
+L→2: (0,0) (-1,0) (-1,-1) (0,+2) (-1,+2)
+L→0: (0,0) (-1,0) (-1,-1) (0,+2) (-1,+2)
+0→L: (0,0) (+1,0) (+1,+1) (0,-2) (+1,-2)
+```
+
+### SRS Wall Kick Tables (I piece)
+```
+0→R: (0,0) (-2,0) (+1,0) (-2,-1) (+1,+2)
+R→0: (0,0) (+2,0) (-1,0) (+2,+1) (-1,-2)
+R→2: (0,0) (-1,0) (+2,0) (-1,+2) (+2,-1)
+2→R: (0,0) (+1,0) (-2,0) (+1,-2) (-2,+1)
+2→L: (0,0) (+2,0) (-1,0) (+2,+1) (-1,-2)
+L→2: (0,0) (-2,0) (+1,0) (-2,-1) (+1,+2)
+L→0: (0,0) (+1,0) (-2,0) (+1,-2) (-2,+1)
+0→L: (0,0) (-1,0) (+2,0) (-1,+2) (+2,-1)
+```
+
+### T-Spin Detection Rules
+1. Last successful movement was a **rotation**
+2. Locked piece is a **T**
+3. **3 of 4 diagonal corners** of T's center cell are occupied
+
+**T-Spin Mini vs Proper:**
+- Check 2 cells on the **pointing side** (flat side opposite stem)
+- Both pointing-side corners occupied → **Proper T-Spin**
+- Only one → **T-Spin Mini**
+- Exception: Test 5 kick → automatically upgraded to **Proper T-Spin**
+
+### 7-Bag Guarantees
+- Max drought between same piece: **12 pieces**
+- Max consecutive S+Z pieces: **4**
+- No piece appears 3× in a row (impossible by design)
+- Some implementations exclude S, Z, O from first piece
+
+### Official Gravity Formula
+```
+seconds_per_cell = (0.8 - (level - 1) * 0.007) ^ (level - 1)
+```
+Level 1 = 1.0s, Level 10 = 0.069s, Level 13 = ~1 cell/frame, Level 19+ = 20G
+
+### Sources
+- tetris.wiki/Tetris_Guideline
+- tetris.wiki/Super_Rotation_System
+- tetris.wiki/Scoring
+- tetris.wiki/T-Spin
+- tetris.wiki/Random_Generator
+- tetris.wiki/Lock_delay
+- tetris.wiki/ARE
+- tetris.wiki/DAS
+- harddrop.com/wiki/SRS
+- harddrop.com/wiki/Tetris_Worlds
