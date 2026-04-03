@@ -1656,9 +1656,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
       <button id="goReviveBtn" onclick="BB.reviveWithAd()" style="flex:1;font-family:'Fredoka One';font-size:13px;padding:10px 6px;border:none;border-radius:12px;color:#fff;cursor:pointer;background:linear-gradient(180deg,#7c4dff,#512da8);box-shadow:0 4px 0 #311b92,0 6px 16px rgba(124,77,255,0.4)">🎬 Revive<br><span style="font-size:10px;opacity:0.7">Watch Ad</span></button>
       <button id="goDoubleBtn" onclick="BB.doubleCoinsWithAd()" style="flex:1;font-family:'Fredoka One';font-size:13px;padding:10px 6px;border:none;border-radius:12px;color:#fff;cursor:pointer;background:linear-gradient(180deg,#ff8f00,#e65100);box-shadow:0 4px 0 #bf360c,0 6px 16px rgba(255,143,0,0.4)">🪙 x2 Coins<br><span style="font-size:10px;opacity:0.7">Watch Ad</span></button>
     </div>
-    <img src="Assets/Buttons/Retry.png" onclick="BB.retry()" style="max-width:220px;height:auto;cursor:pointer;display:block;margin:0 auto 10px;-webkit-tap-highlight-color:transparent" alt="Retry">
+    <button class="btn-retry" onclick="BB.retry()" style="font-size:22px;padding:16px 0;width:100%;margin-bottom:10px;background:linear-gradient(180deg,#00c853,#009624);box-shadow:0 6px 0 #007934,0 8px 24px rgba(0,200,100,0.4)">▶ PLAY AGAIN</button>
     <div class="btn-row">
-      <img src="Assets/Buttons/menu_btn.png" onclick="BB.goMenu()" style="max-width:130px;height:auto;cursor:pointer;-webkit-tap-highlight-color:transparent" alt="Menu">
+      <button class="btn-half btn-menu" onclick="BB.goMenu()">🏠 Menu</button>
       <img src="Assets/Buttons/shop_btn.png?v=2" onclick="BB.openShop()" style="max-width:50px;height:auto;cursor:pointer;-webkit-tap-highlight-color:transparent" alt="Shop">
     </div>
   </div>
@@ -9186,8 +9186,10 @@ return{
     document.getElementById('goModal').classList.remove('on');
     /* Check if last game was Tetris */
     if(_wasTetrisOnGameOver){
+      _wasTetrisOnGameOver=false;
+      tetRestoreUI(); /* restore puzzle UI first so startTetris can re-hide it */
       var lv=_tetLevelOnGameOver||0;
-      setTimeout(function(){tetStartAtLevel(lv);},100);
+      setTimeout(function(){tetStartAtLevel(lv);},150);
       return;
     }
     var savedAdv = isAdventureMode;
