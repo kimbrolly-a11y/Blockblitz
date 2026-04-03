@@ -5815,6 +5815,16 @@ function doGameOver(){
   document.getElementById('goScore').textContent  = score;
   document.getElementById('goStars').textContent  = totalStars-starsLeft;
   document.getElementById('goPentas').textContent = totalPentas-pentasLeft;
+  /* Hide gems row for Tetris — not applicable */
+  var gemSub=document.getElementById('goSub');
+  var gemRow=document.querySelector('#goModal .modal-gem-row');
+  if(_wasTetris){
+    if(gemSub) gemSub.style.display='none';
+    if(gemRow) gemRow.style.display='none';
+  } else {
+    if(gemSub) gemSub.style.display='';
+    if(gemRow) gemRow.style.display='';
+  }
 
   /* ── Coin count-up animation ── */
   var goCoinEl = document.getElementById('goCoinCount');
@@ -5857,12 +5867,14 @@ function doGameOver(){
   var revBtn=document.getElementById('goReviveBtn');
   var dblBtn=document.getElementById('goDoubleBtn');
   if(_wasTetris){
-    /* No revive for Tetris — board is full, revive makes no sense */
-    if(adBtns) adBtns.style.display='none';
+    /* Tetris: hide revive (board full), keep double coins */
+    if(adBtns) adBtns.style.display=isPro?'none':'flex';
+    if(revBtn) revBtn.style.display='none';
+    if(dblBtn){ dblBtn.style.display=''; dblBtn.disabled=false; dblBtn.style.opacity='1'; dblBtn.style.flex='1'; }
   } else {
     if(adBtns) adBtns.style.display=isPro?'none':'flex';
-    if(revBtn){ revBtn.disabled=_reviveUsedThisGame; revBtn.style.opacity=_reviveUsedThisGame?'0.4':'1'; }
-    if(dblBtn){ dblBtn.disabled=false; dblBtn.style.opacity='1'; }
+    if(revBtn){ revBtn.style.display=''; revBtn.disabled=_reviveUsedThisGame; revBtn.style.opacity=_reviveUsedThisGame?'0.4':'1'; }
+    if(dblBtn){ dblBtn.style.display=''; dblBtn.disabled=false; dblBtn.style.opacity='1'; }
   }
 
   document.getElementById('goModal').classList.add('on');
