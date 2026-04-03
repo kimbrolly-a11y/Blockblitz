@@ -1504,18 +1504,78 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
   </button>
 </div>
 
-<!-- TETRIS TOUCH TUTORIAL (shown once) -->
-<div id="tetTutorial" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;flex-direction:column;gap:16px;color:#fff;font-family:'Fredoka One',sans-serif;text-align:center">
-  <div style="font-size:22px;color:#ffd700;margin-bottom:8px">How to Play</div>
-  <div style="font-size:16px">🔄 <b>TAP</b> to rotate</div>
-  <div style="font-size:16px">← → <b>SWIPE</b> to move</div>
-  <div style="font-size:16px">⬇ <b>SWIPE DOWN</b> to drop</div>
-  <div style="font-size:16px">✋ <b>HOLD</b> long press</div>
-  <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:12px">Tap anywhere to start</div>
+<!-- TETRIS HUD BAR (replaces standard top bar during Tetris) -->
+<div id="tetHud" style="display:none;width:100%;padding:6px 10px;box-sizing:border-box;flex-shrink:0">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+    <!-- Pause button -->
+    <button id="tetPauseBtn" onclick="BB.tetPause()" style="width:38px;height:38px;background:rgba(30,40,80,0.85);border:2px solid rgba(100,140,255,0.4);border-radius:10px;color:#fff;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0">⏸</button>
+    <!-- Moves counter -->
+    <div style="text-align:center;min-width:60px">
+      <div style="font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px">MOVES</div>
+      <div id="tetMoveCount" style="font-family:'Fredoka One';font-size:20px;color:#fff">0</div>
+    </div>
+    <!-- Target -->
+    <div style="flex:1;text-align:center;background:rgba(20,30,80,0.7);border:1.5px solid rgba(100,140,255,0.3);border-radius:10px;padding:4px 8px">
+      <div style="font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px">TARGET</div>
+      <div id="tetTargetLabel" style="font-family:'Fredoka One';font-size:14px;color:#64b5f6">CLEAR <span id="tetTargetNum">5</span> LINES</div>
+    </div>
+    <!-- Next preview -->
+    <div style="text-align:center;min-width:50px">
+      <div style="font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px">NEXT</div>
+      <div id="tetNextGrid" style="display:inline-grid;gap:1px;margin-top:2px"></div>
+    </div>
+  </div>
+  <!-- Progress bar -->
+  <div style="margin-top:4px;height:4px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden">
+    <div id="tetProgressFill" style="height:100%;width:0%;background:linear-gradient(90deg,#00e5ff,#64b5f6);border-radius:2px;transition:width .3s ease"></div>
+  </div>
 </div>
 
-<!-- TETRIS PAUSE BUTTON (floating over board) -->
-<button id="tetPauseBtn" onclick="BB.tetPause()" style="display:none;position:fixed;top:90px;left:12px;z-index:200;width:44px;height:44px;background:rgba(30,40,80,0.85);border:2px solid rgba(100,140,255,0.4);border-radius:12px;color:#fff;font-size:20px;cursor:pointer;-webkit-tap-highlight-color:transparent;backdrop-filter:blur(4px)">⏸</button>
+<!-- TETRIS HOLD PREVIEW (left side of board) -->
+<div id="tetHoldPreview" style="display:none;position:absolute;top:8px;left:8px;text-align:center;z-index:50">
+  <div class="tet-hold-label">HOLD</div>
+  <div id="tetHoldGrid" style="display:inline-grid;gap:1px"></div>
+</div>
+
+<!-- TETRIS TUTORIAL (multi-step, shown on first play) -->
+<div id="tetTutorial" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:999;background:rgba(0,0,20,0.88);backdrop-filter:blur(4px)">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:88%;max-width:340px;text-align:center;color:#fff;font-family:'Fredoka One',sans-serif">
+    <div style="font-size:24px;color:#ffd700;margin-bottom:20px;text-shadow:0 0 20px rgba(255,215,0,0.5)">HOW TO PLAY</div>
+    <!-- Step indicators -->
+    <div id="tetTutSteps" style="display:flex;justify-content:center;gap:6px;margin-bottom:20px">
+      <div class="tut-dot active" style="width:8px;height:8px;border-radius:50%;background:#64b5f6"></div>
+      <div class="tut-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2)"></div>
+      <div class="tut-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2)"></div>
+      <div class="tut-dot" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2)"></div>
+    </div>
+    <!-- Tutorial content (swapped per step) -->
+    <div id="tetTutContent" style="background:rgba(20,30,80,0.8);border:2px solid rgba(100,140,255,0.3);border-radius:18px;padding:28px 20px;margin-bottom:16px;min-height:160px">
+      <div style="font-size:48px;margin-bottom:12px">🔄</div>
+      <div style="font-size:18px;color:#64b5f6;margin-bottom:6px">TAP TO ROTATE</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6)">Tap anywhere on the board to rotate the falling piece clockwise</div>
+    </div>
+    <!-- Next / Start button -->
+    <button id="tetTutNextBtn" onclick="BB.tetTutNext()" style="width:100%;padding:14px;font-family:'Fredoka One';font-size:16px;color:#fff;background:linear-gradient(180deg,#00acc1,#00838f);border:none;border-radius:14px;cursor:pointer;box-shadow:0 4px 0 #006064,0 6px 16px rgba(0,172,193,0.3)">NEXT</button>
+  </div>
+</div>
+
+<!-- TETRIS LEVEL CLEAR MODAL -->
+<div id="tetLevelClear" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:997;background:rgba(0,0,20,0.85);backdrop-filter:blur(6px)">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);text-align:center;width:90%;max-width:360px">
+    <!-- Well Done text -->
+    <div style="font-family:'Fredoka One';font-size:36px;color:#ffd700;text-shadow:0 0 30px rgba(255,215,0,0.6),0 4px 0 #b8860b,0 6px 20px rgba(0,0,0,0.5);margin-bottom:16px;animation:tetLevelUp .6s ease-out">Well done!</div>
+    <!-- Coin reward with glow -->
+    <div style="position:relative;margin:20px auto;width:120px;height:120px">
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;background:radial-gradient(circle,rgba(0,200,255,0.4) 0%,transparent 70%);animation:tetLevelUp .8s ease-out"></div>
+      <div style="position:relative;z-index:2;font-size:48px;line-height:120px">🪙</div>
+      <div id="tetClearCoins" style="position:absolute;bottom:5px;left:50%;transform:translateX(-50%);font-family:'Fredoka One';font-size:22px;color:#ffd700;text-shadow:0 2px 6px rgba(0,0,0,0.5);z-index:3">+10</div>
+    </div>
+    <!-- Level info -->
+    <div id="tetClearInfo" style="font-family:'Fredoka One';font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:24px">Level 1 Complete</div>
+    <!-- Claim button -->
+    <button onclick="BB.tetClaimClear()" style="width:80%;max-width:280px;padding:16px;font-family:'Fredoka One';font-size:20px;color:#fff;background:linear-gradient(180deg,#00c853,#009624);border:3px solid rgba(100,255,100,0.3);border-radius:16px;cursor:pointer;box-shadow:0 6px 0 #007934,0 8px 24px rgba(0,200,100,0.4);-webkit-tap-highlight-color:transparent;letter-spacing:2px">CLAIM!</button>
+  </div>
+</div>
 
 <!-- TETRIS PAUSE/SETTINGS OVERLAY -->
 <div id="tetPauseOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;z-index:998;background:rgba(0,0,20,0.8);backdrop-filter:blur(6px)">
@@ -4219,9 +4279,11 @@ function setCS(){
     var trayPad  = h<481? 3: h<601? 5: h<701? 7:  9;
     trayH = slotMin + trayPad + 2; /* +2 for top border */
   }
-  /* Tetris mode: tray/power-ups are hidden, measure touch controls instead */
+  /* Tetris mode: standard top bar hidden, use tetHud height instead */
   if(isTetrisMode){
-    puH=0; taH=0; trayH=8; /* gesture controls — no button bar */
+    var tetHudEl=document.getElementById('tetHud');
+    topH=tetHudEl?tetHudEl.offsetHeight||56:56;
+    xpH=0; puH=0; taH=0; trayH=0;
   }
   /* Board-wrap padding varies by breakpoint */
   var bwPad = h<481?6: h<601?8: h<701?12: 16;
@@ -8295,14 +8357,17 @@ function startTetris(){
   /* Display board is 22x10 */
   board=[];
   for(var r=0;r<TET_VISIBLE;r++){board.push([]);for(var c=0;c<TET_COLS;c++) board[r].push({type:T.EMPTY,color:null});}
+  tetMoveCount=0;
   /* Hide puzzle UI, show tetris UI */
   var tray=document.getElementById('tray');if(tray)tray.style.display='none';
   var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='none';
   var pu=document.querySelector('.pu-bar');if(pu)pu.style.display='none';
   var shuf=document.getElementById('shuffleBtn');if(shuf)shuf.style.display='none';
-  var np=document.getElementById('tetNextPreview');if(np)np.style.display='block';
+  /* Hide standard top bar, show Tetris HUD */
+  var topBar=document.querySelector('.top-bar');if(topBar)topBar.style.display='none';
+  var xpWrap=document.getElementById('xpBarWrap');if(xpWrap)xpWrap.style.display='none';
+  var tetHud=document.getElementById('tetHud');if(tetHud)tetHud.style.display='block';
   var hp=document.getElementById('tetHoldPreview');if(hp)hp.style.display='block';
-  var pb=document.getElementById('tetPauseBtn');if(pb)pb.style.display='block';
   tetPaused=false;
   _tetSoundEnabled=lsGet('bb_tetSound','1')==='1';
   _tetVibEnabled=lsGet('bb_tetVib','1')==='1';
@@ -8449,6 +8514,8 @@ function tetDoLock(){
       }
   tetLocking=false; clearTimeout(tetLockTimer);
   SND.place(); haptic(10);
+  tetMoveCount++;
+  tetUpdateHud();
   /* Lock squish animation on placed cells */
   var bufOff=TET_ROWS-TET_VISIBLE;
   for(var _dr=0;_dr<shape.length;_dr++)
@@ -8606,22 +8673,18 @@ function tetCheckLines(){
   tetLines+=cl;
   tetLevelLinesCleared+=cl;
 
-  /* ── LEVEL UP ── */
+  /* ── LEVEL CLEAR CHECK ── */
   var goal=tetLevelGoal(tetLevel);
+  var _tetLevelCleared=false;
   if(tetLevelLinesCleared>=goal && tetLevel<100){
-    tetLevelLinesCleared=0;
-    tetLevel++;
-    clearInterval(tetGravityId);
-    tetGravityId=setInterval(tetTick,tetGravityMs());
-    tetShowLevelUp(tetLevel);
-    SND.stageWin();
-    updateGemUI();
-    var garbage=tetGarbageCount(tetLevel);
-    if(garbage>0){
-      setTimeout(function(){
-        tetSpawnGarbage(garbage);
-        showToast('\u{26A0}\u{FE0F} Garbage rows!');
-      },600);
+    _tetLevelCleared=true;
+    /* Save progress */
+    var lvIdx=tetLevel-1;
+    if(lvIdx>tetMaxLevel){tetMaxLevel=lvIdx;lsSet('bbTetMaxLv',tetMaxLevel);}
+    var stars=3; /* completed = 3 stars */
+    if(!tetLevelStars[lvIdx]||stars>tetLevelStars[lvIdx]){
+      tetLevelStars[lvIdx]=stars;
+      lsSet('bbTetStars',JSON.stringify(tetLevelStars));
     }
   }
 
@@ -8669,9 +8732,24 @@ function tetCheckLines(){
       tetBoard.unshift(emptyRow);
     }
     tetRender();
-    tetSpawnPiece(); /* spawn AFTER board is correct — fixes ghost/piece display bugs */
-    /* Restart gravity timer */
-    tetGravityId=setInterval(tetTick,tetGravityMs());
+    if(_tetLevelCleared){
+      /* Show "Well Done!" modal — game pauses until CLAIM */
+      tetUpdateHud();
+      SND.stageWin();
+      var coinReward=5+tetLevel*2; /* 7 coins at lv1, 9 at lv2, etc */
+      var clearModal=document.getElementById('tetLevelClear');
+      var clearCoins=document.getElementById('tetClearCoins');
+      var clearInfo=document.getElementById('tetClearInfo');
+      if(clearCoins)clearCoins.textContent='+'+coinReward;
+      if(clearInfo)clearInfo.textContent='Level '+tetLevel+' Complete | '+tetMoveCount+' moves';
+      if(clearModal)clearModal.style.display='block';
+      /* Store reward for claim */
+      clearModal.dataset.coins=coinReward;
+      clearModal.dataset.nextLevel=tetLevel+1;
+    } else {
+      tetSpawnPiece();
+      tetGravityId=setInterval(tetTick,tetGravityMs());
+    }
   },shrinkDelay+160);
 
   /* ── SCREEN SHAKE ── */
@@ -8915,6 +8993,77 @@ function tetDoGameOver(){
 var tetPaused=false;
 var _tetSoundEnabled=true;
 var _tetVibEnabled=true;
+var tetMoveCount=0; /* pieces placed this game */
+var _tetTutStep=0;
+
+/* ── TETRIS TUTORIAL (multi-step) ── */
+var TET_TUT_STEPS=[
+  {icon:'🔄',title:'TAP TO ROTATE',desc:'Tap anywhere on the board to rotate the falling piece clockwise'},
+  {icon:'👆',title:'SWIPE TO MOVE',desc:'Swipe left or right on the board to move the piece horizontally'},
+  {icon:'⬇',title:'SWIPE DOWN TO DROP',desc:'Swipe down to instantly drop the piece to the bottom'},
+  {icon:'✋',title:'LONG PRESS TO HOLD',desc:'Hold your finger down for a moment to save the current piece for later'}
+];
+
+function tetTutNext(){
+  _tetTutStep++;
+  if(_tetTutStep>=TET_TUT_STEPS.length){
+    /* Tutorial complete */
+    document.getElementById('tetTutorial').style.display='none';
+    lsSet('bb_tetTutorialSeen','1');
+    return;
+  }
+  var s=TET_TUT_STEPS[_tetTutStep];
+  var content=document.getElementById('tetTutContent');
+  if(content) content.innerHTML='<div style="font-size:48px;margin-bottom:12px">'+s.icon+'</div><div style="font-size:18px;color:#64b5f6;margin-bottom:6px">'+s.title+'</div><div style="font-size:13px;color:rgba(255,255,255,0.6)">'+s.desc+'</div>';
+  /* Update dots */
+  var dots=document.querySelectorAll('#tetTutSteps .tut-dot');
+  dots.forEach(function(d,i){d.style.background=i===_tetTutStep?'#64b5f6':'rgba(255,255,255,0.2)';});
+  /* Last step = "START" button */
+  var btn=document.getElementById('tetTutNextBtn');
+  if(btn) btn.textContent=_tetTutStep>=TET_TUT_STEPS.length-1?'START!':'NEXT';
+}
+
+/* ── TETRIS LEVEL CLEAR — CLAIM ── */
+function tetClaimClear(){
+  var modal=document.getElementById('tetLevelClear');
+  if(!modal)return;
+  var coinReward=parseInt(modal.dataset.coins)||10;
+  var nextLv=parseInt(modal.dataset.nextLevel)||2;
+  /* Award coins */
+  awardCoins(coinReward);
+  showToast('+'+coinReward+' coins!');
+  /* Hide modal */
+  modal.style.display='none';
+  /* Advance to next level */
+  tetLevelLinesCleared=0;
+  tetLevel=nextLv;
+  tetMoveCount=0;
+  updateGemUI();
+  tetUpdateHud();
+  /* Clear board for fresh start */
+  for(var r=0;r<TET_ROWS;r++) for(var c=0;c<TET_COLS;c++) tetBoard[r][c]={type:T.EMPTY,color:null};
+  /* Spawn garbage if applicable */
+  var garbage=tetGarbageCount(tetLevel);
+  if(garbage>0){
+    tetSpawnGarbage(garbage);
+    showToast('\u{26A0}\u{FE0F} Garbage rows!');
+  }
+  tetRender();
+  tetSpawnPiece();
+  tetGravityId=setInterval(tetTick,tetGravityMs());
+}
+
+/* ── TETRIS HUD UPDATE ── */
+function tetUpdateHud(){
+  var mc=document.getElementById('tetMoveCount');if(mc)mc.textContent=tetMoveCount;
+  var tn=document.getElementById('tetTargetNum');if(tn)tn.textContent=tetLevelGoal(tetLevel);
+  var pf=document.getElementById('tetProgressFill');
+  if(pf){
+    var goal=tetLevelGoal(tetLevel);
+    var pct=goal>0?Math.min(100,Math.round((tetLevelLinesCleared/goal)*100)):0;
+    pf.style.width=pct+'%';
+  }
+}
 
 function tetPause(){
   if(!isTetrisMode||tetGameOver||tetPaused)return;
@@ -9002,9 +9151,12 @@ function stopTetris(){
   }
   var np=document.getElementById('tetNextPreview');if(np)np.style.display='none';
   var hpv=document.getElementById('tetHoldPreview');if(hpv)hpv.style.display='none';
-  var pb=document.getElementById('tetPauseBtn');if(pb)pb.style.display='none';
   var po=document.getElementById('tetPauseOverlay');if(po)po.style.display='none';
   tetPaused=false;
+  /* Restore standard UI */
+  var topBar=document.querySelector('.top-bar');if(topBar)topBar.style.display='';
+  var xpWrap=document.getElementById('xpBarWrap');if(xpWrap)xpWrap.style.display='';
+  var tetHud=document.getElementById('tetHud');if(tetHud)tetHud.style.display='none';
   var tray=document.getElementById('tray');if(tray)tray.style.display='';
   var ta=document.querySelector('.tray-actions');if(ta)ta.style.display='';
   var pu=document.querySelector('.pu-bar');if(pu)pu.style.display='';
@@ -9097,7 +9249,7 @@ return{
   doSpin:            doSpin,
   startTetris:startTetris,tetStartAtLevel:tetStartAtLevel,
   tetLeft:tetMoveLeft,tetRight:tetMoveRight,tetDown:tetMoveDown,tetDrop:tetHardDrop,tetRotate:tetRotate,tetHold:tetHoldPiece,
-  tetPause:tetPause,tetResume:tetResume,tetLeaveGame:tetLeaveGame,tetToggleSound:tetToggleSound,tetToggleVibration:tetToggleVibration,tetUpdateSettings:tetUpdateSettings,
+  tetPause:tetPause,tetResume:tetResume,tetLeaveGame:tetLeaveGame,tetToggleSound:tetToggleSound,tetToggleVibration:tetToggleVibration,tetUpdateSettings:tetUpdateSettings,tetClaimClear:tetClaimClear,tetTutNext:tetTutNext,
   shufflePieces:     shufflePieces,
 };
 
