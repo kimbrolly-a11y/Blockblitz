@@ -8138,7 +8138,7 @@ function tetTouchStart(e){
 }
 
 function tetTouchMove(e){
-  if(!_tetTouchState||!isTetrisMode||tetGameOver)return;
+  if(!_tetTouchState||!isTetrisMode||tetGameOver||tetPaused||!tetPiece)return;
   e.preventDefault();
   var t=e.touches[0];
   var dx=t.clientX-_tetTouchState.x0;
@@ -8169,7 +8169,7 @@ function tetTouchMove(e){
 }
 
 function tetTouchEnd(e){
-  if(!_tetTouchState)return;
+  if(!_tetTouchState||tetPaused||!tetPiece)return;
   clearTimeout(_tetTouchState.longPressTimer);
   var dt=Date.now()-_tetTouchState.t0;
   var dy=_tetTouchState.y-_tetTouchState.y0;
@@ -8351,6 +8351,7 @@ function startTetris(){
   isTetrisMode=true; isLeagueMode=false; isAdventureMode=false; isDailyChallenge=false;
   tetGameOver=false; gameEnded=false;
   tetScore=0; tetLevel=1; tetLines=0; tetLevelLinesCleared=0; _tetCombo=-1; _tetB2B=false; _tetBag=[];
+  _tetLastAction=''; _tetLastWasTSpin=false; tetPaused=false;
   _savedROWS=ROWS; _savedCOLS=COLS;
   ROWS=TET_VISIBLE; COLS=TET_COLS; /* Display grid is 14x10 (2 buffer rows hidden) */
   tetHold=null; tetHoldUsed=false;
@@ -8738,6 +8739,7 @@ function tetCheckLines(){
     tetRender();
     if(_tetLevelCleared){
       /* Show "Well Done!" modal — game pauses until CLAIM */
+      tetPaused=true; /* block all input during modal */
       tetUpdateHud();
       SND.stageWin();
       var coinReward=5+tetLevel*2; /* 7 coins at lv1, 9 at lv2, etc */
@@ -8954,11 +8956,15 @@ function tetRenderNext(){
 function tetStartAtLevel(lv){
   /* Start Tetris at a specific level from the map */
   startTetris();
-  /* Set level and speed */
+  /* Override level and speed (startTetris resets to lv1) */
   tetLevel=lv+1;
-  tetLines=lv*10; /* lines already "cleared" to reach this level */
+  tetLines=0; /* fresh start — per-level goals, not cumulative */
+  tetLevelLinesCleared=0;
+  tetMoveCount=0;
   clearInterval(tetGravityId);
   tetGravityId=setInterval(tetTick,tetGravityMs());
+  updateGemUI();
+  tetUpdateHud();
   tetRender();
 }
 
@@ -9036,12 +9042,19 @@ function tetClaimClear(){
   /* Award coins */
   awardCoins(coinReward);
   showToast('+'+coinReward+' coins!');
-  /* Hide modal */
+  /* Hide modal, unpause */
   modal.style.display='none';
+  tetPaused=false;
   /* Advance to next level */
   tetLevelLinesCleared=0;
   tetLevel=nextLv;
   tetMoveCount=0;
+  _tetCombo=-1; _tetB2B=false;
+  _tetLastAction=''; _tetLastWasTSpin=false;
+  /* Reset hold piece for fresh level */
+  tetHold=null; tetHoldUsed=false; tetRenderHold();
+  /* Reset bag for fresh piece distribution */
+  _tetBag=[];
   updateGemUI();
   tetUpdateHud();
   /* Clear board for fresh start */
@@ -9054,6 +9067,7 @@ function tetClaimClear(){
   }
   tetRender();
   tetSpawnPiece();
+  clearInterval(tetGravityId);
   tetGravityId=setInterval(tetTick,tetGravityMs());
 }
 
