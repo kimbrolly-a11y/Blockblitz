@@ -9095,17 +9095,27 @@ function tetClaimClear(){
   tetGravityId=setInterval(tetTick,tetGravityMs());
 }
 
-/* ── TETRIS STAGE BACKDROP — placeholder for custom border assets ── */
-var TET_BACKDROPS=[]; /* Add backdrop image paths here when assets are ready */
+/* ── TETRIS STAGE BORDERS ── */
+var TET_BACKDROPS=[
+  'Assets/BoardSkins/Crystal/bg_stage01_crystal_cavern.png'
+]; /* Add more stage border images here */
 var TET_STAGE_NAMES=[
   'Crystal Cavern','Mossy Ruins','Ember Forge','Storm Reef','Frost Summit',
   'Phantom Library','Neon Citadel','Void Rift','Celestial Throne','Blitz Core'
 ];
 
 function tetUpdateBackdrop(level){
-  /* No backdrop images loaded — show stage name only */
-  var idx=((level-1)%TET_STAGE_NAMES.length);
-  var name=TET_STAGE_NAMES[idx];
+  var bw=document.querySelector('.board-wrap');
+  if(bw && TET_BACKDROPS.length>0){
+    var idx=((level-1)%TET_BACKDROPS.length);
+    var img=TET_BACKDROPS[idx];
+    bw.style.background="url('"+img+"') center center / 100% 100% no-repeat";
+    bw.style.border='none';
+    bw.style.padding='12px';
+    bw.style.boxShadow='0 0 20px rgba(0,200,255,0.3),0 8px 40px rgba(0,0,0,0.5)';
+  }
+  var idx2=((level-1)%TET_STAGE_NAMES.length);
+  var name=TET_STAGE_NAMES[idx2];
   if(name) showToast(name);
 }
 
