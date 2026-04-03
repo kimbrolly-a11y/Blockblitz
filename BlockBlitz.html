@@ -8428,8 +8428,7 @@ function tetDoLock(){
     });
     if(filled>=3) _tetLastWasTSpin=true;
   }
-  tetCheckLines();
-  tetSpawnPiece();
+  tetCheckLines(); /* tetSpawnPiece is called INSIDE tetCheckLines after animation completes */
 }
 
 function tetMoveLeft(){
@@ -8535,6 +8534,7 @@ function tetCheckLines(){
   if(!fullRows.length){
     _tetCombo=-1; /* reset combo on non-clear */
     if(_tetLastWasTSpin){ tetScore+=400*tetLevel; showToast('\u{1F300} T-Spin!'); tetSpawnScorePop(400*tetLevel,window.innerWidth/2-30,window.innerHeight*0.35,true); }
+    tetSpawnPiece(); /* no lines cleared — spawn next piece immediately */
     return;
   }
   var cl=fullRows.length;
@@ -8582,6 +8582,10 @@ function tetCheckLines(){
     }
   }
 
+  /* Pause gravity during animation — prevent tetTick from running on a clearing board */
+  tetPiece=null; /* no active piece during clear animation */
+  clearInterval(tetGravityId);
+
   /* ── HIT-PAUSE + HAPTICS ── */
   hitPause(cl>=4?100:cl>=2?70:50);
   haptic(cl>=4?40:cl>=2?25:12);
@@ -8612,8 +8616,9 @@ function tetCheckLines(){
     },shrinkDelay);
   });
 
-  /* Phase 3: Collapse board (after shrink) */
+  /* Phase 3: Collapse board + spawn next piece (after shrink completes) */
   setTimeout(function(){
+    if(tetGameOver)return;
     for(var i=fullRows.length-1;i>=0;i--) tetBoard.splice(fullRows[i],1);
     while(tetBoard.length<TET_ROWS){
       var emptyRow=[];
@@ -8621,6 +8626,9 @@ function tetCheckLines(){
       tetBoard.unshift(emptyRow);
     }
     tetRender();
+    tetSpawnPiece(); /* spawn AFTER board is correct — fixes ghost/piece display bugs */
+    /* Restart gravity timer */
+    tetGravityId=setInterval(tetTick,tetGravityMs());
   },shrinkDelay+160);
 
   /* ── SCREEN SHAKE ── */
@@ -8733,6 +8741,8 @@ function tetRender(){
     var br=vr+bufOff; /* board row */
     for(var c=0;c<TET_COLS;c++){
       var el=cellEl(vr,c);if(!el)continue;
+      el.style.animation=''; /* clear any lingering line-clear animations */
+      el.style.transform=''; el.style.opacity='';
       var src=tetBoard[br][c];
       var isGhost=false,isActive=false;
       /* Check if this cell is part of ghost piece */
