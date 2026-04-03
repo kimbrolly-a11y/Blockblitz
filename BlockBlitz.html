@@ -1511,8 +1511,8 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
     <button id="tetPauseBtn" onclick="BB.tetPause()" style="width:38px;height:38px;background:rgba(30,40,80,0.85);border:2px solid rgba(100,140,255,0.4);border-radius:10px;color:#fff;font-size:16px;cursor:pointer;-webkit-tap-highlight-color:transparent;flex-shrink:0">⏸</button>
     <!-- Moves counter -->
     <div style="text-align:center;min-width:60px">
-      <div style="font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px">MOVES</div>
-      <div id="tetMoveCount" style="font-family:'Fredoka One';font-size:20px;color:#fff">0</div>
+      <div style="font-family:'Fredoka One';font-size:9px;color:rgba(255,255,255,0.5);letter-spacing:1px">SCORE</div>
+      <div id="tetHudScore" style="font-family:'Fredoka One';font-size:18px;color:#ffd700">0</div>
     </div>
     <!-- Target -->
     <div style="flex:1;text-align:center;background:rgba(20,30,80,0.7);border:1.5px solid rgba(100,140,255,0.3);border-radius:10px;padding:4px 8px">
@@ -8747,7 +8747,7 @@ function tetCheckLines(){
       var clearCoins=document.getElementById('tetClearCoins');
       var clearInfo=document.getElementById('tetClearInfo');
       if(clearCoins)clearCoins.textContent='+'+coinReward;
-      if(clearInfo)clearInfo.textContent='Level '+tetLevel+' Complete | '+tetMoveCount+' moves';
+      if(clearInfo)clearInfo.textContent='Level '+tetLevel+' Complete | '+tetScore.toLocaleString()+' pts';
       if(clearModal)clearModal.style.display='block';
       /* Store reward for claim */
       clearModal.dataset.coins=coinReward;
@@ -9073,7 +9073,7 @@ function tetClaimClear(){
 
 /* ── TETRIS HUD UPDATE ── */
 function tetUpdateHud(){
-  var mc=document.getElementById('tetMoveCount');if(mc)mc.textContent=tetMoveCount;
+  var sc=document.getElementById('tetHudScore');if(sc)sc.textContent=tetScore.toLocaleString();
   var goal=tetLevelGoal(tetLevel);
   var remaining=Math.max(0, goal - tetLevelLinesCleared);
   var tn=document.getElementById('tetTargetNum');if(tn)tn.textContent=remaining;
