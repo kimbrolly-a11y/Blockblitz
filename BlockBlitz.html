@@ -1852,6 +1852,9 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 var BB = (function(){
 'use strict';
 
+/* ══ DEV MODE — set to true to unlock all stages for testing ══ */
+var DEV_UNLOCK_ALL = true; /* TODO: set to false before release */
+
 /* ══ WORLD LEADERBOARD — Supabase config ══
    1. Create a free project at supabase.com
    2. Run supabase-setup.sql in the SQL Editor
@@ -7487,7 +7490,7 @@ function buildMapModal(mode){
       sec.appendChild(wtitle);
       var grid=document.createElement('div');grid.className='map-grid';
       for(var i=w.levels[0];i<=w.levels[1];i++){
-        var unlocked=i<=tetMaxLevel;
+        var unlocked=DEV_UNLOCK_ALL||i<=tetMaxLevel;
         var isCurrent=i===tetLevel-1&&isTetrisMode;
         var stars=tetLevelStars[i]||0;
         var item=document.createElement('div');item.className='map-lvl';
@@ -7577,7 +7580,7 @@ function buildMapModal(mode){
     grid.className='map-grid';
     for(var i=w.levels[0];i<=w.levels[1];i++){
       var lvNum=i;
-      var unlocked = lvNum <= Math.max(curLevel, curMaxLv);
+      var unlocked = DEV_UNLOCK_ALL || lvNum <= Math.max(curLevel, curMaxLv);
       var isCurrent = (lvNum === curLevel) && (isAdv === isAdventureMode);
       var stars = curStars[lvNum]||0;
       var item=document.createElement('div');
