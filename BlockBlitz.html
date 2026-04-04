@@ -9107,20 +9107,21 @@ var TET_STAGE_NAMES=[
 ];
 
 function tetUpdateBackdrop(level){
-  var overlay=document.getElementById('tetFrameOverlay');
-  if(overlay && TET_BACKDROPS.length>0){
+  var bw=document.querySelector('.board-wrap');
+  if(bw && TET_BACKDROPS.length>0){
     var idx=((level-1)%TET_BACKDROPS.length);
     var img=TET_BACKDROPS[idx];
-    overlay.style.display='block';
-    overlay.style.backgroundImage="url('"+img+"')";
+    /* Use border-image — frame sits OUTSIDE the grid content area */
+    bw.style.borderImage="url('"+img+"') 60 fill / 24px / 8px";
+    bw.style.borderStyle='solid';
+    bw.style.borderWidth='24px';
+    bw.style.borderRadius='0'; /* border-image doesn't support radius */
+    bw.style.boxShadow='0 0 20px rgba(0,200,255,0.3)';
+    bw.style.padding='0';
   }
-  /* Remove default board-wrap border so frame image is the only border */
-  var bw=document.querySelector('.board-wrap');
-  if(bw){
-    bw.style.border='none';
-    bw.style.boxShadow='none';
-    bw.style.background='transparent';
-  }
+  /* Hide the old overlay approach */
+  var overlay=document.getElementById('tetFrameOverlay');
+  if(overlay) overlay.style.display='none';
   var idx2=((level-1)%TET_STAGE_NAMES.length);
   var name=TET_STAGE_NAMES[idx2];
   if(name) showToast(name);
@@ -9228,7 +9229,7 @@ function stopTetris(fromGameOver){
   tetPaused=false;
   /* Restore board-wrap default styles */
   var bw=document.querySelector('.board-wrap');
-  if(bw){bw.style.border='';bw.style.boxShadow='';bw.style.background='';}
+  if(bw){bw.style.border='';bw.style.borderImage='';bw.style.borderRadius='';bw.style.boxShadow='';bw.style.background='';bw.style.padding='';}
   /* If called from game over, DON'T restore puzzle UI — game over modal shows on top */
   if(fromGameOver){
     var tetHud=document.getElementById('tetHud');if(tetHud)tetHud.style.display='none';
