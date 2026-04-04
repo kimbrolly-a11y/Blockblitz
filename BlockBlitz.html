@@ -1490,9 +1490,11 @@ body.skin-rainbow  .cell.empty{background:linear-gradient(145deg,#080418,#10062a
 <div id="floodCounter"></div>
 <div id="tetNextPreview"><div class="tet-next-label">NEXT</div><div id="tetNextGrid"></div></div>
 <div id="tetHoldPreview"><div class="tet-hold-label">HOLD</div><div id="tetHoldGrid"></div></div>
-  <div class="board-wrap">
+  <div class="board-wrap" style="position:relative">
     <div class="dc-timer-bar" id="dcTimerBar"><div class="dc-timer-fill" id="dcTimerFill" style="width:100%"></div></div>
     <div id="board"></div>
+    <!-- Tetris frame overlay — sits ON TOP of grid, transparent to touch -->
+    <div id="tetFrameOverlay" style="display:none;position:absolute;top:-16px;left:-16px;right:-16px;bottom:-16px;pointer-events:none;z-index:60;background-size:100% 100%;background-repeat:no-repeat"></div>
   </div>
 </div>
 
@@ -9105,14 +9107,19 @@ var TET_STAGE_NAMES=[
 ];
 
 function tetUpdateBackdrop(level){
-  var bw=document.querySelector('.board-wrap');
-  if(bw && TET_BACKDROPS.length>0){
+  var overlay=document.getElementById('tetFrameOverlay');
+  if(overlay && TET_BACKDROPS.length>0){
     var idx=((level-1)%TET_BACKDROPS.length);
     var img=TET_BACKDROPS[idx];
-    bw.style.background="url('"+img+"') center center / 100% 100% no-repeat";
+    overlay.style.display='block';
+    overlay.style.backgroundImage="url('"+img+"')";
+  }
+  /* Remove default board-wrap border so frame image is the only border */
+  var bw=document.querySelector('.board-wrap');
+  if(bw){
     bw.style.border='none';
-    bw.style.padding='12px';
-    bw.style.boxShadow='0 0 20px rgba(0,200,255,0.3),0 8px 40px rgba(0,0,0,0.5)';
+    bw.style.boxShadow='none';
+    bw.style.background='transparent';
   }
   var idx2=((level-1)%TET_STAGE_NAMES.length);
   var name=TET_STAGE_NAMES[idx2];
@@ -9217,9 +9224,12 @@ function stopTetris(fromGameOver){
   }
   var hpv=document.getElementById('tetHoldPreview');if(hpv)hpv.style.display='none';
   var po=document.getElementById('tetPauseOverlay');if(po)po.style.display='none';
+  var fo=document.getElementById('tetFrameOverlay');if(fo)fo.style.display='none';
   tetPaused=false;
+  /* Restore board-wrap default styles */
+  var bw=document.querySelector('.board-wrap');
+  if(bw){bw.style.border='';bw.style.boxShadow='';bw.style.background='';}
   /* If called from game over, DON'T restore puzzle UI — game over modal shows on top */
-  /* But DO hide the Tetris HUD so it doesn't show behind the modal */
   if(fromGameOver){
     var tetHud=document.getElementById('tetHud');if(tetHud)tetHud.style.display='none';
     return;
