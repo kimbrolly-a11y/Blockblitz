@@ -9107,19 +9107,6 @@ var TET_STAGE_NAMES=[
 ];
 
 function tetUpdateBackdrop(level){
-  var overlay=document.getElementById('tetFrameOverlay');
-  if(overlay && TET_BACKDROPS.length>0){
-    var idx=((level-1)%TET_BACKDROPS.length);
-    var img=TET_BACKDROPS[idx];
-    overlay.style.display='block';
-    overlay.style.backgroundImage="url('"+img+"')";
-    overlay.style.opacity='0.4'; /* subtle — not distracting */
-  }
-  var bw=document.querySelector('.board-wrap');
-  if(bw){
-    bw.style.border='none';
-    bw.style.boxShadow='0 0 15px rgba(0,200,255,0.2)';
-  }
   var idx2=((level-1)%TET_STAGE_NAMES.length);
   var name=TET_STAGE_NAMES[idx2];
   if(name) showToast(name);
